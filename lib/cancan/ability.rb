@@ -2,6 +2,9 @@ module CanCan
   module Ability
     def self.included(base)
       base.extend ClassMethods
+      base.alias_action :index, :show, :to => :read
+      base.alias_action :new, :to => :create
+      base.alias_action :edit, :to => :update
     end
     
     def can?(original_action, target)

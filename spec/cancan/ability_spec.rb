@@ -18,6 +18,7 @@ describe CanCan::Ability do
   end
   
   it "should return what block returns on a can call" do
+    @ability_class.can :read, :all
     @ability_class.can :read, Symbol do |sym|
       sym
     end
@@ -62,5 +63,18 @@ describe CanCan::Ability do
     end
     @ability.can?(:foo, 123).should == [:foo, Fixnum, 123]
     @ability.can?(:bar, Fixnum).should == [:bar, Fixnum, nil]
+  end
+  
+  it "should automatically alias index and show into read calls" do
+    @ability_class.can :read, :all
+    @ability.can?(:index, 123).should be_true
+    @ability.can?(:show, 123).should be_true
+  end
+  
+  it "should automatically alias new and edit into create and update respectively" do
+    @ability_class.can(:create, :all) { :create_called }
+    @ability_class.can(:update, :all) { :update_called }
+    @ability.can?(:new, 123).should == :create_called
+    @ability.can?(:edit, 123).should == :update_called
   end
 end
