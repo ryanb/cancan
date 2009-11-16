@@ -6,21 +6,15 @@ module CanCan
     
     def can?(action, target)
       self.class.can_history.reverse.each do |can_action, can_target, can_block|
-        if can_action == action && (can_target == :all || can_target == target || target.kind_of?(can_target))
+        if (can_action == :manage || can_action == action) && (can_target == :all || can_target == target || target.kind_of?(can_target))
           if can_block.nil?
             return true
           else
-            if can_target == :all
-              if target.class == Class
-                return can_block.call(target, nil)
-              else
-                return can_block.call(target.class, target)
-              end
-            elsif can_target == target
-              return can_block.call(nil)
-            else
-              return can_block.call(target)
-            end
+            block_args = []
+            block_args << action if can_action == :manage
+            block_args << (target.class == Class ? target : target.class) if can_target == :all
+            block_args << (target.class == Class ? nil : target)
+            return can_block.call(*block_args)
           end
         end
       end
