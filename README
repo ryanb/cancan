@@ -1,0 +1,61 @@
+= Render Caching
+
+Cache render calls in Rails controllers.
+
+
+== Install
+
+First install the gem.
+
+  gem install ryanb-render-caching --source=http://gems.github.com
+
+Then specify it in your Rails config.
+
+	config.gem 'ryanb-render-caching', :lib => 'render_caching', :source => 'http://gems.github.com'
+
+Rails 2.1 or later required.
+
+
+== Usage
+
+This gem adds the render_with_cache method to all controllers. Call 
+this inside of an action to cache the view.
+
+	def show
+	  @user = User.find(params[:id])
+	  render_with_cache
+	end
+
+This will cache the full rendered contents into a key matching the URL 
+path (similar to action caching). You can change this key by simply 
+passing any parameter.
+
+	def show
+	  @user = User.find(params[:id])
+	  render_with_cache @user.cache_key
+	end
+
+Cache key is a method supplied by Rails. This includes the updated_at 
+time which will give you an auto-expiring cache when the user record is 
+updated.
+
+You can also supply a block to the render call which will only get 
+executed if there is no cache. Here is a good place to do any custom 
+render calls.
+
+	def show
+	  @user = User.find(params[:id])
+	  render_with_cache @user.cache_key do
+	    render :layout => false
+	  end
+	end
+
+
+== Development
+
+This project can be found on github at the following URL.
+
+http://github.com/ryanb/render-caching/
+
+If you would like to contribute to this project, please fork the 
+repository and send me a pull request.
