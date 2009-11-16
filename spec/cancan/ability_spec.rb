@@ -2,6 +2,8 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 class Ability
   include CanCan::Ability
+  alias_action :update, :destroy, :to => :modify
+  
   can :read, :all
   can :read, Symbol do |sym|
     sym
@@ -11,6 +13,9 @@ class Ability
   end
   can :manage, Array do |action, object|
     [action, object]
+  end
+  can :modify, :all do |object_class, object|
+    :modify_called
   end
 end
 
@@ -51,6 +56,11 @@ describe Ability do
   it "should pass action and object for global manage actions" do
     @ability.can?(:stuff, [1, 2]).should == [:stuff, [1, 2]]
     @ability.can?(:stuff, Array).should == [:stuff, nil]
+  end
+  
+  it "should alias update or destroy actions to modify action" do
+    @ability.can?(:update, 123).should == :modify_called
+    @ability.can?(:destroy, 123).should == :modify_called
   end
 end
 
