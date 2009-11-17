@@ -77,4 +77,11 @@ describe CanCan::Ability do
     @ability.can?(:new, 123).should == :create_called
     @ability.can?(:edit, 123).should == :update_called
   end
+  
+  it "should be able to access given user" do
+    @ability_class.can(:preview, :all) { user }
+    ability = @ability_class.for_user(:some_user)
+    ability.user.should == :some_user
+    ability.can?(:preview, 123).should == :some_user
+  end
 end

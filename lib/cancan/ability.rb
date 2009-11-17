@@ -1,5 +1,7 @@
 module CanCan
   module Ability
+    attr_accessor :user
+    
     def self.included(base)
       base.extend ClassMethods
       base.alias_action :index, :show, :to => :read
@@ -18,7 +20,7 @@ module CanCan
               block_args << action if can_action == :manage
               block_args << (target.class == Class ? target : target.class) if can_target == :all
               block_args << (target.class == Class ? nil : target)
-              return can_block.call(*block_args)
+              return instance_exec(*block_args, &can_block)
             end
           end
         end
@@ -47,6 +49,12 @@ module CanCan
         @aliased_actions ||= {}
         target = args.pop[:to]
         @aliased_actions[target] = args
+      end
+      
+      def for_user(user)
+        ability = new
+        ability.user = user
+        ability
       end
     end
   end
