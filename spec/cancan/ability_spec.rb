@@ -81,4 +81,8 @@ describe CanCan::Ability do
   it "should not respond to prepare (now using initialize)" do
     @ability.should_not respond_to(:prepare)
   end
+  
+  it "should offer cannot? method which is simply invert of can?" do
+    @ability.cannot?(:tie, String).should be_true
+  end
 end

@@ -11,7 +11,7 @@ describe CanCan::ControllerAdditions do
   before(:each) do
     @controller_class = Class.new
     @controller = @controller_class.new
-    mock(@controller_class).helper_method(:can?)
+    mock(@controller_class).helper_method(:can?, :cannot?)
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
   
@@ -26,10 +26,11 @@ describe CanCan::ControllerAdditions do
     @controller.current_ability.should be_kind_of(Ability)
   end
   
-  it "should provide a can? method which goes through the current ability" do
+  it "should provide a can? and cannot? methods which go through the current ability" do
     stub(@controller).current_user { :current_user }
     @controller.current_ability.should be_kind_of(Ability)
     @controller.can?(:foo, :bar).should be_false
+    @controller.cannot?(:foo, :bar).should be_true
   end
   
   it "should load the resource if params[:id] is specified" do

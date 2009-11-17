@@ -21,6 +21,10 @@ module CanCan
       false
     end
     
+    def cannot?(*args)
+      !can?(*args)
+    end
+    
     def possible_actions_for(initial_action)
       actions = [initial_action]
       (@aliased_actions || default_alias_actions).each do |target, aliases|

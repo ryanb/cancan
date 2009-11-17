@@ -1,3 +1,5 @@
+* adding "cannot?" method to ability, controller, and view which is inverse of "can?" - see issue #1
+
 * BACKWARDS INCOMPATIBLE: use Ability#initialize instead of 'prepare' to set up abilities - see issue #4
 
 *0.1.0* (Nov 16th, 2009)

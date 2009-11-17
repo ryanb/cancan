@@ -38,17 +38,17 @@ First define a class called Ability, place it in "models/ability.rb".
 
 This class is where all permissions will go. See the "Defining Abilities" section below for more information.
 
-In the view layer you can access the current permissions at any point using the "can?" method. See "Checking Abilities" section below.
+In the view layer you can access the current permissions at any point using the "can?" and "cannot?" methods. See "Checking Abilities" section below.
 
   <% if can? :update, @article %>
     <%= link_to "Edit", edit_article_path(@article) %>
   <% end %>
 
-You can also use this method in the controller layer along with the "unauthorized!" method to restrict access.
+You can also use these methods in the controller layer along with the "unauthorized!" method to restrict access.
 
   def show
     @article = Article.find(params[:id])
-    unauthorized! unless can? :read, @article
+    unauthorized! if cannot? :read, @article
   end
 
 Setting this for every action can be tedious, therefore a before filter is also provided for automatically applying this setting to a RESTful style resource controller.
@@ -135,6 +135,10 @@ You can also pass the class instead of an instance (if you don't have one handy)
     <%= link_to "New Project", new_project_path %>
   <% end %>
 
+The "cannot?" method is for convenience and performs the opposite check of "can?"
+
+  cannot? :destroy, @project
+
 
 == Custom Actions
 
@@ -148,7 +152,7 @@ There is no limit to what actions you can use to determine abilities. For exampl
   
   # projects_controller.rb
   def update
-    unauthorized! if params[:project][:upload_picture] && !can?(:upload_picture, @project)
+    unauthorized! if params[:project][:upload_picture] && cannot?(:upload_picture, @project)
     # ...
   end
 
@@ -199,7 +203,7 @@ def test "user can only destroy projects which he owns"
   user = User.new
   ability = Ability.new(user)
   assert ability.can?(:destroy, Project.new(:user => user))
-  assert !ability.can?(:destroy, Project.new)
+  assert ability.cannot?(:destroy, Project.new)
 end
 
 
