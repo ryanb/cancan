@@ -7,11 +7,17 @@ This assumes you already have an authentication solution (such as Authlogic) whi
 
 == Installation
 
-Install it as a Rails plugin.
+You can set it up as a gem in your environment.rb file.
+  
+  config.gem "cancan", :source => "http://gemcutter.org"
+  
+And then install the gem.
+
+  gem install cancan
+
+Alternatively you can install it as a Rails plugin.
 
   script/plugin install git://github.com/ryanb/cancan.git
-
-It will be available as a gem soon.
 
 
 == Setup
