@@ -35,6 +35,8 @@ module CanCan
   end
 end
 
-class ActionController::Base
-  include CanCan::ControllerAdditions
+if defined? ActionController
+  ActionController::Base.class_eval do
+    include CanCan::ControllerAdditions
+  end
 end
