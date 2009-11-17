@@ -13,7 +13,7 @@ You can set it up as a gem in your environment.rb file.
   
 And then install the gem.
 
-  gem install cancan
+  sudo rake gems:install
 
 Alternatively you can install it as a Rails plugin.
 
@@ -157,8 +157,8 @@ There is no limit to what actions you can use to determine abilities. For exampl
 
 CanCan makes two assumptions about your application.
 
-  * The permissions are defined in Ability#prepare.
-  * The user is fetched with current_user method in the controller.
+* The permissions are defined in Ability#prepare.
+* The user is fetched with current_user method in the controller.
 
 You can override these by defining the "current_ability" method in your ApplicationController.
 
@@ -191,3 +191,8 @@ For example, let's assume that each user has_many :permissions, and each permiss
   end
 
 The actual details will depend largely on your application requirements, but hopefully you can see how it's possible to define permissions in the database and use them with CanCan.
+
+
+== Special Thanks
+
+CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Many thanks to the authors and contributors.
