@@ -17,10 +17,12 @@ module CanCan
     end
     
     def load_resource # TODO this could use some refactoring
-      if params[:id]
-        instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.find(params[:id]))
-      elsif params[params[:controller].singularize.to_sym]
-        instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.new(params[params[:controller].singularize.to_sym]))
+      unless params[:action] == "index"
+        if params[:id]
+          instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.find(params[:id]))
+        else
+          instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.new(params[params[:controller].singularize.to_sym]))
+        end
       end
     end
     

@@ -44,7 +44,14 @@ describe CanCan::ControllerAdditions do
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
   
-  it "should not build a resource of neither id nor attributes are specified" do
+  it "should build a new resource even if attribute hash isn't specified" do
+    stub(@controller).params { {:controller => "abilities", :action => "new"} }
+    stub(Ability).new(nil) { :some_resource }
+    @controller.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
+  it "should not build a resource when on index action" do
     stub(@controller).params { {:controller => "abilities", :action => "index"} }
     @controller.load_resource
     @controller.instance_variable_get(:@ability).should be_nil
