@@ -21,17 +21,19 @@ module CanCan
     end
     
     def load_resource # TODO this could use some refactoring
+      model_name = params[:controller].split('/').last.singularize
       unless params[:action] == "index"
         if params[:id]
-          instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.find(params[:id]))
+          instance_variable_set("@#{model_name}", model_name.camelcase.constantize.find(params[:id]))
         else
-          instance_variable_set("@#{params[:controller].singularize}", params[:controller].singularize.camelcase.constantize.new(params[params[:controller].singularize.to_sym]))
+          instance_variable_set("@#{model_name}", model_name.camelcase.constantize.new(params[model_name.to_sym]))
         end
       end
     end
     
     def authorize_resource # TODO this could use some refactoring
-      unauthorized! unless can?(params[:action].to_sym, instance_variable_get("@#{params[:controller].singularize}") || params[:controller].singularize.camelcase.constantize)
+      model_name = params[:controller].split('/').last.singularize
+      unauthorized! unless can?(params[:action].to_sym, instance_variable_get("@#{model_name}") || model_name.camelcase.constantize)
     end
     
     def load_and_authorize_resource

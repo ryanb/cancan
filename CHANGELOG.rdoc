@@ -1,3 +1,5 @@
+* fix behavior of load_and_authorize_resource for namespaced controllers - see issue #3
+
 * support arrays being passed to "can" to specify multiple actions or classes - see issue #2
 
 * adding "cannot?" method to ability, controller, and view which is inverse of "can?" - see issue #1

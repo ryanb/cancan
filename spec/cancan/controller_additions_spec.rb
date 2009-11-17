@@ -82,4 +82,11 @@ describe CanCan::ControllerAdditions do
     stub(@controller).authorize_resource
     @controller.load_and_authorize_resource
   end
+  
+  it "should properly load resource for namespaced controller" do
+    stub(@controller).params { {:controller => "admin/abilities", :action => "show", :id => 123} }
+    stub(Ability).find(123) { :some_resource }
+    @controller.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
 end
