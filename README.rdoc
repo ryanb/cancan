@@ -195,12 +195,12 @@ For example, let's assume that each user has_many :permissions, and each permiss
 An alternatie approach is to define a separate "can" ability for each permission.
 
   def initialize(user)
-		user.permissions.each do |permission|
-		  can permission.action, permission.object_type.constantize do |object|
-		    object.nil? || permission.object_id.nil? || permission.object_id == object.id
-		  end
-		end
-	end
+    user.permissions.each do |permission|
+      can permission.action, permission.object_type.constantize do |object|
+        object.nil? || permission.object_id.nil? || permission.object_id == object.id
+      end
+    end
+  end
 
 The actual details will depend largely on your application requirements, but hopefully you can see how it's possible to define permissions in the database and use them with CanCan.
 
@@ -209,12 +209,12 @@ The actual details will depend largely on your application requirements, but hop
 
 It is very easy to test the Ability model since you can call "can?" directly on it as you would in the view or controller.
 
-def test "user can only destroy projects which he owns"
-  user = User.new
-  ability = Ability.new(user)
-  assert ability.can?(:destroy, Project.new(:user => user))
-  assert ability.cannot?(:destroy, Project.new)
-end
+  def test "user can only destroy projects which he owns"
+    user = User.new
+    ability = Ability.new(user)
+    assert ability.can?(:destroy, Project.new(:user => user))
+    assert ability.cannot?(:destroy, Project.new)
+  end
 
 
 == Special Thanks
