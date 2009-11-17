@@ -1,3 +1,187 @@
 = CanCan
 
-Documentation coming soon.
+This is a simple authorization solution for Rails which is completely decoupled from how you set up the user's roles. All permissions are stored in a single location for convenience.
+
+This assumes you already have an authentication solution (such as Authlogic) which proves a current_user model.
+
+
+== Installation
+
+Install it as a Rails plugin.
+
+  script/plugin install git://github.com/ryanb/cancan.git
+
+It will be available as a gem soon.
+
+
+== Setup
+
+First define a class called Ability, place it in "models/ability.rb".
+
+  class Ability
+    include CanCan::Ability
+  
+    def prepare(user)
+      if user.admin?
+        can :manage, :all
+      else
+        can :read, :all
+      end
+    end
+  end
+
+This class is where all permissions will go. See the "Defining Abilities" section below for more information.
+
+In the view layer you can access the current permissions at any point using the "can?" method. See "Checking Abilities" section below.
+
+  <% if can? :update, @article %>
+    <%= link_to "Edit", edit_article_path(@article) %>
+  <% end %>
+
+You can also use this method in the controller layer along with the "unauthorized!" method to restrict access.
+
+  def show
+    @article = Article.find(params[:id])
+    unauthorized! unless can? :read, @article
+  end
+
+Setting this for every action can be tedious, therefore a before filter is also provided for automatically applying this setting to a RESTful style resource controller.
+
+  class ArticlesController < ApplicationController
+    before_filter :load_and_authorize_resource
+    
+    def show
+      # @article is already loaded
+    end
+  end
+
+If the user authorization fails, a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior.
+
+  class ApplicationController < ActionController::Base
+    rescue_from CanCan::AccessDenied, :with => :access_denied
+  
+    protected
+  
+    def access_denied
+      flash[:error] = "Sorry, you are not allowed to access that page."
+      redirect_to root_url
+    end
+  end
+
+
+== Defining Abilities
+
+As shown above, the Ability#prepare method is where all user permissions are defined. The user model is passed into this method so you are free to modify the permissions based on the user's attributes. This way CanCan is completely decoupled with how you choose to handle roles.
+
+The "can" method accepts two arguments, the first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
+
+  can :update, Article
+
+You can pass an array for either of these parameters to match any one.
+
+  can [:update, :destroy], [Article, Comment]
+
+In this case the user has the ability to update or destroy both articles and comments.
+
+You can pass a block to provide logic based on the article's attributes. For example:
+
+  can :update, Article do |article|
+    article && article.user == user
+  end
+
+If the block returns true then the user has that :update ability for that article, otherwise he will be denied access. It's possible for the passed in model to be nil if one isn't specified, so be sure to take that into consideration.
+
+You can pass :all to reference every type of object. In this case the object type will be passed into the block as well (just in case object is nil).
+
+  can :read, :all do |object_class, object|
+    object_class != Order
+  end
+
+Here the user has permission to read all objects except orders.
+
+You can also pass :manage as the action which will match any action. In this case the action is passed to the block.
+
+  can :manage, Comment do |action, comment|
+    action != :destroy
+  end
+
+Finally, you can use the "alias_action" method to alias one or more actions into one.
+
+  alias_action :update, :destroy, :to => :modify
+  can :modify, Comment
+
+The following aliases are added by default for conveniently mapping common controller actions.
+
+  alias_action :index, :show, :to => :read
+  alias_action :new, :to => :create
+  alias_action :edit, :to => :update
+
+
+== Checking Abilities
+
+Use the "can?" method in the controller or view to check the user's permission for a given action and object.
+
+  can? :destroy, @project
+
+You can also pass the class instead of an instance (if you don't have one handy). For example:
+
+  <% if can? :create, Project %>
+    <%= link_to "New Project", new_project_path %>
+  <% end %>
+
+
+== Custom Actions
+
+There is no limit to what actions you can use to determine abilities. For example, if only pro users are allowed to upload a picture for their product, you might add restrictions like this.
+
+  # ability.rb
+  can :upload_picture, Project if user.pro?
+
+  # projects/_form.html.erb
+  <%= f.file_field :picture if can? :upload_picture, @project %>
+  
+  # projects_controller.rb
+  def update
+    unauthorized! if params[:project][:upload_picture] && !can?(:upload_picture, @project)
+    # ...
+  end
+
+
+== Customizing Assumptions
+
+CanCan makes two assumptions about your application.
+
+  * The permissions are defined in Ability#prepare.
+  * The user is fetched with current_user method in the controller.
+
+You can override these by defining the "current_ability" method in your ApplicationController.
+
+   def current_ability
+     ability = UserAbility.new          # instead of Ability
+     ability.prepare(current_account)   # instead of current_user
+     ability                            # be sure to return the ability
+   end
+
+That's it!
+
+
+== Permissions in Database
+
+Perhaps a non-coder needs the ability to modify the user abilities, or you want to change them without having to re-deploy the application. In that case it may be best to store the permission logic in a separate model, let's call it Permission. It is easy to use the database records when defining abilities.
+
+For example, let's assume that each user has_many :permissions, and each permission has "action", "object_type" and "object_id" columns. The last of which is optional.
+
+  class Ability
+    include CanCan::Ability
+  
+    def prepare(user)
+      can :manage, :all do |action, object_class, object|
+        user.permissions.find_all_by_action(action).any? do |permission|
+          permission.object_type.constantize == object_class &&
+            (object.nil? || permission.object_id.nil? || permission.object_id == object.id)
+        end
+      end
+    end
+  end
+
+The actual details will depend largely on your application requirements, but hopefully you can see how it's possible to define permissions in the database and use them with CanCan.
