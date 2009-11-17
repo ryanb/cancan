@@ -9,7 +9,7 @@ module CanCan
       base.alias_action :edit, :to => :update
     end
     
-    def can?(original_action, target)
+    def can?(original_action, target) # TODO this could use some refactoring
       (self.class.can_history || []).reverse.each do |can_action, can_target, can_block|
         possible_actions_for(original_action).each do |action|
           if (can_action == :manage || can_action == action) && (can_target == :all || can_target == target || target.kind_of?(can_target))

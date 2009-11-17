@@ -29,4 +29,47 @@ describe CanCan::ControllerAdditions do
     @controller.current_ability.should be_kind_of(Ability)
     @controller.can?(:foo, :bar).should be_false
   end
+  
+  it "should load the resource if params[:id] is specified" do
+    stub(@controller).params { {:controller => "abilities", :action => "show", :id => 123} }
+    stub(Ability).find(123) { :some_resource }
+    @controller.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
+  it "should build a new resource with hash if params[:id] is not specified" do
+    stub(@controller).params { {:controller => "abilities", :action => "create", :ability => {:foo => "bar"}} }
+    stub(Ability).new(:foo => "bar") { :some_resource }
+    @controller.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
+  it "should not build a resource of neither id nor attributes are specified" do
+    stub(@controller).params { {:controller => "abilities", :action => "index"} }
+    @controller.load_resource
+    @controller.instance_variable_get(:@ability).should be_nil
+  end
+  
+  it "should perform authorization using controller action and loaded model" do
+    @controller.instance_variable_set(:@ability, :some_resource)
+    stub(@controller).params { {:controller => "abilities", :action => "show"} }
+    stub(@controller).can?(:show, :some_resource) { false }
+    lambda {
+      @controller.authorize_resource
+    }.should raise_error(CanCan::AccessDenied)
+  end
+  
+  it "should perform authorization using controller action and non loaded model" do
+    stub(@controller).params { {:controller => "abilities", :action => "show"} }
+    stub(@controller).can?(:show, Ability) { false }
+    lambda {
+      @controller.authorize_resource
+    }.should raise_error(CanCan::AccessDenied)
+  end
+  
+  it "should load and authorize resource in one call" do
+    mock(@controller).load_resource
+    stub(@controller).authorize_resource
+    @controller.load_and_authorize_resource
+  end
 end
