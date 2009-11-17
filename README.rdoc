@@ -2,7 +2,7 @@
 
 This is a simple authorization solution for Rails which is completely decoupled from how you set up the user's roles. All permissions are stored in a single location for convenience.
 
-This assumes you already have an authentication solution (such as Authlogic) which proves a current_user model.
+This assumes you already have an authentication solution (such as Authlogic) which provides a current_user model.
 
 
 == Installation
@@ -27,7 +27,7 @@ First define a class called Ability, place it in "models/ability.rb".
   class Ability
     include CanCan::Ability
   
-    def prepare(user)
+    def initialize(user)
       if user.admin?
         can :manage, :all
       else
@@ -77,7 +77,7 @@ If the user authorization fails, a CanCan::AccessDenied exception will be raised
 
 == Defining Abilities
 
-As shown above, the Ability#prepare method is where all user permissions are defined. The user model is passed into this method so you are free to modify the permissions based on the user's attributes. This way CanCan is completely decoupled with how you choose to handle roles.
+As shown above, the Ability#initialize method is where all user permissions are defined. The user model is passed into this method so you are free to modify the permissions based on the user's attributes. This way CanCan is completely decoupled with how you choose to handle roles.
 
 The "can" method accepts two arguments, the first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
 
@@ -153,19 +153,17 @@ There is no limit to what actions you can use to determine abilities. For exampl
   end
 
 
-== Customizing Assumptions
+== Assumptions & Configuring
 
 CanCan makes two assumptions about your application.
 
-* The permissions are defined in Ability#prepare.
-* The user is fetched with current_user method in the controller.
+* The permissions are defined in Ability#initialize.
+* The user is fetched with the current_user method in the controller.
 
 You can override these by defining the "current_ability" method in your ApplicationController.
 
    def current_ability
-     ability = UserAbility.new          # instead of Ability
-     ability.prepare(current_account)   # instead of current_user
-     ability                            # be sure to return the ability
+     UserAbility.new(current_account) # instead of Ability.new(current_user)
    end
 
 That's it!
@@ -180,7 +178,7 @@ For example, let's assume that each user has_many :permissions, and each permiss
   class Ability
     include CanCan::Ability
   
-    def prepare(user)
+    def initialize(user)
       can :manage, :all do |action, object_class, object|
         user.permissions.find_all_by_action(action).any? do |permission|
           permission.object_type.constantize == object_class &&

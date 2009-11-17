@@ -78,7 +78,7 @@ describe CanCan::Ability do
     @ability.can?(:edit, 123).should == :update_called
   end
   
-  it "should respond to prepare" do
-    @ability.should respond_to(:prepare)
+  it "should not respond to prepare (now using initialize)" do
+    @ability.should_not respond_to(:prepare)
   end
 end

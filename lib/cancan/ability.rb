@@ -47,9 +47,5 @@ module CanCan
         :update => [:edit],
       }
     end
-    
-    def prepare(user)
-      # to be overriden by included class
-    end
   end
 end

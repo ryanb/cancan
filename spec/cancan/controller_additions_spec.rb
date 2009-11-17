@@ -2,6 +2,9 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 class Ability
   include CanCan::Ability
+  
+  def initialize(user)
+  end
 end
 
 describe CanCan::ControllerAdditions do
