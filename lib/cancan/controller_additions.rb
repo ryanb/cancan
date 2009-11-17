@@ -9,7 +9,9 @@ module CanCan
     end
     
     def current_ability
-      ::Ability.for_user(current_user)
+      ability = ::Ability.new
+      ability.prepare(current_user)
+      ability
     end
     
     def can?(*args)

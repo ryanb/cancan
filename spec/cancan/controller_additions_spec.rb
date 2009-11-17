@@ -21,7 +21,6 @@ describe CanCan::ControllerAdditions do
   it "should have a current_ability method which generates an ability for the current user" do
     stub(@controller).current_user { :current_user }
     @controller.current_ability.should be_kind_of(Ability)
-    @controller.current_ability.user.should == :current_user
   end
   
   it "should provide a can? method which goes through the current ability" do
