@@ -85,4 +85,18 @@ describe CanCan::Ability do
   it "should offer cannot? method which is simply invert of can?" do
     @ability.cannot?(:tie, String).should be_true
   end
+  
+  it "should be able to specify multiple actions and match any" do
+    @ability.can [:read, :update], :all
+    @ability.can?(:read, 123).should be_true
+    @ability.can?(:update, 123).should be_true
+    @ability.can?(:count, 123).should be_false
+  end
+  
+  it "should be able to specify multiple classes and match any" do
+    @ability.can :update, [String, Array]
+    @ability.can?(:update, "foo").should be_true
+    @ability.can?(:update, []).should be_true
+    @ability.can?(:update, 123).should be_false
+  end
 end

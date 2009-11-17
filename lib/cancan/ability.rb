@@ -4,14 +4,16 @@ module CanCan
     
     def can?(original_action, target) # TODO this could use some refactoring
       (@can_history || []).reverse.each do |can_action, can_target, can_block|
+        can_actions = [can_action].flatten
+        can_targets = [can_target].flatten
         possible_actions_for(original_action).each do |action|
-          if (can_action == :manage || can_action == action) && (can_target == :all || can_target == target || target.kind_of?(can_target))
+          if (can_actions.include?(:manage) || can_actions.include?(action)) && (can_targets.include?(:all) || can_targets.include?(target) || can_targets.any? { |c| target.kind_of?(c) })
             if can_block.nil?
               return true
             else
               block_args = []
-              block_args << action if can_action == :manage
-              block_args << (target.class == Class ? target : target.class) if can_target == :all
+              block_args << action if can_actions.include?(:manage)
+              block_args << (target.class == Class ? target : target.class) if can_targets.include?(:all)
               block_args << (target.class == Class ? nil : target)
               return can_block.call(*block_args)
             end
