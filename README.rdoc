@@ -191,6 +191,18 @@ For example, let's assume that each user has_many :permissions, and each permiss
 The actual details will depend largely on your application requirements, but hopefully you can see how it's possible to define permissions in the database and use them with CanCan.
 
 
+== Testing Abilities
+
+It is very easy to test the Ability model since you can call "can?" directly on it as you would in the view or controller.
+
+def test "user can only destroy projects which he owns"
+  user = User.new
+  ability = Ability.new(user)
+  assert ability.can?(:destroy, Project.new(:user => user))
+  assert !ability.can?(:destroy, Project.new)
+end
+
+
 == Special Thanks
 
 CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Many thanks to the authors and contributors.
