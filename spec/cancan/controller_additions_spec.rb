@@ -61,6 +61,7 @@ describe CanCan::ControllerAdditions do
   end
   
   it "should perform authorization using controller action and loaded model" do
+    stub(@controller).current_user { :current_user }
     @controller.instance_variable_set(:@ability, :some_resource)
     stub(@controller).params { {:controller => "abilities", :action => "show"} }
     stub(@controller).can?(:show, :some_resource) { false }
@@ -70,6 +71,7 @@ describe CanCan::ControllerAdditions do
   end
   
   it "should perform authorization using controller action and non loaded model" do
+    stub(@controller).current_user { :current_user }
     stub(@controller).params { {:controller => "abilities", :action => "show"} }
     stub(@controller).can?(:show, Ability) { false }
     lambda {
