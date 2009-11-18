@@ -4,6 +4,7 @@ This is a simple authorization solution for Ruby on Rails to restrict what a giv
 
 This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic]) which provides a current_user model.
 
+See the RDocs[http://rdoc.info/projects/ryanb/cancan] for additional documentation.
 
 == Installation
 
