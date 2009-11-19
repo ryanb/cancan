@@ -4,7 +4,7 @@ This is a simple authorization solution for Ruby on Rails to restrict what a giv
 
 This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic]) which provides a current_user model.
 
-See the RDocs[http://rdoc.info/projects/ryanb/cancan] for additional documentation.
+See the RDocs[http://rdoc.info/projects/ryanb/cancan] and Wiki[http://wiki.github.com/ryanb/cancan] for additional documentation.
 
 == Installation
 
@@ -141,23 +141,6 @@ The "cannot?" method is for convenience and performs the opposite check of "can?
   cannot? :destroy, @project
 
 
-== Custom Actions
-
-You can have fine grained control over abilities by coming up with new actions. For example, if only pro users are allowed to upload a picture for their product, you could add the following restrictions.
-
-  # ability.rb
-  can :upload_picture, Project if user.pro?
-
-  # projects/_form.html.erb
-  <%= f.file_field :picture if can? :upload_picture, @project %>
-  
-  # projects_controller.rb
-  def update
-    unauthorized! if params[:project][:upload_picture] && cannot?(:upload_picture, @project)
-    # ...
-  end
-
-
 == Assumptions & Configuring
 
 CanCan makes two assumptions about your application.
@@ -172,38 +155,6 @@ You can override these by overriding the "current_ability" method in your Applic
    end
 
 That's it!
-
-
-== Permissions in Database
-
-Perhaps a non-coder needs the ability to modify the user abilities, or you want to change them without having to re-deploy the application. In that case it may be best to store the permission logic in a separate model, let's call it Permission. It is easy to use the database records when defining abilities.
-
-For example, let's assume that each user has_many :permissions, and each permission has "action", "object_type" and "object_id" columns. The last of which is optional.
-
-  class Ability
-    include CanCan::Ability
-  
-    def initialize(user)
-      can :manage, :all do |action, object_class, object|
-        user.permissions.find_all_by_action(action).any? do |permission|
-          permission.object_type == object_class.to_s &&
-            (object.nil? || permission.object_id.nil? || permission.object_id == object.id)
-        end
-      end
-    end
-  end
-
-An alternatie approach is to define a separate "can" ability for each permission.
-
-  def initialize(user)
-    user.permissions.each do |permission|
-      can permission.action, permission.object_type.constantize do |object|
-        object.nil? || permission.object_id.nil? || permission.object_id == object.id
-      end
-    end
-  end
-
-The actual details will depend largely on your application requirements, but hopefully you can see how it's possible to define permissions in the database and use them with CanCan.
 
 
 == Testing Abilities
