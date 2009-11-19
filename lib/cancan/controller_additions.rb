@@ -47,8 +47,8 @@ module CanCan
       ::Ability.new(current_user)
     end
     
-    # Use the "can?" method in the controller or view to check the user's permission
-    # for a given action and object.
+    # Use in the controller or view to check the user's permission for a given action
+    # and object.
     # 
     #   can? :destroy, @project
     # 
@@ -58,7 +58,7 @@ module CanCan
     #     <%= link_to "New Project", new_project_path %>
     #   <% end %>
     # 
-    # This simply calls "can?" on the current_ability.
+    # This simply calls "can?" on the current_ability. See Ability#can?.
     def can?(*args)
       (@current_ability ||= current_ability).can?(*args)
     end

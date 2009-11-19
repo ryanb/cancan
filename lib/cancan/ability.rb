@@ -17,14 +17,22 @@ module CanCan
   # 
   module Ability
     attr_accessor :user
-    
+
+    # Use to check the user's permission for a given action and object.
+    # 
+    #   can? :destroy, @project
+    # 
+    # You can also pass the class instead of an instance (if you don't have one handy).
+    # 
+    #   can? :create, Project
+    # 
     # Not only can you use the can? method in the controller and view (see ControllerAdditions), 
     # but you can also call it directly on an ability instance.
     # 
     #   ability.can? :destroy, @project
     # 
     # This makes testing a user's abilities very easy.
-    #
+    # 
     #   def test "user can only destroy projects which he owns"
     #     user = User.new
     #     ability = Ability.new(user)
@@ -103,10 +111,27 @@ module CanCan
       @can_history << [action, target, block]
     end
     
-    # Finally, you can use the "alias_action" method to alias one or more actions into one.
+    # Alias one or more actions into another one.
     # 
     #   alias_action :update, :destroy, :to => :modify
     #   can :modify, Comment
+    # 
+    # Then :modify permission will apply to both :update and :destroy requests.
+    # 
+    #   can? :update, Comment # => true
+    #   can? :destroy, Comment # => true
+    # 
+    # This only works in one direction. Passing the aliased action into the "can?" call
+    # will not work because aliases are meant to generate more generic actions.
+    # 
+    #   alias_action :update, :destroy, :to => :modify
+    #   can :update, Comment
+    #   can? :modify, Comment # => false
+    # 
+    # Unless that exact alias is used.
+    # 
+    #   can :modify, Comment
+    #   can? :modify, Comment # => true
     # 
     # The following aliases are added by default for conveniently mapping common controller actions.
     # 
@@ -114,6 +139,7 @@ module CanCan
     #   alias_action :new, :to => :create
     #   alias_action :edit, :to => :update
     # 
+    # This way one can use params[:action] in the controller to determine the permission.
     def alias_action(*args)
       @aliased_actions ||= default_alias_actions
       target = args.pop[:to]
