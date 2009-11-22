@@ -83,14 +83,7 @@ module CanCan
     #   before_filter :load_resource
     # 
     def load_resource # TODO this could use some refactoring
-      model_name = params[:controller].split('/').last.singularize
-      unless params[:action] == "index"
-        if params[:id]
-          instance_variable_set("@#{model_name}", model_name.camelcase.constantize.find(params[:id]))
-        else
-          instance_variable_set("@#{model_name}", model_name.camelcase.constantize.new(params[model_name.to_sym]))
-        end
-      end
+      self.model_instance = params[:id] ? model_class.find(params[:id]) : model_class.new(params[model_name.to_sym]) unless params[:action] == "index"
     end
     
     # Authorizes the resource in the current instance variable. For example,
@@ -106,8 +99,7 @@ module CanCan
     # 
     # See load_and_authorize_resource to automatically load the resource too.
     def authorize_resource # TODO this could use some refactoring
-      model_name = params[:controller].split('/').last.singularize
-      unauthorized! if cannot?(params[:action].to_sym, instance_variable_get("@#{model_name}") || model_name.camelcase.constantize)
+      unauthorized! if cannot?(params[:action].to_sym, model_instance || model_class)
     end
     
     # Calls load_resource to load the current resource model into an instance variable. 
@@ -120,6 +112,25 @@ module CanCan
       load_resource
       authorize_resource
     end
+    
+    private
+    
+    def model_name
+       params[:controller].split('/').last.singularize
+    end
+    
+    def model_class
+      model_name.camelcase.constantize
+    end
+    
+    def model_instance
+      instance_variable_get("@#{model_name}")
+    end
+    
+    def model_instance=(instance)
+      instance_variable_set("@#{model_name}", instance)
+    end
+    
   end
 end
 
