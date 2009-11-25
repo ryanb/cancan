@@ -45,7 +45,7 @@ module CanCan
         can_actions = [can_action].flatten
         can_targets = [can_target].flatten
         possible_actions_for(original_action).each do |action|
-          if (can_actions.include?(:manage) || can_actions.include?(action)) && (can_targets.include?(:all) || can_targets.include?(target) || can_targets.any? { |c| target.kind_of?(c) })
+          if (can_actions.include?(:manage) || can_actions.include?(action)) && (can_targets.include?(:all) || can_targets.include?(target) || can_targets.any? { |c| c.kind_of?(Class) && target.kind_of?(c) })
             if can_block.nil?
               return true
             else
@@ -105,6 +105,12 @@ module CanCan
     #   can :manage, Comment do |action, comment|
     #     action != :destroy
     #   end
+    # 
+    # You can pass custom objects into this "can" method, this is usually done through a symbol
+    # and is useful if a class isn't available to define permissions on.
+    # 
+    #   can :read, :stats
+    #   can? :read, :stats # => true
     # 
     def can(action, target, &block)
       @can_history ||= []

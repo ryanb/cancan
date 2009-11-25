@@ -99,4 +99,11 @@ describe CanCan::Ability do
     @ability.can?(:update, []).should be_true
     @ability.can?(:update, 123).should be_false
   end
+  
+  it "should support custom objects in the can definition" do
+    @ability.can :read, :stats
+    @ability.can?(:read, :stats).should be_true
+    @ability.can?(:update, :stats).should be_false
+    @ability.can?(:read, :nonstats).should be_false
+  end
 end

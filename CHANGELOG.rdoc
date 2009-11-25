@@ -1,3 +1,5 @@
+* support custom objects (usually symbols) in can definition - see issue #8
+
 0.2.0 (Nov 17, 2009)
 
 * fix behavior of load_and_authorize_resource for namespaced controllers - see issue #3
