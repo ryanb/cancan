@@ -41,19 +41,19 @@ module CanCan
     #   end
     # 
     def can?(original_action, target) # TODO this could use some refactoring
-      (@can_history || []).reverse.each do |can_action, can_target, can_block|
+      (@can_history || []).reverse.each do |base_behavior, can_action, can_target, can_block|
         can_actions = [can_action].flatten
         can_targets = [can_target].flatten
         possible_actions_for(original_action).each do |action|
           if (can_actions.include?(:manage) || can_actions.include?(action)) && (can_targets.include?(:all) || can_targets.include?(target) || can_targets.any? { |c| c.kind_of?(Class) && target.kind_of?(c) })
             if can_block.nil?
-              return true
+              return base_behavior
             else
               block_args = []
               block_args << action if can_actions.include?(:manage)
               block_args << (target.class == Class ? target : target.class) if can_targets.include?(:all)
               block_args << (target.class == Class ? nil : target)
-              return can_block.call(*block_args)
+              return base_behavior ? can_block.call(*block_args) : !can_block.call(*block_args)
             end
           end
         end
@@ -114,7 +114,24 @@ module CanCan
     # 
     def can(action, target, &block)
       @can_history ||= []
-      @can_history << [action, target, block]
+      @can_history << [true, action, target, block]
+    end
+    
+    # Define an ability which cannot be done. Accepts the same arguments as "can".
+    # 
+    #   can :read, :all
+    #   cannot :read, Comment
+    # 
+    # A block can be passed just like "can", however if the logic is complex it is recommended
+    # to use the "can" method.
+    # 
+    #   cannot :read, Product do |product|
+    #     product.invisible?
+    #   end
+    # 
+    def cannot(action, target, &block)
+      @can_history ||= []
+      @can_history << [false, action, target, block]
     end
     
     # Alias one or more actions into another one.

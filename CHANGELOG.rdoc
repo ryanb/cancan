@@ -1,3 +1,5 @@
+* adding "cannot" method to define which abilities cannot be done - see issue #7
+
 * support custom objects (usually symbols) in can definition - see issue #8
 
 0.2.0 (Nov 17, 2009)

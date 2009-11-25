@@ -111,17 +111,11 @@ You can also pass :manage as the action which will match any action. In this cas
   can :manage, Comment do |action, comment|
     action != :destroy
   end
+  
+Finally, the "cannot" method works similar to "can" but defines which abilities cannot be done.
 
-Finally, you can use the "alias_action" method to alias one or more actions into one.
-
-  alias_action :update, :destroy, :to => :modify
-  can :modify, Comment
-
-The following aliases are added by default for conveniently mapping common controller actions.
-
-  alias_action :index, :show, :to => :read
-  alias_action :new, :to => :create
-  alias_action :edit, :to => :update
+  can :read, :all
+  cannot :read, Product
 
 
 == Checking Abilities
@@ -139,6 +133,21 @@ You can also pass the class instead of an instance (if you don't have one handy)
 The "cannot?" method is for convenience and performs the opposite check of "can?"
 
   cannot? :destroy, @project
+
+
+== Aliasing Actions
+
+You can use the "alias_action" method to alias one or more actions into one.
+
+  alias_action :update, :destroy, :to => :modify
+  can :modify, Comment
+  can? :update, Comment # => true
+
+The following aliases are added by default for conveniently mapping common controller actions.
+
+  alias_action :index, :show, :to => :read
+  alias_action :new, :to => :create
+  alias_action :edit, :to => :update
 
 
 == Assumptions & Configuring
