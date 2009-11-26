@@ -9,3 +9,10 @@ require File.dirname(__FILE__) + '/../lib/cancan.rb'
 Spec::Runner.configure do |config|
   config.mock_with :rr
 end
+
+class Ability
+  include CanCan::Ability
+  
+  def initialize(user)
+  end
+end
