@@ -40,22 +40,13 @@ module CanCan
     #     assert ability.cannot?(:destroy, Project.new)
     #   end
     # 
-    def can?(original_action, target) # TODO this could use some refactoring
-      (@can_history || []).reverse.each do |base_behavior, can_action, can_target, can_block|
-        can_actions = [can_action].flatten
-        can_targets = [can_target].flatten
-        possible_actions_for(original_action).each do |action|
-          if (can_actions.include?(:manage) || can_actions.include?(action)) && (can_targets.include?(:all) || can_targets.include?(target) || can_targets.any? { |c| c.kind_of?(Class) && target.kind_of?(c) })
-            if can_block.nil?
-              return base_behavior
-            else
-              block_args = []
-              block_args << action if can_actions.include?(:manage)
-              block_args << (target.class == Class ? target : target.class) if can_targets.include?(:all)
-              block_args << (target.class == Class ? nil : target)
-              return base_behavior ? can_block.call(*block_args) : !can_block.call(*block_args)
-            end
-          end
+    def can?(action, noun) # TODO this could use some refactoring
+      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_block|
+        defined_actions = expand_actions(defined_action)
+        defined_nouns = [defined_noun].flatten
+        if includes_action?(defined_actions, action) && includes_noun?(defined_nouns, noun)
+          result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block)
+          return base_behavior ? result : !result
         end
       end
       false
@@ -112,9 +103,9 @@ module CanCan
     #   can :read, :stats
     #   can? :read, :stats # => true
     # 
-    def can(action, target, &block)
-      @can_history ||= []
-      @can_history << [true, action, target, block]
+    def can(action, noun, &block)
+      @can_definitions ||= []
+      @can_definitions << [true, action, noun, block]
     end
     
     # Define an ability which cannot be done. Accepts the same arguments as "can".
@@ -129,9 +120,9 @@ module CanCan
     #     product.invisible?
     #   end
     # 
-    def cannot(action, target, &block)
-      @can_history ||= []
-      @can_history << [false, action, target, block]
+    def cannot(action, noun, &block)
+      @can_definitions ||= []
+      @can_definitions << [false, action, noun, block]
     end
     
     # Alias one or more actions into another one.
@@ -164,12 +155,15 @@ module CanCan
     # 
     # This way one can use params[:action] in the controller to determine the permission.
     def alias_action(*args)
-      @aliased_actions ||= default_alias_actions
       target = args.pop[:to]
-      @aliased_actions[target] = args
+      aliased_actions[target] = args
     end
     
     private
+    
+    def aliased_actions
+      @aliased_actions ||= default_alias_actions
+    end
     
     def default_alias_actions
       {
@@ -179,12 +173,34 @@ module CanCan
       }
     end
     
-    def possible_actions_for(initial_action)
-      actions = [initial_action]
-      (@aliased_actions || default_alias_actions).each do |target, aliases|
-        actions += possible_actions_for(target) if aliases.include? initial_action
+    def expand_actions(actions)
+      [actions].flatten.map do |action|
+        if aliased_actions[action]
+          [action, *aliased_actions[action]]
+        else
+          action
+        end
+      end.flatten
+    end
+    
+    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block)
+      if defined_block.nil?
+        true
+      else
+        block_args = []
+        block_args << action if defined_actions.include?(:manage)
+        block_args << (noun.class == Class ? noun : noun.class) if defined_nouns.include?(:all)
+        block_args << (noun.class == Class ? nil : noun)
+        return defined_block.call(*block_args)
       end
-      actions
+    end
+    
+    def includes_action?(actions, action)
+      actions.include?(:manage) || actions.include?(action)
+    end
+    
+    def includes_noun?(nouns, noun)
+      nouns.include?(:all) || nouns.include?(noun) || nouns.any? { |c| c.kind_of?(Class) && noun.kind_of?(c) }
     end
   end
 end
