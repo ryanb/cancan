@@ -37,8 +37,9 @@ describe CanCan::ControllerAdditions do
     @controller.authorize_resource
   end
   
-  it "should load and authorize resource in one call" do
-    mock.instance_of(CanCan::ResourceAuthorization).load_and_authorize_resource
+  it "should load and authorize resource in one call through controller" do
+    mock(@controller).load_resource
+    mock(@controller).authorize_resource
     @controller.load_and_authorize_resource
   end
 end

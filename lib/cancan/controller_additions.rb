@@ -82,7 +82,7 @@ module CanCan
     # 
     #   before_filter :load_resource
     # 
-    def load_resource # TODO this could use some refactoring
+    def load_resource
       ResourceAuthorization.new(self, params).load_resource
     end
     
@@ -98,7 +98,7 @@ module CanCan
     #   before_filter :authorize_resource
     # 
     # See load_and_authorize_resource to automatically load the resource too.
-    def authorize_resource # TODO this could use some refactoring
+    def authorize_resource
       ResourceAuthorization.new(self, params).authorize_resource
     end
     
@@ -109,7 +109,8 @@ module CanCan
     #   before_filter :load_and_authorize_resource
     # 
     def load_and_authorize_resource
-      ResourceAuthorization.new(self, params).load_and_authorize_resource
+      load_resource
+      authorize_resource
     end
   end
 end

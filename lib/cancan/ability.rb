@@ -40,7 +40,7 @@ module CanCan
     #     assert ability.cannot?(:destroy, Project.new)
     #   end
     # 
-    def can?(action, noun) # TODO this could use some refactoring
+    def can?(action, noun)
       (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_block|
         defined_actions = expand_actions(defined_action)
         defined_nouns = [defined_noun].flatten
