@@ -1,3 +1,5 @@
+* Don't set resource instance variable if it has been set already - see issue #13
+
 * Allowing :nested option to accept an array for deep nesting
 
 * Adding :nested option to load resource method - see issue #10

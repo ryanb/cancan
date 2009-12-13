@@ -4,8 +4,8 @@ module CanCan
   # It also makes the "can?" and "cannot?" methods available to all views.
   module ControllerAdditions
     module ClassMethods
-      # Sets up a before filter which loads and authorizes the current resource. This accepts the
-      # same arguments as load_resource and authorize_resource. See those methods for details.
+      # Sets up a before filter which loads and authorizes the current resource. This performs both
+      # load_resource and authorize_resource and accepts the same arguments. See those methods for details.
       # 
       #   class BooksController < ApplicationController
       #     load_and_authorize_resource
@@ -21,10 +21,24 @@ module CanCan
       # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
       # action.
       # 
-      # You would call this method directly on the controller class.
+      # Call this method directly on the controller class.
       # 
       #   class BooksController < ApplicationController
       #     load_resource
+      #   end
+      # 
+      # A resource is not loaded if the instance variable is already set. This makes it easy to override
+      # the behavior through a before_filter on certain actions.
+      # 
+      #   class BooksController < ApplicationController
+      #     before_filter :find_book_by_permalink, :only => :show
+      #     load_resource
+      #
+      #     private
+      #
+      #     def find_book_by_permalink
+      #       @book = Book.find_by_permalink!(params[:id)
+      #     end
       #   end
       # 
       # See load_and_authorize_resource to automatically authorize the resource too.
@@ -70,7 +84,7 @@ module CanCan
       # 
       #   unauthorized! if cannot?(params[:action].to_sym, @article || Article)
       # 
-      # You would call this method directly on the controller class.
+      # Call this method directly on the controller class.
       # 
       #   class BooksController < ApplicationController
       #     authorize_resource

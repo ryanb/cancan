@@ -11,14 +11,14 @@ module CanCan
     end
     
     def find(id)
-      self.model_instance = base.find(id)
+      self.model_instance ||= base.find(id)
     end
     
     def build(attributes)
       if base.kind_of? Class
-        self.model_instance = base.new(attributes)
+        self.model_instance ||= base.new(attributes)
       else
-        self.model_instance = base.build(attributes)
+        self.model_instance ||= base.build(attributes)
       end
     end
     

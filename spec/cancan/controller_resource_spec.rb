@@ -34,4 +34,10 @@ describe CanCan::ControllerResource do
     CanCan::ControllerResource.new(@controller, :ability, parent).build(123)
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
+  
+  it "should not load resource if instance variable is already provided" do
+    @controller.instance_variable_set(:@ability, :some_ability)
+    CanCan::ControllerResource.new(@controller, :ability).find(123)
+    @controller.instance_variable_get(:@ability).should == :some_ability
+  end
 end
