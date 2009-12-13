@@ -5,5 +5,6 @@ module CanCan
 end
 
 require File.dirname(__FILE__) + '/cancan/ability'
+require File.dirname(__FILE__) + '/cancan/controller_resource'
 require File.dirname(__FILE__) + '/cancan/resource_authorization'
 require File.dirname(__FILE__) + '/cancan/controller_additions'
