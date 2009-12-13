@@ -10,7 +10,7 @@ See the RDocs[http://rdoc.info/projects/ryanb/cancan] and Wiki[http://wiki.githu
 
 You can set it up as a gem in your environment.rb file.
   
-  config.gem "cancan", :source => "http://gemcutter.org"
+  config.gem "cancan"
   
 And then install the gem.
 
@@ -21,7 +21,7 @@ Alternatively you can install it as a Rails plugin.
   script/plugin install git://github.com/ryanb/cancan.git
 
 
-== Setup
+== Getting Started
 
 First, define a class called Ability in "models/ability.rb".
 
@@ -52,10 +52,10 @@ You can also use these methods in a controller along with the "unauthorized!" me
     unauthorized! if cannot? :read, @article
   end
 
-Setting this for every action can be tedious, therefore a before filter is also provided to automatically authorize all actions in a RESTful style resource controller.
+Setting this for every action can be tedious, therefore the load_and_authorize_resource method is also provided to automatically authorize all actions in a RESTful style resource controller. It will set up a before filter which loads the resource into the instance variable and authorizes it.
 
   class ArticlesController < ApplicationController
-    before_filter :load_and_authorize_resource
+    load_and_authorize_resource
     
     def show
       # @article is already loaded
@@ -148,6 +148,30 @@ The following aliases are added by default for conveniently mapping common contr
   alias_action :index, :show, :to => :read
   alias_action :new, :to => :create
   alias_action :edit, :to => :update
+
+
+== Authorizing Controller Actions
+
+As mentioned in the Getting Started section, you can use the +load_and_authorize_resource+ method in your controller to load the resource into an instance variable and authorize it. If you have a nested resource you can specify that as well.
+
+  load_and_authorize_resource :nested => :author
+
+You can also pass an array to the :+nested+ attribute for deep nesting.
+
+If you want to customize the loading behavior on certain actions, you can do so in a before filter.
+
+  class BooksController < ApplicationController
+    before_filter :find_book_by_permalink, :only => :show
+    load_and_authorize_resource
+  
+    private
+  
+    def find_book_by_permalink
+      @book = Book.find_by_permalink!(params[:id)
+    end
+  end
+
+Here the @book instance variable is already set so it will not be loaded again for that action. This works for nested resources as well.
 
 
 == Assumptions & Configuring

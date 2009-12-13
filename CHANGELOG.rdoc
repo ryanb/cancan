@@ -1,3 +1,5 @@
+1.0.0 (Dec 13, 2009)
+
 * Don't set resource instance variable if it has been set already - see issue #13
 
 * Allowing :nested option to accept an array for deep nesting
@@ -10,6 +12,7 @@
 
 * BACKWARDS INCOMPATIBLE: turning load and authorize resource methods into class methods which set up the before filter so they can accept additional arguments.
 
+
 0.2.1 (Nov 26, 2009)
 
 * many internal refactorings - see issues #11 and #12
@@ -17,6 +20,7 @@
 * adding "cannot" method to define which abilities cannot be done - see issue #7
 
 * support custom objects (usually symbols) in can definition - see issue #8
+
 
 0.2.0 (Nov 17, 2009)
 
