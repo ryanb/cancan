@@ -16,3 +16,7 @@ class Ability
   def initialize(user)
   end
 end
+
+# this class helps out in testing nesting
+class Person
+end

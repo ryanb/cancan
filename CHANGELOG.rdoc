@@ -1,3 +1,5 @@
+* Adding :nested option to load resource method - see issue #10
+
 * Pass :only and :except options to before filters for load/authorize resource methods.
 
 * Adding :collection and :new options to load_resource method so we can specify behavior of additional actions if needed.

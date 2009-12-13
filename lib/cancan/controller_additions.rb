@@ -35,7 +35,12 @@ module CanCan
       #   
       # [:+except+]
       #   Does not apply before filter to given actions.
-      # 
+      #   
+      # [:+nested+]
+      #   Specify which resource this is nested under.
+      #   
+      #     load_resource :nested => :author
+      #   
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
       #   is usually not necessary because it will try to guess depending on if an :+id+
