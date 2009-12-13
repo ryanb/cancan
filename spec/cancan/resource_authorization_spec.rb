@@ -84,22 +84,16 @@ describe CanCan::ResourceAuthorization do
   end
   
   it "should load nested resource and fetch other resource through the association" do
-    person = Object.new
-    stub(Person).find(456) { person }
-    stub(person).abilities.stub!.find(123) { :some_ability }
+    stub(Person).find(456).stub!.abilities.stub!.find(123) { :some_ability }
     authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "show", :id => 123, :person_id => 456}, {:nested => :person})
     authorization.load_resource
-    @controller.instance_variable_get(:@person).should == person
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
   
-  it "should load nested resource and fetch build resource through the association" do
-    person = Object.new
-    stub(Person).find(456) { person }
-    stub(person).abilities.stub!.build({:foo => :bar}) { :some_ability }
-    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "new", :person_id => 456, :ability => {:foo => :bar}}, {:nested => :person})
+  it "should load nested resource and build resource through a deep association" do
+    stub(Person).find(456).stub!.behaviors.stub!.find(789).stub!.abilities.stub!.build(nil) { :some_ability }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "new", :person_id => 456, :behavior_id => 789}, {:nested => [:person, :behavior]})
     authorization.load_resource
-    @controller.instance_variable_get(:@person).should == person
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 end

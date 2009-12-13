@@ -41,6 +41,10 @@ module CanCan
       #   
       #     load_resource :nested => :author
       #   
+      #   Deep nesting can be defined in an array.
+      #   
+      #     load_resource :nested => [:publisher, :author]
+      #   
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
       #   is usually not necessary because it will try to guess depending on if an :+id+

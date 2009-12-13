@@ -34,11 +34,12 @@ module CanCan
     end
     
     def parent_resource
-      if @options[:nested]
-        parent = ControllerResource.new(@controller, @options[:nested])
-        parent.find(@params["#{@options[:nested]}_id".to_sym])
-        parent
+      parent = nil
+      [@options[:nested]].flatten.compact.each do |name|
+        parent = ControllerResource.new(@controller, name, parent)
+        parent.find(@params["#{name}_id".to_sym])
       end
+      parent
     end
     
     def model_name

@@ -1,3 +1,5 @@
+* Allowing :nested option to accept an array for deep nesting
+
 * Adding :nested option to load resource method - see issue #10
 
 * Pass :only and :except options to before filters for load/authorize resource methods.
