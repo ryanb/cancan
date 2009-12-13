@@ -28,7 +28,23 @@ module CanCan
       #   end
       # 
       # See load_and_authorize_resource to automatically authorize the resource too.
-      def load_resource(*args) # TODO add documentation for options which can be passed.
+      # 
+      # Options:
+      # [:+collection+]
+      #   Specify which actions are resource collection actions in addition to :+index+. This
+      #   is usually not necessary because it will try to guess depending on if an :+id+
+      #   is present in +params+.
+      #   
+      #     load_resource :collection => [:sort, :list]
+      #   
+      # [:+new+]
+      #   Specify which actions are new resource actions in addition to :+new+ and :+create+.
+      #   Pass an action name into here if you would like to build a new resource instead of
+      #   fetch one.
+      #   
+      #     load_resource :new => :build
+      #   
+      def load_resource(*args)
         before_filter { |c| ResourceAuthorization.new(c, c.params, *args).load_resource }
       end
       

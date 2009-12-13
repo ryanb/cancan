@@ -1,3 +1,5 @@
+* Adding :collection and :new options to load_resource method so we can specify behavior of additional actions if needed.
+
 * BACKWARDS INCOMPATIBLE: turning load and authorize resource methods into class methods which set up the before filter so they can accept additional arguments.
 
 0.2.1 (Nov 26, 2009)

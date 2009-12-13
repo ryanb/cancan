@@ -2,9 +2,10 @@ module CanCan
   class ResourceAuthorization # :nodoc:
     attr_reader :params
     
-    def initialize(controller, params)
+    def initialize(controller, params, options = {})
       @controller = controller
       @params = params
+      @options = options
     end
     
     def load_and_authorize_resource
@@ -13,7 +14,13 @@ module CanCan
     end
     
     def load_resource
-      self.model_instance = params[:id] ? model_class.find(params[:id]) : model_class.new(params[model_name.to_sym]) unless params[:action] == "index"
+      unless collection_actions.include? params[:action].to_sym
+        if new_actions.include? params[:action].to_sym
+          self.model_instance = model_class.new(params[model_name.to_sym])
+        else
+          self.model_instance = model_class.find(params[:id]) if params[:id]
+        end
+      end
     end
     
     def authorize_resource
@@ -36,6 +43,14 @@ module CanCan
     
     def model_instance=(instance)
       @controller.instance_variable_set("@#{model_name}", instance)
+    end
+    
+    def collection_actions
+      [:index] + [@options[:collection]].flatten
+    end
+    
+    def new_actions
+      [:new, :create] + [@options[:new]].flatten
     end
   end
 end

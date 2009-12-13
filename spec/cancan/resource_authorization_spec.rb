@@ -63,4 +63,23 @@ describe CanCan::ResourceAuthorization do
     mock(authorization).authorize_resource
     authorization.load_and_authorize_resource
   end
+  
+  it "should not build a resource when on custom collection action" do
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "sort"}, {:collection => [:sort, :list]})
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should be_nil
+  end
+  
+  it "should build a resource when on custom new action even when params[:id] exists" do
+    stub(Ability).new(nil) { :some_resource }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "build", :id => 123}, {:new => :build})
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
+  it "should not try to load resource for other action if params[:id] is undefined" do
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "list"})
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should be_nil
+  end
 end
