@@ -1,3 +1,5 @@
+* BACKWARDS INCOMPATIBLE: turning load and authorize resource methods into class methods which set up the before filter so they can accept additional arguments.
+
 0.2.1 (Nov 26, 2009)
 
 * many internal refactorings - see issues #11 and #12

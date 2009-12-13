@@ -3,7 +3,56 @@ module CanCan
   # This module is automatically included into all controllers.
   # It also makes the "can?" and "cannot?" methods available to all views.
   module ControllerAdditions
+    module ClassMethods
+      # Sets up a before filter which loads and authorizes the current resource. This accepts the
+      # same arguments as load_resource and authorize_resource. See those methods for details.
+      # 
+      #   class BooksController < ApplicationController
+      #     load_and_authorize_resource
+      #   end
+      # 
+      def load_and_authorize_resource(*args)
+        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).load_and_authorize_resource }
+      end
+      
+      # Sets up a before filter which loads the appropriate model resource into an instance variable.
+      # For example, given an ArticlesController it will load the current article into the @article
+      # instance variable. It does this by either calling Article.find(params[:id]) or
+      # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
+      # action.
+      # 
+      # You would call this method directly on the controller class.
+      # 
+      #   class BooksController < ApplicationController
+      #     load_resource
+      #   end
+      # 
+      # See load_and_authorize_resource to automatically authorize the resource too.
+      def load_resource(*args) # TODO add documentation for options which can be passed.
+        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).load_resource }
+      end
+      
+      # Sets up a before filter which authorizes the current resource using the instance variable.
+      # For example, if you have an ArticlesController it will check the @article instance variable
+      # and ensure the user can perform the current action on it. Under the hood it is doing
+      # something like the following.
+      # 
+      #   unauthorized! if cannot?(params[:action].to_sym, @article || Article)
+      # 
+      # You would call this method directly on the controller class.
+      # 
+      #   class BooksController < ApplicationController
+      #     authorize_resource
+      #   end
+      # 
+      # See load_and_authorize_resource to automatically load the resource too.
+      def authorize_resource(*args)
+        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).authorize_resource }
+      end
+    end
+    
     def self.included(base)
+      base.extend ClassMethods
       base.helper_method :can?, :cannot?
     end
     
@@ -69,48 +118,6 @@ module CanCan
     # 
     def cannot?(*args)
       (@current_ability ||= current_ability).cannot?(*args)
-    end
-    
-    # This method loads the appropriate model resource into an instance variable. For example,
-    # given an ArticlesController it will load the current article into the @article instance
-    # variable. It does this by either calling Article.find(params[:id]) or
-    # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
-    # action.
-    # 
-    # You would often use this as a before filter in the controller. See
-    # load_and_authorize_resource to handle authorization too.
-    # 
-    #   before_filter :load_resource
-    # 
-    def load_resource
-      ResourceAuthorization.new(self, params).load_resource
-    end
-    
-    # Authorizes the resource in the current instance variable. For example,
-    # if you have an ArticlesController it will check the @article instance variable
-    # and ensure the user can perform the current action on it.
-    # Under the hood it is doing something like the following.
-    # 
-    #   unauthorized! if cannot?(params[:action].to_sym, @article || Article)
-    # 
-    # You would often use this as a before filter in the controller.
-    # 
-    #   before_filter :authorize_resource
-    # 
-    # See load_and_authorize_resource to automatically load the resource too.
-    def authorize_resource
-      ResourceAuthorization.new(self, params).authorize_resource
-    end
-    
-    # Calls load_resource to load the current resource model into an instance variable. 
-    # Then calls authorize_resource to ensure the current user is authorized to access the page. 
-    # You would often use this as a before filter in the controller.
-    # 
-    #   before_filter :load_and_authorize_resource
-    # 
-    def load_and_authorize_resource
-      load_resource
-      authorize_resource
     end
   end
 end

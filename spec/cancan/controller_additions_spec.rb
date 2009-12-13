@@ -27,19 +27,21 @@ describe CanCan::ControllerAdditions do
     @controller.cannot?(:foo, :bar).should be_true
   end
   
-  it "should load resource" do
-    mock.instance_of(CanCan::ResourceAuthorization).load_resource
-    @controller.load_resource
+  it "load_and_authorize_resource should setup a before filter which passes call to ResourceAuthorization" do
+    stub(CanCan::ResourceAuthorization).new(@controller, @controller.params, :foo => :bar).mock!.load_and_authorize_resource
+    mock(@controller_class).before_filter { |block| block.call(@controller) }
+    @controller_class.load_and_authorize_resource :foo => :bar
   end
   
-  it "should authorize resource" do
-    mock.instance_of(CanCan::ResourceAuthorization).authorize_resource
-    @controller.authorize_resource
+  it "authorize_resource should setup a before filter which passes call to ResourceAuthorization" do
+    stub(CanCan::ResourceAuthorization).new(@controller, @controller.params, :foo => :bar).mock!.authorize_resource
+    mock(@controller_class).before_filter { |block| block.call(@controller) }
+    @controller_class.authorize_resource :foo => :bar
   end
   
-  it "should load and authorize resource in one call through controller" do
-    mock(@controller).load_resource
-    mock(@controller).authorize_resource
-    @controller.load_and_authorize_resource
+  it "load_resource should setup a before filter which passes call to ResourceAuthorization" do
+    stub(CanCan::ResourceAuthorization).new(@controller, @controller.params, :foo => :bar).mock!.load_resource
+    mock(@controller_class).before_filter { |block| block.call(@controller) }
+    @controller_class.load_resource :foo => :bar
   end
 end

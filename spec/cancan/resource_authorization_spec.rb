@@ -56,4 +56,11 @@ describe CanCan::ResourceAuthorization do
       authorization.authorize_resource
     }.should raise_error(CanCan::AccessDenied)
   end
+  
+  it "should call load_resource and authorize_resource for load_and_authorize_resource" do
+    authorization = CanCan::ResourceAuthorization.new(@controller, :controller => "abilities", :action => "show")
+    mock(authorization).load_resource
+    mock(authorization).authorize_resource
+    authorization.load_and_authorize_resource
+  end
 end
