@@ -11,8 +11,8 @@ module CanCan
       #     load_and_authorize_resource
       #   end
       # 
-      def load_and_authorize_resource(*args)
-        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).load_and_authorize_resource }
+      def load_and_authorize_resource(options = {})
+        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).load_and_authorize_resource }
       end
       
       # Sets up a before filter which loads the appropriate model resource into an instance variable.
@@ -30,6 +30,12 @@ module CanCan
       # See load_and_authorize_resource to automatically authorize the resource too.
       # 
       # Options:
+      # [:+only+]
+      #   Only applies before filter to given actions.
+      #   
+      # [:+except+]
+      #   Does not apply before filter to given actions.
+      # 
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
       #   is usually not necessary because it will try to guess depending on if an :+id+
@@ -44,8 +50,8 @@ module CanCan
       #   
       #     load_resource :new => :build
       #   
-      def load_resource(*args)
-        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).load_resource }
+      def load_resource(options = {})
+        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).load_resource }
       end
       
       # Sets up a before filter which authorizes the current resource using the instance variable.
@@ -62,8 +68,16 @@ module CanCan
       #   end
       # 
       # See load_and_authorize_resource to automatically load the resource too.
-      def authorize_resource(*args)
-        before_filter { |c| ResourceAuthorization.new(c, c.params, *args).authorize_resource }
+      # 
+      # Options:
+      # [:+only+]
+      #   Only applies before filter to given actions.
+      #   
+      # [:+except+]
+      #   Does not apply before filter to given actions.
+      # 
+      def authorize_resource(options = {})
+        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).authorize_resource }
       end
     end
     
