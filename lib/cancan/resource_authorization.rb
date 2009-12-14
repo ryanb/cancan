@@ -30,7 +30,7 @@ module CanCan
     private
     
     def resource
-      @resource ||= ControllerResource.new(@controller, model_name, parent_resource)
+      @resource ||= ControllerResource.new(@controller, model_name, parent_resource, @options)
     end
     
     def parent_resource

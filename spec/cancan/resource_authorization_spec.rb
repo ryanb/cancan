@@ -105,4 +105,11 @@ describe CanCan::ResourceAuthorization do
     @controller.instance_variable_get(:@person).should == :some_person
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
+  
+  it "should load the model using a custom class" do
+    stub(Person).find(123) { :some_resource }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:class => Person})
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
 end

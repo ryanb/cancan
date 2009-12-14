@@ -1,13 +1,14 @@
 module CanCan
   class ControllerResource # :nodoc:
-    def initialize(controller, name, parent = nil)
+    def initialize(controller, name, parent = nil, options = {})
       @controller = controller
       @name = name
       @parent = parent
+      @options = options
     end
     
     def model_class
-      @name.to_s.camelize.constantize
+      @options[:class] || @name.to_s.camelize.constantize
     end
     
     def find(id)

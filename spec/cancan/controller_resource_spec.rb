@@ -40,4 +40,10 @@ describe CanCan::ControllerResource do
     CanCan::ControllerResource.new(@controller, :ability).find(123)
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
+  
+  it "should use the model class option if provided" do
+    stub(Person).find(123) { :some_resource }
+    CanCan::ControllerResource.new(@controller, :ability, nil, :class => Person).find(123)
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
 end

@@ -59,6 +59,9 @@ module CanCan
       #   
       #     load_resource :nested => [:publisher, :author]
       #   
+      # [:+class+]
+      #   The class to use for the model.
+      #   
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
       #   is usually not necessary because it will try to guess depending on if an :+id+
@@ -72,7 +75,7 @@ module CanCan
       #   fetch one.
       #   
       #     load_resource :new => :build
-      #   
+      # 
       def load_resource(options = {})
         before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).load_resource }
       end
@@ -98,6 +101,9 @@ module CanCan
       #   
       # [:+except+]
       #   Does not apply before filter to given actions.
+      # 
+      # [:+class+]
+      #   The class to use for the model.
       # 
       def authorize_resource(options = {})
         before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).authorize_resource }
