@@ -4,8 +4,8 @@ Gem::Specification.new do |s|
   s.description = "Simple authorization solution for Rails which is completely decoupled from the user's roles. All permissions are stored in a single location for convenience."
   s.homepage = "http://github.com/ryanb/cancan"
   
-  s.version = "1.0.0"
-  s.date = "2009-12-13"
+  s.version = "1.0.1"
+  s.date = "2009-12-14"
   
   s.authors = ["Ryan Bates"]
   s.email = "ryan@railscasts.com"

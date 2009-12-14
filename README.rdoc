@@ -65,11 +65,7 @@ Setting this for every action can be tedious, therefore the load_and_authorize_r
 If the user authorization fails, a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the ApplicationController.
 
   class ApplicationController < ActionController::Base
-    rescue_from CanCan::AccessDenied, :with => :access_denied
-  
-    protected
-  
-    def access_denied
+    rescue_from CanCan::AccessDenied do |exception|
       flash[:error] = "Sorry, you are not allowed to access that page."
       redirect_to root_url
     end

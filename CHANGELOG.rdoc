@@ -1,3 +1,5 @@
+1.0.1 (Dec 14, 2009)
+
 * Adding :class option to load_resource so one can customize which class to use for the model - see issue #17
 
 * Don't fetch parent of nested resource if *_id parameter is missing so it works with shallow nested routes - see issue #14
