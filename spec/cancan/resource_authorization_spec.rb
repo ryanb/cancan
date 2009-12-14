@@ -96,4 +96,13 @@ describe CanCan::ResourceAuthorization do
     authorization.load_resource
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
+  
+  it "should not load nested resource and build through this if *_id param isn't specified" do
+    stub(Person).find(456) { :some_person }
+    stub(Ability).new(nil) { :some_ability }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "new", :person_id => 456}, {:nested => [:person, :behavior]})
+    authorization.load_resource
+    @controller.instance_variable_get(:@person).should == :some_person
+    @controller.instance_variable_get(:@ability).should == :some_ability
+  end
 end

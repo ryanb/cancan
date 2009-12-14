@@ -36,8 +36,13 @@ module CanCan
     def parent_resource
       parent = nil
       [@options[:nested]].flatten.compact.each do |name|
-        parent = ControllerResource.new(@controller, name, parent)
-        parent.find(@params["#{name}_id".to_sym])
+        id = @params["#{name}_id".to_sym]
+        if id
+          parent = ControllerResource.new(@controller, name, parent)
+          parent.find(id)
+        else
+          parent = nil
+        end
       end
       parent
     end

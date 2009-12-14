@@ -1,3 +1,6 @@
+* Don't fetch parent of nested resource if *_id parameter is missing so it works with shallow nested routes - see issue #14
+
+
 1.0.0 (Dec 13, 2009)
 
 * Don't set resource instance variable if it has been set already - see issue #13
