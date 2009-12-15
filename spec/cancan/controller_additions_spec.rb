@@ -9,10 +9,16 @@ describe CanCan::ControllerAdditions do
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
   
-  it "should read from the cache with request uri as key and render that text" do
+  it "should raise access denied with default message when calling unauthorized!" do
     lambda {
       @controller.unauthorized!
-    }.should raise_error(CanCan::AccessDenied)
+    }.should raise_error(CanCan::AccessDenied, "You are not authorized to access this page.")
+  end
+  
+  it "should raise access denied with custom message when calling unauthorized!" do
+    lambda {
+      @controller.unauthorized! "Access denied!"
+    }.should raise_error(CanCan::AccessDenied, "Access denied!")
   end
   
   it "should have a current_ability method which generates an ability for the current user" do

@@ -123,24 +123,22 @@ module CanCan
     #     unauthorized! if cannot? :read, @article
     #   end
     # 
-    # You can rescue from the exception in the controller to specify
-    # the user experience.
+    # The unauthorized! method accepts an optional argument which sets the
+    # message of the exception.
+    # 
+    # You can rescue from the exception in the controller to define the behavior.
     # 
     #   class ApplicationController < ActionController::Base
-    #     rescue_from CanCan::AccessDenied, :with => :access_denied
-    #   
-    #     protected
-    #   
-    #     def access_denied
-    #       flash[:error] = "Sorry, you are not allowed to access that page."
+    #     rescue_from CanCan::AccessDenied do |exception|
+    #       flash[:error] = exception.message
     #       redirect_to root_url
     #     end
     #   end
     # 
     # See the load_and_authorize_resource method to automatically add
     # the "unauthorized!" behavior to a RESTful controller's actions.
-    def unauthorized!
-      raise AccessDenied, "You are unable to access this page."
+    def unauthorized!(message = "You are not authorized to access this page.")
+      raise AccessDenied, message
     end
     
     # Creates and returns the current user's ability. You generally do not invoke

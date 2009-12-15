@@ -1,3 +1,6 @@
+* Adding custom message argument to unauthorized! method (thanks tjwallace) - see issue #18
+
+
 1.0.1 (Dec 14, 2009)
 
 * Adding :class option to load_resource so one can customize which class to use for the model - see issue #17
