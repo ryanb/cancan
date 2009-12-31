@@ -49,9 +49,7 @@ describe CanCan::Ability do
   
   it "should alias update or destroy actions to modify action" do
     @ability.alias_action :update, :destroy, :to => :modify
-    @ability.can :modify, :all do |object_class, object|
-      :modify_called
-    end
+    @ability.can(:modify, :all) { :modify_called }
     @ability.can?(:update, 123).should == :modify_called
     @ability.can?(:destroy, 123).should == :modify_called
   end
@@ -126,10 +124,12 @@ describe CanCan::Ability do
   it "should append aliased actions" do
     @ability.alias_action :update, :to => :modify
     @ability.alias_action :destroy, :to => :modify
-    @ability.can :modify, :all do |object_class, object|
-      :modify_called
-    end
-    @ability.can?(:update, 123).should == :modify_called
-    @ability.can?(:destroy, 123).should == :modify_called
+    @ability.aliased_actions[:modify].should == [:update, :destroy]
+  end
+  
+  it "should clear aliased actions" do
+    @ability.alias_action :update, :to => :modify
+    @ability.clear_aliased_actions
+    @ability.aliased_actions[:modify].should be_nil
   end
 end

@@ -1,3 +1,5 @@
+* Adding clear_aliased_actions to Ability which removes previously defined actions including defaults - see issue #20
+
 * Append aliased actions (don't overwrite them) - see issue #20
 
 * Adding custom message argument to unauthorized! method (thanks tjwallace) - see issue #18

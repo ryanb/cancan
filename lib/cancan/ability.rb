@@ -160,11 +160,17 @@ module CanCan
       aliased_actions[target] += args
     end
     
-    private
-    
+    # Returns a hash of aliased actions. The key is the target and the value is an array of actions aliasing the key.
     def aliased_actions
       @aliased_actions ||= default_alias_actions
     end
+    
+    # Removes previously aliased actions including the defaults.
+    def clear_aliased_actions
+      @aliased_actions = {}
+    end
+    
+    private
     
     def default_alias_actions
       {
