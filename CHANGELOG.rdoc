@@ -1,3 +1,5 @@
+* Append aliased actions (don't overwrite them) - see issue #20
+
 * Adding custom message argument to unauthorized! method (thanks tjwallace) - see issue #18
 
 

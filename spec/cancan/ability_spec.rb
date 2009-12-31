@@ -2,9 +2,8 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 describe CanCan::Ability do
   before(:each) do
-    @ability_class = Class.new
-    @ability_class.send(:include, CanCan::Ability)
-    @ability = @ability_class.new
+    @ability = Object.new
+    @ability.extend(CanCan::Ability)
   end
   
   it "should be able to :read anything" do
@@ -122,5 +121,15 @@ describe CanCan::Ability do
     @ability.can?(:read, "foo").should be_true
     @ability.can?(:read, 3).should be_true
     @ability.can?(:read, 123).should be_false
+  end
+  
+  it "should append aliased actions" do
+    @ability.alias_action :update, :to => :modify
+    @ability.alias_action :destroy, :to => :modify
+    @ability.can :modify, :all do |object_class, object|
+      :modify_called
+    end
+    @ability.can?(:update, 123).should == :modify_called
+    @ability.can?(:destroy, 123).should == :modify_called
   end
 end
