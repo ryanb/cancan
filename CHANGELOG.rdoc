@@ -1,3 +1,5 @@
+1.0.2 (Dec 30, 2009)
+
 * Adding clear_aliased_actions to Ability which removes previously defined actions including defaults - see issue #20
 
 * Append aliased actions (don't overwrite them) - see issue #20
