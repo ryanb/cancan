@@ -1,10 +1,10 @@
 = CanCan
 
+RDocs[http://rdoc.info/projects/ryanb/cancan] | Wiki[http://wiki.github.com/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan] | Metrics[http://getcaliper.com/caliper/project?repo=git%3A%2F%2Fgithub.com%2Fryanb%2Fcancan.git] | Tests[http://runcoderun.com/ryanb/cancan]
+
 This is a simple authorization solution for Ruby on Rails to restrict what a given user is allowed to access in the application. This is completely decoupled from any role based implementation allowing you to define user roles the way you want. All permissions are stored in a single location for convenience.
 
 This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic]) which provides a current_user model.
-
-See the RDocs[http://rdoc.info/projects/ryanb/cancan], Wiki[http://wiki.github.com/ryanb/cancan] and Railscasts episode[http://railscasts.com/episodes/192-authorization-with-cancan] for additional documentation.
 
 == Installation
 
