@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.summary     = "Simple authorization solution for Rails."
   s.description = "Simple authorization solution for Rails which is completely decoupled from the user's roles. All permissions are stored in a single location for convenience."
   
-  s.files        = Dir["{lib,spec}/**/*"] + Dir["[A-Z]*"] + ["init.rb"]
+  s.files        = Dir["{lib,spec}/**/*", "[A-Z]*", "init.rb"]
   s.require_path = "lib"
   
   s.rubyforge_project = s.name
