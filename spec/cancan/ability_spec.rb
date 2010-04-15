@@ -132,4 +132,12 @@ describe CanCan::Ability do
     @ability.clear_aliased_actions
     @ability.aliased_actions[:modify].should be_nil
   end
+  
+  it "should pass additional arguments to block from can?" do
+    @ability.can :read, Integer do |int, x|
+      int > x
+    end
+    @ability.can?(:read, 2, 1).should be_true
+    @ability.can?(:read, 2, 3).should be_false
+  end
 end

@@ -40,12 +40,12 @@ module CanCan
     #     assert ability.cannot?(:destroy, Project.new)
     #   end
     # 
-    def can?(action, noun)
+    def can?(action, noun, *extra_args)
       (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_block|
         defined_actions = expand_actions(defined_action)
         defined_nouns = [defined_noun].flatten
         if includes_action?(defined_actions, action) && includes_noun?(defined_nouns, noun)
-          result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block)
+          result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block, extra_args)
           return base_behavior ? result : !result
         end
       end
@@ -190,7 +190,7 @@ module CanCan
       end.flatten
     end
     
-    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block)
+    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block, extra_args)
       if defined_block.nil?
         true
       else
@@ -198,6 +198,7 @@ module CanCan
         block_args << action if defined_actions.include?(:manage)
         block_args << (noun.class == Class ? noun : noun.class) if defined_nouns.include?(:all)
         block_args << (noun.class == Class ? nil : noun)
+        block_args += extra_args
         return defined_block.call(*block_args)
       end
     end
