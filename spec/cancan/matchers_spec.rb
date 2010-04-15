@@ -22,4 +22,12 @@ describe "be_able_to" do
       object.should_not be_able_to(:read, 123)
     end.should raise_error('expected not to be able to :read 123')
   end
+
+  it "delegates additional arguments to can? and reports in failure message" do
+    object = Object.new
+    mock(object).can?(:read, 123, 456) { false }
+    expect do
+      object.should be_able_to(:read, 123, 456)
+    end.should raise_error('expected to be able to :read 123 456')
+  end
 end

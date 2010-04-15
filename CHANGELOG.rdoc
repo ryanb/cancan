@@ -1,5 +1,7 @@
 1.1.0 (not released)
 
+* Adding be_able_to RSpec matcher (thanks dchelimsky) - see issue #54
+
 * Support additional arguments to can? which get passed to the block - see issue #48
 
 
