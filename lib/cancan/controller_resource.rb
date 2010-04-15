@@ -1,6 +1,7 @@
 module CanCan
   class ControllerResource # :nodoc:
     def initialize(controller, name, parent = nil, options = {})
+      raise "The :class option has been renamed to :resource for specifying the class in CanCan." if options.has_key? :class
       @controller = controller
       @name = name
       @parent = parent
@@ -8,7 +9,13 @@ module CanCan
     end
     
     def model_class
-      @options[:class] || @name.to_s.camelize.constantize
+      if @options[:resource].nil?
+        @name.to_s.camelize.constantize
+      elsif @options[:resource].kind_of? String
+        @options[:resource].constantize
+      else
+        @options[:resource]
+      end
     end
     
     def find(id)

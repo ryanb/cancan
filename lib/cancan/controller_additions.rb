@@ -12,7 +12,7 @@ module CanCan
       #   end
       # 
       def load_and_authorize_resource(options = {})
-        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).load_and_authorize_resource }
+        ResourceAuthorization.add_before_filter(self, :load_and_authorize_resource, options)
       end
       
       # Sets up a before filter which loads the appropriate model resource into an instance variable.
@@ -59,8 +59,8 @@ module CanCan
       #   
       #     load_resource :nested => [:publisher, :author]
       #   
-      # [:+class+]
-      #   The class to use for the model.
+      # [:+resource+]
+      #   The class to use for the model (string or constant).
       #   
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
@@ -77,7 +77,7 @@ module CanCan
       #     load_resource :new => :build
       # 
       def load_resource(options = {})
-        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).load_resource }
+        ResourceAuthorization.add_before_filter(self, :load_resource, options)
       end
       
       # Sets up a before filter which authorizes the current resource using the instance variable.
@@ -102,11 +102,12 @@ module CanCan
       # [:+except+]
       #   Does not apply before filter to given actions.
       # 
-      # [:+class+]
-      #   The class to use for the model.
+      # [:+resource+]
+      #   The class to use for the model (string or constant). Alternatively pass a symbol
+      #   to represent a resource which does not have a class.
       # 
       def authorize_resource(options = {})
-        before_filter(options.slice(:only, :except)) { |c| ResourceAuthorization.new(c, c.params, options.except(:only, :except)).authorize_resource }
+        ResourceAuthorization.add_before_filter(self, :authorize_resource, options)
       end
     end
     

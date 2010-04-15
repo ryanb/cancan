@@ -1,6 +1,10 @@
 1.1.0 (not released)
 
-* Adding be_able_to RSpec matcher (thanks dchelimsky) - see issue #54
+* Renaming :class option to :resource for load_and_authorize_resource which now supports a symbol for non models - see issue #45
+
+* Properly handle Admin::AbilitiesController in params[:controller] - see issue #46
+
+* Adding be_able_to RSpec matcher (thanks dchelimsky), requires Ruby 1.8.7 or higher - see issue #54
 
 * Support additional arguments to can? which get passed to the block - see issue #48
 

@@ -43,7 +43,17 @@ describe CanCan::ControllerResource do
   
   it "should use the model class option if provided" do
     stub(Person).find(123) { :some_resource }
-    CanCan::ControllerResource.new(@controller, :ability, nil, :class => Person).find(123)
+    CanCan::ControllerResource.new(@controller, :ability, nil, :resource => Person).find(123)
     @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
+  it "should convert string to constant for resource" do
+    CanCan::ControllerResource.new(@controller, :ability, nil, :resource => "Person").model_class.should == Person
+  end
+  
+  it "should raise an exception when specifying :class option since it is no longer used" do
+    lambda {
+      CanCan::ControllerResource.new(@controller, :ability, nil, :class => Person)
+    }.should raise_error
   end
 end
