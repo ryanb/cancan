@@ -50,13 +50,9 @@ module CanCan
     #   end
     # 
     def can?(action, noun, *extra_args)
-      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_block|
-        defined_actions = expand_actions(defined_action)
-        defined_nouns = [defined_noun].flatten
-        if includes_action?(defined_actions, action) && includes_noun?(defined_nouns, noun)
-          result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block, extra_args)
-          return base_behavior ? result : !result
-        end
+      matching_can_definition(action, noun) do |base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block|
+        result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_conditions, defined_block, extra_args)
+        return base_behavior ? result : !result
       end
       false
     end
@@ -79,16 +75,26 @@ module CanCan
     #   can [:update, :destroy], [Article, Comment]
     #
     # In this case the user has the ability to update or destroy both articles and comments.
+    # 
+    # You can pass a hash of conditions as the third argument.
     #
-    # You can pass a block to provide logic based on the article's attributes.
+    #   can :read, Project, :active => true, :user_id => user.id
+    # 
+    # Here the user can only see active projects which he owns. See ControllerAdditions#conditions for a way to
+    # use this in database queries.
+    # 
+    # If the conditions hash does not give you enough control over defining abilities, you can use a block to
+    # write any Ruby code you want.
     #
-    #   can :update, Article do |article|
-    #     article && article.user == user
+    #   can :update, Project do |project|
+    #     project && project.groups.include?(user.group)
     #   end
     # 
-    # If the block returns true then the user has that :update ability for that article, otherwise he
+    # If the block returns true then the user has that :update ability for that project, otherwise he
     # will be denied access. It's possible for the passed in model to be nil if one isn't specified,
     # so be sure to take that into consideration.
+    # 
+    # The downside to using a block is that it cannot be used to generate conditions for database queries.
     # 
     # You can pass :all to reference every type of object. In this case the object type will be passed
     # into the block as well (just in case object is nil).
@@ -112,9 +118,9 @@ module CanCan
     #   can :read, :stats
     #   can? :read, :stats # => true
     # 
-    def can(action, noun, &block)
+    def can(action, noun, conditions = nil, &block)
       @can_definitions ||= []
-      @can_definitions << [true, action, noun, block]
+      @can_definitions << [true, action, noun, conditions, block]
     end
     
     # Define an ability which cannot be done. Accepts the same arguments as "can".
@@ -129,9 +135,9 @@ module CanCan
     #     product.invisible?
     #   end
     # 
-    def cannot(action, noun, &block)
+    def cannot(action, noun, conditions = nil, &block)
       @can_definitions ||= []
-      @can_definitions << [false, action, noun, block]
+      @can_definitions << [false, action, noun, conditions, block]
     end
     
     # Alias one or more actions into another one.
@@ -179,7 +185,38 @@ module CanCan
       @aliased_actions = {}
     end
     
+    # Returns a hash of conditions which match the given ability. This is useful if you need to generate a database
+    # query based on the current ability.
+    # 
+    #   can :read, Article, :visible => true
+    #   conditions :read, Article # returns { :visible => true }
+    # 
+    # For example, you can use this in Active Record find conditions to only fetch articles the user has permission to read.
+    # 
+    #   Article.where(current_ability.conditions(:read, Article))
+    # 
+    # If the ability is not defined then false is returned so be sure to take that into consideration.
+    # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
+    # determined from that.
+    def conditions(action, noun)
+      matching_can_definition(action, noun) do |base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block|
+        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{noun.inspect}" if defined_block
+        return defined_conditions || {}
+      end
+      false
+    end
+    
     private
+    
+    def matching_can_definition(action, noun, &block)
+      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_conditions, defined_block|
+        defined_actions = expand_actions(defined_action)
+        defined_nouns = [defined_noun].flatten
+        if includes_action?(defined_actions, action) && includes_noun?(defined_nouns, noun)
+          return block.call(base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block)
+        end
+      end
+    end
     
     def default_alias_actions
       {
@@ -199,16 +236,22 @@ module CanCan
       end.flatten
     end
     
-    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_block, extra_args)
-      if defined_block.nil?
-        true
-      else
+    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_conditions, defined_block, extra_args)
+      if defined_block
         block_args = []
         block_args << action if defined_actions.include?(:manage)
         block_args << (noun.class == Class ? noun : noun.class) if defined_nouns.include?(:all)
         block_args << (noun.class == Class ? nil : noun)
         block_args += extra_args
-        return defined_block.call(*block_args)
+        defined_block.call(*block_args)
+      elsif defined_conditions
+        if noun.class != Class
+          defined_conditions.all? do |name, value|
+            noun.send(name) == value
+          end
+        end
+      else
+        true
       end
     end
     

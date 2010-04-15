@@ -140,4 +140,32 @@ describe CanCan::Ability do
     @ability.can?(:read, 2, 1).should be_true
     @ability.can?(:read, 2, 3).should be_false
   end
+  
+  it "should use conditions as third parameter and determine abilities from it" do
+    @ability.can :read, Array, :first => 1, :last => 3
+    @ability.can?(:read, [1, 2, 3]).should be_true
+    @ability.can?(:read, [1, 2, 3, 4]).should be_false
+    @ability.can?(:read, Array).should be_false
+  end
+  
+  it "should return conditions for a given ability" do
+    @ability.can :read, Array, :first => 1, :last => 3
+    @ability.conditions(:show, Array).should == {:first => 1, :last => 3}
+  end
+  
+  it "should raise an exception when a block is used on condition" do
+    @ability.can :read, Array do |a|
+      true
+    end
+    lambda { @ability.conditions(:show, Array) }.should raise_error(CanCan::Error, "Cannot determine ability conditions from block for :show Array")
+  end
+  
+  it "should return an empty hash for conditions when there are no conditions" do
+    @ability.can :read, Array
+    @ability.conditions(:show, Array).should == {}
+  end
+  
+  it "should return false when performed on an action which isn't defined" do
+    @ability.conditions(:foo, Array).should == false
+  end
 end

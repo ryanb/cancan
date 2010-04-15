@@ -1,5 +1,7 @@
 1.1.0 (not released)
 
+* Adding conditions behavior to Ability#can and fetch with Ability#conditions - see issue #53
+
 * Renaming :class option to :resource for load_and_authorize_resource which now supports a symbol for non models - see issue #45
 
 * Properly handle Admin::AbilitiesController in params[:controller] - see issue #46

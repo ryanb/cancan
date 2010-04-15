@@ -154,6 +154,10 @@ module CanCan
       ::Ability.new(current_user)
     end
     
+    def cached_current_ability
+      @current_ability ||= current_ability
+    end
+    
     # Use in the controller or view to check the user's permission for a given action
     # and object.
     # 
@@ -167,7 +171,7 @@ module CanCan
     # 
     # This simply calls "can?" on the current_ability. See Ability#can?.
     def can?(*args)
-      (@current_ability ||= current_ability).can?(*args)
+      cached_current_ability.can?(*args)
     end
     
     # Convenience method which works the same as "can?" but returns the opposite value.
@@ -175,7 +179,7 @@ module CanCan
     #   cannot? :destroy, @project
     # 
     def cannot?(*args)
-      (@current_ability ||= current_ability).cannot?(*args)
+      cached_current_ability.cannot?(*args)
     end
   end
 end
