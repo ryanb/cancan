@@ -48,7 +48,7 @@ module CanCan
     end
     
     def model_name
-      params[:controller].split('/').last.singularize
+      params[:controller].sub("Controller", "").underscore.split('/').last.singularize
     end
     
     def collection_actions

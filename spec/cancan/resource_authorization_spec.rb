@@ -20,6 +20,13 @@ describe CanCan::ResourceAuthorization do
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
   
+  it "should properly load resource for namespaced controller when using '::' for namespace" do
+    stub(Ability).find(123) { :some_resource }
+    authorization = CanCan::ResourceAuthorization.new(@controller, :controller => "Admin::AbilitiesController", :action => "show", :id => 123)
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+  
   it "should build a new resource with hash if params[:id] is not specified" do
     stub(Ability).new(:foo => "bar") { :some_resource }
     authorization = CanCan::ResourceAuthorization.new(@controller, :controller => "abilities", :action => "create", :ability => {:foo => "bar"})
