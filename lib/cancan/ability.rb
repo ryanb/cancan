@@ -26,6 +26,15 @@ module CanCan
     # 
     #   can? :create, Project
     # 
+    # Any additional arguments will be passed into the "can" block definition. This
+    # can be used to pass more information about the user's request for example.
+    # 
+    #   can? :create, Project, request.remote_ip
+    #   
+    #   can :create Project do |project, remote_ip|
+    #     # ...
+    #   end
+    # 
     # Not only can you use the can? method in the controller and view (see ControllerAdditions), 
     # but you can also call it directly on an ability instance.
     # 
