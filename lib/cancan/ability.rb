@@ -49,9 +49,9 @@ module CanCan
     #     assert ability.cannot?(:destroy, Project.new)
     #   end
     # 
-    def can?(action, noun, *extra_args)
-      matching_can_definition(action, noun) do |base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block|
-        result = can_perform_action?(action, noun, defined_actions, defined_nouns, defined_conditions, defined_block, extra_args)
+    def can?(action, subject, *extra_args)
+      matching_can_definition(action, subject) do |base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block|
+        result = can_perform_action?(action, subject, defined_actions, defined_subjects, defined_conditions, defined_block, extra_args)
         return base_behavior ? result : !result
       end
       false
@@ -118,9 +118,9 @@ module CanCan
     #   can :read, :stats
     #   can? :read, :stats # => true
     # 
-    def can(action, noun, conditions = nil, &block)
+    def can(action, subject, conditions = nil, &block)
       @can_definitions ||= []
-      @can_definitions << [true, action, noun, conditions, block]
+      @can_definitions << [true, action, subject, conditions, block]
     end
     
     # Define an ability which cannot be done. Accepts the same arguments as "can".
@@ -135,9 +135,9 @@ module CanCan
     #     product.invisible?
     #   end
     # 
-    def cannot(action, noun, conditions = nil, &block)
+    def cannot(action, subject, conditions = nil, &block)
       @can_definitions ||= []
-      @can_definitions << [false, action, noun, conditions, block]
+      @can_definitions << [false, action, subject, conditions, block]
     end
     
     # Alias one or more actions into another one.
@@ -196,9 +196,9 @@ module CanCan
     # If the ability is not defined then false is returned so be sure to take that into consideration.
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
     # determined from that.
-    def conditions(action, noun)
-      matching_can_definition(action, noun) do |base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block|
-        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{noun.inspect}" if defined_block
+    def conditions(action, subject)
+      matching_can_definition(action, subject) do |base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block|
+        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}" if defined_block
         return defined_conditions || {}
       end
       false
@@ -206,12 +206,12 @@ module CanCan
     
     private
     
-    def matching_can_definition(action, noun, &block)
-      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_noun, defined_conditions, defined_block|
+    def matching_can_definition(action, subject, &block)
+      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_subject, defined_conditions, defined_block|
         defined_actions = expand_actions(defined_action)
-        defined_nouns = [defined_noun].flatten
-        if includes_action?(defined_actions, action) && includes_noun?(defined_nouns, noun)
-          return block.call(base_behavior, defined_actions, defined_nouns, defined_conditions, defined_block)
+        defined_subjects = [defined_subject].flatten
+        if includes_action?(defined_actions, action) && includes_subject?(defined_subjects, subject)
+          return block.call(base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block)
         end
       end
     end
@@ -234,18 +234,18 @@ module CanCan
       end.flatten
     end
     
-    def can_perform_action?(action, noun, defined_actions, defined_nouns, defined_conditions, defined_block, extra_args)
+    def can_perform_action?(action, subject, defined_actions, defined_subjects, defined_conditions, defined_block, extra_args)
       if defined_block
         block_args = []
         block_args << action if defined_actions.include?(:manage)
-        block_args << (noun.class == Class ? noun : noun.class) if defined_nouns.include?(:all)
-        block_args << (noun.class == Class ? nil : noun)
+        block_args << (subject.class == Class ? subject : subject.class) if defined_subjects.include?(:all)
+        block_args << (subject.class == Class ? nil : subject)
         block_args += extra_args
         defined_block.call(*block_args)
       elsif defined_conditions
-        if noun.class != Class
+        if subject.class != Class
           defined_conditions.all? do |name, value|
-            noun.send(name) == value
+            subject.send(name) == value
           end
         end
       else
@@ -257,8 +257,8 @@ module CanCan
       actions.include?(:manage) || actions.include?(action)
     end
     
-    def includes_noun?(nouns, noun)
-      nouns.include?(:all) || nouns.include?(noun) || nouns.any? { |c| c.kind_of?(Class) && noun.kind_of?(c) }
+    def includes_subject?(subjects, subject)
+      subjects.include?(:all) || subjects.include?(subject) || subjects.any? { |c| c.kind_of?(Class) && subject.kind_of?(c) }
     end
   end
 end
