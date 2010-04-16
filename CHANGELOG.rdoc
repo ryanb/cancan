@@ -1,5 +1,7 @@
 1.1.0 (not released)
 
+* Adding "can" method to Active Record for fetching records matching a specific ability
+
 * Adding conditions behavior to Ability#can and fetch with Ability#conditions - see issue #53
 
 * Renaming :class option to :resource for load_and_authorize_resource which now supports a symbol for non models - see issue #45
