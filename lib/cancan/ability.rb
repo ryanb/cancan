@@ -191,9 +191,7 @@ module CanCan
     #   can :read, Article, :visible => true
     #   conditions :read, Article # returns { :visible => true }
     # 
-    # For example, you can use this in Active Record find conditions to only fetch articles the user has permission to read.
-    # 
-    #   Article.where(current_ability.conditions(:read, Article))
+    # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#can method.
     # 
     # If the ability is not defined then false is returned so be sure to take that into consideration.
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be

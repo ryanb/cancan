@@ -178,6 +178,21 @@ If you want to customize the loading behavior on certain actions, you can do so 
 Here the @book instance variable is already set so it will not be loaded again for that action. This works for nested resources as well.
 
 
+== Fetching Records
+
+Sometimes you need to restrict which records are returned from the database based on what the user is able to access. This can be done with the +can+ method on any Active Record model. Simply pass it the current ability and an action.
+
+  @articles = Article.can(current_ability, :read)
+
+The action defaults to :read so that can optionally be left out.
+
+  @articles = Article.can(current_ability)
+
+Here only the records which the user can read will be returned. This is an Active Record scope so other scopes and pagination can be chained onto it.
+
+Note: This does not work for abilities which were defined by a block because the conditions hash can not be determined from them. Instead an exception will be raised.
+
+
 == Assumptions & Configuring
 
 CanCan makes two assumptions about your application.
@@ -204,6 +219,12 @@ It is very easy to test the Ability model since you can call "can?" directly on 
     assert ability.can?(:destroy, Project.new(:user => user))
     assert ability.cannot?(:destroy, Project.new)
   end
+
+A matcher called +be_able_to+ is provided for testing abilities in RSpec.
+
+  require "cancan/matchers"
+  # ...
+  ability.should be_able_to(:destroy, Project.new)
 
 
 == Special Thanks

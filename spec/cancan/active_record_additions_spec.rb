@@ -3,7 +3,7 @@ require "spec_helper"
 describe CanCan::ActiveRecordAdditions do
   before(:each) do
     @model_class = Class.new
-    stub(@model_class).where { :where_stub }
+    stub(@model_class).scoped { :scoped_stub }
     @model_class.send(:include, CanCan::ActiveRecordAdditions)
     @ability = Object.new
     @ability.extend(CanCan::Ability)
@@ -18,5 +18,11 @@ describe CanCan::ActiveRecordAdditions do
     @ability.can :read, @model_class, :foo => 1
     stub(@model_class).where(:foo => 1) { :found_records }
     @model_class.can(@ability, :read).should == :found_records
+  end
+  
+  it "should default to :read ability and use scoped when where isn't available" do
+    @ability.can :read, @model_class, :foo => 1
+    stub(@model_class).scoped(:conditions => {:foo => 1}) { :found_records }
+    @model_class.can(@ability).should == :found_records
   end
 end
