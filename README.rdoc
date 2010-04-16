@@ -202,9 +202,10 @@ CanCan makes two assumptions about your application.
 
 You can override these by overriding the "current_ability" method in your ApplicationController.
 
-   def current_ability
-     UserAbility.new(current_account) # instead of Ability.new(current_user)
-   end
+  def current_ability
+    # instead of Ability.new(current_user)
+    @current_ability ||= UserAbility.new(current_account)
+  end
 
 That's it!
 

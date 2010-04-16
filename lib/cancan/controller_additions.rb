@@ -142,20 +142,19 @@ module CanCan
       raise AccessDenied, message
     end
     
-    # Creates and returns the current user's ability. You generally do not invoke
-    # this method directly, instead you can override this method to change its
-    # behavior if the Ability class or current_user method are different.
+    # Creates and returns the current user's ability and caches it. If you
+    # want to override how the Ability is defined then this is the place.
+    # Just define the method in the controller to change behavior.
     # 
     #   def current_ability
-    #     UserAbility.new(current_account) # instead of Ability.new(current_user)
+    #     # instead of Ability.new(current_user)
+    #     @current_ability ||= UserAbility.new(current_account)
     #   end
     # 
+    # Notice it is important to cache the ability object so it is not
+    # recreated every time.
     def current_ability
-      ::Ability.new(current_user)
-    end
-    
-    def cached_current_ability
-      @current_ability ||= current_ability
+      @current_ability ||= ::Ability.new(current_user)
     end
     
     # Use in the controller or view to check the user's permission for a given action
@@ -171,7 +170,7 @@ module CanCan
     # 
     # This simply calls "can?" on the current_ability. See Ability#can?.
     def can?(*args)
-      cached_current_ability.can?(*args)
+      current_ability.can?(*args)
     end
     
     # Convenience method which works the same as "can?" but returns the opposite value.
@@ -179,7 +178,7 @@ module CanCan
     #   cannot? :destroy, @project
     # 
     def cannot?(*args)
-      cached_current_ability.cannot?(*args)
+      current_ability.cannot?(*args)
     end
   end
 end
