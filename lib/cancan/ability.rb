@@ -16,8 +16,6 @@ module CanCan
   #   end
   # 
   module Ability
-    attr_accessor :user
-
     # Use to check the user's permission for a given action and object.
     # 
     #   can? :destroy, @project
