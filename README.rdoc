@@ -180,13 +180,13 @@ Here the @book instance variable is already set so it will not be loaded again f
 
 == Fetching Records
 
-Sometimes you need to restrict which records are returned from the database based on what the user is able to access. This can be done with the +can+ method on any Active Record model. Simply pass it the current ability and an action.
+Sometimes you need to restrict which records are returned from the database based on what the user is able to access. This can be done with the +accessible_by+ method on any Active Record model. Simply pass it the current ability and an action.
 
-  @articles = Article.can(current_ability, :read)
+  @articles = Article.accessible_by(current_ability, :read)
 
 The action defaults to :read so that can optionally be left out.
 
-  @articles = Article.can(current_ability)
+  @articles = Article.accessible_by(current_ability)
 
 Here only the records which the user can read will be returned. This is an Active Record scope so other scopes and pagination can be chained onto it.
 

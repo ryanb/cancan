@@ -2,7 +2,7 @@
 
 * Adding caching to current_ability controller method, if you're overriding this be sure to add caching too.
 
-* Adding "can" method to Active Record for fetching records matching a specific ability
+* Adding "accessible_by" method to Active Record for fetching records matching a specific ability
 
 * Adding conditions behavior to Ability#can and fetch with Ability#conditions - see issue #53
 

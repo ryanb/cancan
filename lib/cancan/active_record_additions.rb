@@ -6,7 +6,7 @@ module CanCan
       # can perform a given action on. The action defaults to :read. This
       # is usually called from a controller and passed the +current_ability+.
       #
-      #   @articles = Article.can(current_ability)
+      #   @articles = Article.accessible_by(current_ability)
       # 
       # Here only the articles which the user is able to read will be returned.
       # If the user does not have permission to read any articles then an empty
@@ -15,11 +15,11 @@ module CanCan
       # 
       # An alternative action can optionally be passed as a second argument.
       # 
-      #   @articles = Article.can(current_ability, :update)
+      #   @articles = Article.accessible_by(current_ability, :update)
       # 
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
-      def can(ability, action = :read)
+      def accessible_by(ability, action = :read)
         conditions = ability.conditions(action, self) || {:id => nil}
         if respond_to? :where
           where(conditions)
