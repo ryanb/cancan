@@ -1,5 +1,9 @@
 1.1.0 (not released)
 
+* Removing "unauthorized!" method in favor of "authorize!"
+
+* Adding action, subject and default_message abilities to AccessDenied exception - see issue #40
+
 * Adding caching to current_ability controller method, if you're overriding this be sure to add caching too.
 
 * Adding "accessible_by" method to Active Record for fetching records matching a specific ability

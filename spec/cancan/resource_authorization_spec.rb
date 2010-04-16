@@ -3,7 +3,6 @@ require "spec_helper"
 describe CanCan::ResourceAuthorization do
   before(:each) do
     @controller = Object.new # simple stub for now
-    stub(@controller).unauthorized! { raise CanCan::AccessDenied }
   end
   
   it "should load the resource into an instance variable if params[:id] is specified" do
@@ -49,19 +48,15 @@ describe CanCan::ResourceAuthorization do
   
   it "should perform authorization using controller action and loaded model" do
     @controller.instance_variable_set(:@ability, :some_resource)
-    stub(@controller).cannot?(:show, :some_resource) { true }
+    stub(@controller).authorize!(:show, :some_resource) { raise CanCan::AccessDenied }
     authorization = CanCan::ResourceAuthorization.new(@controller, :controller => "abilities", :action => "show")
-    lambda {
-      authorization.authorize_resource
-    }.should raise_error(CanCan::AccessDenied)
+    lambda { authorization.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
   
   it "should perform authorization using controller action and non loaded model" do
-    stub(@controller).cannot?(:show, Ability) { true }
+    stub(@controller).authorize!(:show, Ability) { raise CanCan::AccessDenied }
     authorization = CanCan::ResourceAuthorization.new(@controller, :controller => "abilities", :action => "show")
-    lambda {
-      authorization.authorize_resource
-    }.should raise_error(CanCan::AccessDenied)
+    lambda { authorization.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
   
   it "should call load_resource and authorize_resource for load_and_authorize_resource" do

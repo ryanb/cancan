@@ -54,6 +54,6 @@ describe CanCan::ControllerResource do
   it "should raise an exception when specifying :class option since it is no longer used" do
     lambda {
       CanCan::ControllerResource.new(@controller, :ability, nil, :class => Person)
-    }.should raise_error(CanCan::Error)
+    }.should raise_error(CanCan::ImplementationRemoved)
   end
 end

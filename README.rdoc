@@ -39,17 +39,17 @@ First, define a class called Ability in "models/ability.rb".
 
 This is where all permissions will go. See the "Defining Abilities" section below for more information.
 
-You can access the current permissions at any point using the "can?" and "cannot?" methods in the view.
+You can access the current permissions at any point using the "can?" and "cannot?" methods in the view and controller.
 
   <% if can? :update, @article %>
     <%= link_to "Edit", edit_article_path(@article) %>
   <% end %>
 
-You can also use these methods in a controller along with the "unauthorized!" method to restrict access.
+The "authorize!" method in the controller will raise CanCan::AccessDenied if the user is not able to perform the given action.
 
   def show
     @article = Article.find(params[:id])
-    unauthorized! if cannot? :read, @article
+    authorize! :read, @article
   end
 
 Setting this for every action can be tedious, therefore the load_and_authorize_resource method is also provided to automatically authorize all actions in a RESTful style resource controller. It will set up a before filter which loads the resource into the instance variable and authorizes it.
@@ -70,6 +70,8 @@ If the user authorization fails, a CanCan::AccessDenied exception will be raised
       redirect_to root_url
     end
   end
+
+See the CanCan::AccessDenied rdoc for more information on exception handling.
 
 
 == Defining Abilities

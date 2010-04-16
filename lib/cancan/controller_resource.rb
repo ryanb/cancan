@@ -1,7 +1,7 @@
 module CanCan
   class ControllerResource # :nodoc:
     def initialize(controller, name, parent = nil, options = {})
-      raise CanCan::Error, "The :class option has been renamed to :resource for specifying the class in CanCan." if options.has_key? :class
+      raise ImplementationRemoved, "The :class option has been renamed to :resource for specifying the class in CanCan." if options.has_key? :class
       @controller = controller
       @name = name
       @parent = parent

@@ -5,29 +5,48 @@ describe CanCan::ControllerAdditions do
     @controller_class = Class.new
     @controller = @controller_class.new
     stub(@controller).params { {} }
+    stub(@controller).current_user { :current_user }
     mock(@controller_class).helper_method(:can?, :cannot?)
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
   
-  it "should raise access denied with default message when calling unauthorized!" do
-    lambda {
-      @controller.unauthorized!
-    }.should raise_error(CanCan::AccessDenied, "You are not authorized to access this page.")
+  it "should raise ImplementationRemoved when attempting to call 'unauthorized!' on a controller" do
+    lambda { @controller.unauthorized! }.should raise_error(CanCan::ImplementationRemoved)
   end
   
-  it "should raise access denied with custom message when calling unauthorized!" do
-    lambda {
-      @controller.unauthorized! "Access denied!"
-    }.should raise_error(CanCan::AccessDenied, "Access denied!")
+  it "should raise access denied exception if ability us unauthorized to perform a certain action" do
+    begin
+      @controller.authorize! :read, :foo, 1, 2, 3, :message => "Access denied!"
+    rescue CanCan::AccessDenied => e
+      e.message.should == "Access denied!"
+      e.action.should == :read
+      e.subject.should == :foo
+    else
+      fail "Expected CanCan::AccessDenied exception to be raised"
+    end
+  end
+  
+  it "should not raise access denied exception if ability is authorized to perform an action" do
+    @controller.current_ability.can :read, :foo
+    lambda { @controller.authorize!(:read, :foo) }.should_not raise_error
+  end
+  
+  it "should raise access denied exception with default message if not specified" do
+    begin
+      @controller.authorize! :read, :foo
+    rescue CanCan::AccessDenied => e
+      e.default_message = "Access denied!"
+      e.message.should == "Access denied!"
+    else
+      fail "Expected CanCan::AccessDenied exception to be raised"
+    end
   end
   
   it "should have a current_ability method which generates an ability for the current user" do
-    stub(@controller).current_user { :current_user }
     @controller.current_ability.should be_kind_of(Ability)
   end
   
   it "should provide a can? and cannot? methods which go through the current ability" do
-    stub(@controller).current_user { :current_user }
     @controller.current_ability.should be_kind_of(Ability)
     @controller.can?(:foo, :bar).should be_false
     @controller.cannot?(:foo, :bar).should be_true

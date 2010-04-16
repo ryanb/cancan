@@ -85,7 +85,7 @@ module CanCan
       # and ensure the user can perform the current action on it. Under the hood it is doing
       # something like the following.
       # 
-      #   unauthorized! if cannot?(params[:action].to_sym, @article || Article)
+      #   authorize!(params[:action].to_sym, @article || Article)
       # 
       # Call this method directly on the controller class.
       # 
@@ -116,18 +116,21 @@ module CanCan
       base.helper_method :can?, :cannot?
     end
     
-    # Raises the CanCan::AccessDenied exception. This is often used in a
-    # controller action to mark a request as unauthorized.
+    # Raises a CanCan::AccessDenied exception if the current_ability cannot
+    # perform the given action. This is usually called in a controller action or
+    # before filter to perform the authorization.
     # 
     #   def show
     #     @article = Article.find(params[:id])
-    #     unauthorized! if cannot? :read, @article
+    #     authorize! :read, @article
     #   end
     # 
-    # The unauthorized! method accepts an optional argument which sets the
-    # message of the exception.
+    # A :message option can be passed to specify a different message.
     # 
-    # You can rescue from the exception in the controller to define the behavior.
+    #   authorize! :read, @article, :message => "Not authorized to read #{@article.name}"
+    # 
+    # You can rescue from the exception in the controller to customize how unauthorized
+    # access is displayed to the user.
     # 
     #   class ApplicationController < ActionController::Base
     #     rescue_from CanCan::AccessDenied do |exception|
@@ -136,10 +139,20 @@ module CanCan
     #     end
     #   end
     # 
-    # See the load_and_authorize_resource method to automatically add
-    # the "unauthorized!" behavior to a RESTful controller's actions.
-    def unauthorized!(message = "You are not authorized to access this page.")
-      raise AccessDenied, message
+    # See the CanCan::AccessDenied exception for more details on working with the exception.
+    # 
+    # See the load_and_authorize_resource method to automatically add the authorize! behavior
+    # to the default RESTful actions.
+    def authorize!(action, subject, *args)
+      message = nil
+      if args.last.kind_of?(Hash) && args.last.has_key?(:message)
+        message = args.pop[:message]
+      end
+      raise AccessDenied.new(message, action, subject) if cannot?(action, subject, *args)
+    end
+    
+    def unauthorized!(message = nil)
+      raise ImplementationRemoved, "The unauthorized! method has been removed from CanCan, use authorize! instead."
     end
     
     # Creates and returns the current user's ability and caches it. If you
