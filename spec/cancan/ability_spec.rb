@@ -145,7 +145,7 @@ describe CanCan::Ability do
     @ability.can :read, Array, :first => 1, :last => 3
     @ability.can?(:read, [1, 2, 3]).should be_true
     @ability.can?(:read, [1, 2, 3, 4]).should be_false
-    @ability.can?(:read, Array).should be_false
+    @ability.can?(:read, Array).should be_true
   end
   
   it "should return conditions for a given ability" do

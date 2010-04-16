@@ -1,6 +1,6 @@
 1.1.0 (not released)
 
-* Removing "unauthorized!" method in favor of "authorize!"
+* Removing "unauthorized!" method in favor of "authorize!" in controllers
 
 * Adding action, subject and default_message abilities to AccessDenied exception - see issue #40
 

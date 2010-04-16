@@ -241,7 +241,9 @@ module CanCan
         block_args += extra_args
         defined_block.call(*block_args)
       elsif defined_conditions
-        if subject.class != Class
+        if subject.class == Class
+          true
+        else
           defined_conditions.all? do |name, value|
             subject.send(name) == value
           end
