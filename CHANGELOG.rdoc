@@ -1,4 +1,4 @@
-1.1.0 (not released)
+1.1.0 (April 17, 2010)
 
 * Supporting arrays, ranges, and nested hashes in ability conditions
 
