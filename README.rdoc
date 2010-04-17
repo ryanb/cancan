@@ -4,7 +4,7 @@ Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryan
 
 CanCan is an authorization solution for Ruby on Rails. This restricts what a given user is allowed to access throughout the application. It is completely decoupled from any role based implementation and focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
 
-This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). This will provide a +current_user+ method which CanCan relies on. See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
+This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]) that provides a +current_user+ method which CanCan relies on. See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
 
 
 == Installation
@@ -51,7 +51,7 @@ The "authorize!" method in the controller will raise an exception if the user is
     authorize! :read, @article
   end
 
-Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will set up a before filter which loads the resource into the instance variable and authorizes it for each action.
+Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will use a before filter to load the resource into an instance variable and authorize it for each action.
 
   class ArticlesController < ApplicationController
     load_and_authorize_resource
@@ -63,7 +63,7 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
 
 See {Authorizing Controller Actions}[http://wiki.github.com/ryanb/cancan/authorizing-controller-actions] for more information
 
-If the user authorization fails a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
+If the user authorization fails, a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
   class ApplicationController < ActionController::Base
     rescue_from CanCan::AccessDenied do |exception|
@@ -110,7 +110,7 @@ If the block returns true then the user has that :+update+ ability for that proj
 
 == Aliasing Actions
 
-You will usually be working with four actions when defining and checking permissions: :+read+, :+create+, :+update+, :+destroy+. These aren't the same as the 7 RESTful actions in Rails. CanCan adds some default aliases for mapping those actions.
+You will usually be working with four actions when defining and checking permissions: :+read+, :+create+, :+update+, :+destroy+. These aren't the same as the 7 RESTful actions in Rails. CanCan automatically adds some default aliases for mapping those actions.
 
   alias_action :index, :show, :to => :read
   alias_action :new, :to => :create
