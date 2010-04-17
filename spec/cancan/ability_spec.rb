@@ -148,6 +148,26 @@ describe CanCan::Ability do
     @ability.can?(:read, Array).should be_true
   end
   
+  it "should allow an array of options in conditions hash" do
+    @ability.can :read, Array, :first => [1, 3, 5]
+    @ability.can?(:read, [1, 2, 3]).should be_true
+    @ability.can?(:read, [2, 3]).should be_false
+    @ability.can?(:read, [3, 4]).should be_true
+  end
+  
+  it "should allow a range of options in conditions hash" do
+    @ability.can :read, Array, :first => 1..3
+    @ability.can?(:read, [1, 2, 3]).should be_true
+    @ability.can?(:read, [3, 4]).should be_true
+    @ability.can?(:read, [4, 5]).should be_false
+  end
+  
+  it "should allow nested hashes in conditions hash" do
+    @ability.can :read, Array, :first => { :length => 5 }
+    @ability.can?(:read, ["foo", "bar"]).should be_false
+    @ability.can?(:read, ["test1", "foo"]).should be_true
+  end
+  
   it "should return conditions for a given ability" do
     @ability.can :read, Array, :first => 1, :last => 3
     @ability.conditions(:show, Array).should == {:first => 1, :last => 3}

@@ -244,12 +244,23 @@ module CanCan
         if subject.class == Class
           true
         else
-          defined_conditions.all? do |name, value|
-            subject.send(name) == value
-          end
+          matches_conditions? subject, defined_conditions
         end
       else
         true
+      end
+    end
+    
+    def matches_conditions?(subject, defined_conditions)
+      defined_conditions.all? do |name, value|
+        attribute = subject.send(name)
+        if value.kind_of?(Hash)
+          matches_conditions? attribute, value
+        elsif value.kind_of?(Array) || value.kind_of?(Range)
+          value.include? attribute
+        else
+          attribute == value
+        end
       end
     end
     
