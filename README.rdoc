@@ -139,6 +139,7 @@ See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for
 * {Upgrading to 1.1}[http://wiki.github.com/ryanb/cancan/upgrading-to-11]
 * {Testing Abilities}[http://wiki.github.com/ryanb/cancan/testing-abilities]
 * {Accessing Request Data}[http://wiki.github.com/ryanb/cancan/accessing-request-data]
+* {Admin Namespace}[http://wiki.github.com/ryanb/cancan/admin-namespace]
 * {See more}[http://wiki.github.com/ryanb/cancan/]
 
 == Special Thanks
