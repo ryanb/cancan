@@ -4,7 +4,7 @@ module CanCan
     
     def self.add_before_filter(controller_class, method, options = {})
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
-        new(controller, controller.params, options.except(:only, :except)).send(method)
+        ResourceAuthorization.new(controller, controller.params, options.except(:only, :except)).send(method)
       end
     end
     

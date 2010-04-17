@@ -1,3 +1,8 @@
+1.1.1 (April 17, 2010)
+
+* Fixing behavior in Rails 3 by properly initializing ResourceAuthorization
+
+
 1.1.0 (April 17, 2010)
 
 * Supporting arrays, ranges, and nested hashes in ability conditions
