@@ -6,7 +6,7 @@ module CanCan
   class ImplementationRemoved < Error; end
   
   # This error is raised when a user isn't allowed to access a given controller action.
-  # This usually happens within a call to ControllerAdditions#authorized! but can be
+  # This usually happens within a call to ControllerAdditions#authorize! but can be
   # raised manually.
   # 
   #   raise CanCan::AccessDenied.new("Not authorized!", :read, Article)

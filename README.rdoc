@@ -1,30 +1,26 @@
 = CanCan
 
-RDocs[http://rdoc.info/projects/ryanb/cancan] | Wiki[http://wiki.github.com/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan] | Metrics[http://getcaliper.com/caliper/project?repo=git%3A%2F%2Fgithub.com%2Fryanb%2Fcancan.git]
+Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan] | Metrics[http://getcaliper.com/caliper/project?repo=git%3A%2F%2Fgithub.com%2Fryanb%2Fcancan.git]
 
-This is a simple authorization solution for Ruby on Rails to restrict what a given user is allowed to access. This is completely decoupled from any role based implementation allowing you to define user roles the way you want. All permissions are stored in a single location and not duplicated across the controller, view, and database.
+CanCan is an authorization solution for Ruby on Rails. This restricts what a given user is allowed to access throughout the application. It is completely decoupled from any role based implementation and focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
 
-This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). Either of these will define a +current_user+ model in the controller which CanCan requires.
+This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). This will provide a +current_user+ method which CanCan relies on. See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
 
 
 == Installation
 
-You can set CanCan up as a gem in your environment.rb file.
+CanCan is provided as a gem. Simply include it in your environment.rb or Gemfile.
 
   config.gem "cancan"
 
-And then install the gem.
-
-  sudo rake gems:install
-
-Alternatively you can install it as a Rails plugin.
+Alternatively it can be installed as a plugin.
 
   script/plugin install git://github.com/ryanb/cancan.git
 
 
 == Getting Started
 
-First, define a class called Ability in "models/ability.rb".
+First, define a class called +Ability+ in "models/ability.rb". It should look something like this.
 
   class Ability
     include CanCan::Ability
@@ -40,30 +36,34 @@ First, define a class called Ability in "models/ability.rb".
 
 This is where all permissions will go. See the "Defining Abilities" section below for more information.
 
-You can access the current permissions at any point using the "can?" and "cannot?" methods in the view and controller.
+The current user's permissions can be accessed using the "can?" and "cannot?" methods in the view and controller.
 
   <% if can? :update, @article %>
     <%= link_to "Edit", edit_article_path(@article) %>
   <% end %>
 
-The "authorize!" method in the controller will raise CanCan::AccessDenied if the user is not able to perform the given action.
+See {Checking Abilities}[http://wiki.github.com/ryanb/cancan/checking-abilities] for more information
+
+The "authorize!" method in the controller will raise an exception if the user is not able to perform the given action.
 
   def show
     @article = Article.find(params[:id])
     authorize! :read, @article
   end
 
-Setting this for every action can be tedious, therefore the load_and_authorize_resource method is also provided to automatically authorize all actions in a RESTful style resource controller. It will set up a before filter which loads the resource into the instance variable and authorizes it.
+Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will set up a before filter which loads the resource into the instance variable and authorizes it for each action.
 
   class ArticlesController < ApplicationController
     load_and_authorize_resource
     
     def show
-      # @article is already loaded
+      # @article is already loaded and authorized
     end
   end
 
-If the user authorization fails, a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the ApplicationController.
+See {Authorizing Controller Actions}[http://wiki.github.com/ryanb/cancan/authorizing-controller-actions] for more information
+
+If the user authorization fails a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
   class ApplicationController < ActionController::Base
     rescue_from CanCan::AccessDenied do |exception|
@@ -72,164 +72,74 @@ If the user authorization fails, a CanCan::AccessDenied exception will be raised
     end
   end
 
-See the CanCan::AccessDenied rdoc for more information on exception handling.
+See {Exception Handling}[http://wiki.github.com/ryanb/cancan/exception-handling] for more information.
 
 
 == Defining Abilities
 
-As shown above, the Ability class is where all user permissions are defined. The user model is passed into the initialize method so you are free to modify the permissions based on the user's attributes. This way CanCan is completely decoupled with how you choose to handle roles.
+As shown above, the +Ability+ class is where all user permissions are defined. The user model is passed into the initialize method so the permissions can be modified based on any user attributes. CanCan makes no assumptions about how roles are handled in your application. See {Role Based Authorization}[http://wiki.github.com/ryanb/cancan/role-based-authorization] for an example.
 
-The "can" method accepts two arguments, the first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
+The +can+ method is used to define permissions and requires two arguments. The first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
 
   can :update, Article
 
-You can pass an array for either of these parameters to match any one.
+You can pass an array for either of these parameters to match any one. In this case the user will have the ability to update or destroy both articles and comments.
 
   can [:update, :destroy], [Article, Comment]
 
-In this case the user has the ability to update or destroy both articles and comments.
+Use :+manage+ to represent any action and :+all+ to represent any class. Here are some examples.
 
-You can pass a hash of conditions as the third argument.
+  can :manage, Article   # has permissions to do anything to articles
+  can :read, :all        # has permission to read any model
+  can :manage, :all      # has permission to do anything to any model
+
+You can pass a hash of conditions as the third argument to further restrict what the user is able to access. Here the user will only have permission to read active projects which he owns.
 
   can :read, Project, :active => true, :user_id => user.id
 
-Here the user can only see active projects which he owns. See ControllerAdditions#conditions for a way to use this in database queries.
+See {Defining Abilities with Hashes}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-hashes] for more information.
 
-If the conditions hash does not give you enough control over defining abilities, you can use a block to write any Ruby code you want.
+Blocks can also be used if you need more control.
 
   can :update, Project do |project|
     project && project.groups.include?(user.group)
   end
 
-If the block returns true then the user has that :update ability for that project, otherwise he will be denied access. It's possible for the passed in model to be nil if one isn't specified, so be sure to take that into consideration.
-
-The downside to using a block is that it cannot be used to generate conditions for database queries.
-
-You can pass :all to reference every type of object. In this case the object type will be passed into the block as well (just in case object is nil).
-
-  can :read, :all do |object_class, object|
-    object_class != Order
-  end
-
-Here the user has permission to read all objects except orders.
-
-You can also pass :manage as the action which will match any action. In this case the action is passed to the block.
-
-  can :manage, Comment do |action, comment|
-    action != :destroy
-  end
-  
-Finally, the "cannot" method works similar to "can" but defines which abilities cannot be done.
-
-  can :read, :all
-  cannot :read, Product
-
-
-== Checking Abilities
-
-Use the "can?" method in the controller or view to check the user's permission for a given action and object.
-
-  can? :destroy, @project
-
-You can also pass the class instead of an instance (if you don't have one handy).
-
-  <% if can? :create, Project %>
-    <%= link_to "New Project", new_project_path %>
-  <% end %>
-
-The "cannot?" method is for convenience and performs the opposite check of "can?"
-
-  cannot? :destroy, @project
+If the block returns true then the user has that :+update+ ability for that project, otherwise he will be denied access. See {Defining Abilities with Blocks}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-blocks] for more information.
 
 
 == Aliasing Actions
 
-You can use the "alias_action" method to alias one or more actions into one.
-
-  alias_action :update, :destroy, :to => :modify
-  can :modify, Comment
-  can? :update, Comment # => true
-
-The following aliases are added by default for conveniently mapping common controller actions.
+You will usually be working with four actions when defining and checking permissions: :+read+, :+create+, :+update+, :+destroy+. These aren't the same as the 7 RESTful actions in Rails. CanCan adds some default aliases for mapping those actions.
 
   alias_action :index, :show, :to => :read
   alias_action :new, :to => :create
   alias_action :edit, :to => :update
 
+Notice the +edit+ action is aliased to +update+. If the user is able to update a record he also has permission to edit it. You can define your own aliases in the +Ability+ class
 
-== Authorizing Controller Actions
+  alias_action :update, :destroy, :to => :modify
+  can :modify, Comment
+  can? :update, Comment # => true
 
-As mentioned in the Getting Started section, you can use the +load_and_authorize_resource+ method in your controller to load the resource into an instance variable and authorize it. If you have a nested resource you can specify that as well.
-
-  load_and_authorize_resource :nested => :author
-
-You can also pass an array to the :+nested+ attribute for deep nesting.
-
-If you want to customize the loading behavior on certain actions, you can do so in a before filter.
-
-  class BooksController < ApplicationController
-    before_filter :find_book_by_permalink, :only => :show
-    load_and_authorize_resource
-  
-    private
-  
-    def find_book_by_permalink
-      @book = Book.find_by_permalink!(params[:id)
-    end
-  end
-
-Here the @book instance variable is already set so it will not be loaded again for that action. This works for nested resources as well.
+See {Custom Actions}[http://wiki.github.com/ryanb/cancan/custom-actions] for information on adding other actions.
 
 
 == Fetching Records
 
-Sometimes you need to restrict which records are returned from the database based on what the user is able to access. This can be done with the +accessible_by+ method on any Active Record model. Simply pass it the current ability and an action.
-
-  @articles = Article.accessible_by(current_ability, :read)
-
-The action defaults to :read so that can optionally be left out.
+In the controller +index+ action you may want to fetch only the records which the user has permission to read. You can do this with the +accessible_by+ scope.
 
   @articles = Article.accessible_by(current_ability)
 
-Here only the records which the user can read will be returned. This is an Active Record scope so other scopes and pagination can be chained onto it.
-
-Note: This does not work for abilities which were defined by a block because the conditions hash can not be determined from them. Instead an exception will be raised.
+See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for more information.
 
 
-== Assumptions & Configuring
+== Additional Docs
 
-CanCan makes two assumptions about your application.
-
-* You have an Ability class which defines the permissions.
-* You have a current_user method in the controller which returns the current user model.
-
-You can override these by overriding the "current_ability" method in your ApplicationController.
-
-  def current_ability
-    # instead of Ability.new(current_user)
-    @current_ability ||= UserAbility.new(current_account)
-  end
-
-That's it!
-
-
-== Testing Abilities
-
-It is very easy to test the Ability model since you can call "can?" directly on it as you would in the view or controller.
-
-  def test "user can only destroy projects which he owns"
-    user = User.new
-    ability = Ability.new(user)
-    assert ability.can?(:destroy, Project.new(:user => user))
-    assert ability.cannot?(:destroy, Project.new)
-  end
-
-A matcher called +be_able_to+ is provided for testing abilities in RSpec.
-
-  require "cancan/matchers"
-  # ...
-  ability.should be_able_to(:destroy, Project.new)
-
+* {Upgrading to 1.1}[http://wiki.github.com/ryanb/cancan/upgrading-to-11]
+* {Testing Abilities}[http://wiki.github.com/ryanb/cancan/testing-abilities]
+* {Accessing Request Data}[http://wiki.github.com/ryanb/cancan/accessing-request-data]
+* {See more}[http://wiki.github.com/ryanb/cancan/]
 
 == Special Thanks
 
