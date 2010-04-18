@@ -48,11 +48,8 @@ module CanCan
     #   end
     # 
     def can?(action, subject, *extra_args)
-      matching_can_definition(action, subject) do |base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block|
-        result = can_perform_action?(action, subject, defined_actions, defined_subjects, defined_conditions, defined_block, extra_args)
-        return base_behavior ? result : !result
-      end
-      false
+      can_definition = matching_can_definition(action, subject)
+      can_definition && can_definition.can?(action, subject, extra_args)
     end
     
     # Convenience method which works the same as "can?" but returns the opposite value.
@@ -117,8 +114,7 @@ module CanCan
     #   can? :read, :stats # => true
     # 
     def can(action, subject, conditions = nil, &block)
-      @can_definitions ||= []
-      @can_definitions << [true, action, subject, conditions, block]
+      can_definitions << CanDefinition.new(true, action, subject, conditions, block)
     end
     
     # Define an ability which cannot be done. Accepts the same arguments as "can".
@@ -134,8 +130,7 @@ module CanCan
     #   end
     # 
     def cannot(action, subject, conditions = nil, &block)
-      @can_definitions ||= []
-      @can_definitions << [false, action, subject, conditions, block]
+      can_definitions << CanDefinition.new(false, action, subject, conditions, block)
     end
     
     # Alias one or more actions into another one.
@@ -195,22 +190,25 @@ module CanCan
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
     # determined from that.
     def conditions(action, subject)
-      matching_can_definition(action, subject) do |base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block|
-        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}" if defined_block
-        return defined_conditions || {}
+      can_definition = matching_can_definition(action, subject)
+      if can_definition
+        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}" if can_definition.block
+        can_definition.conditions || {}
+      else
+        false
       end
-      false
     end
     
     private
     
-    def matching_can_definition(action, subject, &block)
-      (@can_definitions || []).reverse.each do |base_behavior, defined_action, defined_subject, defined_conditions, defined_block|
-        defined_actions = expand_actions(defined_action)
-        defined_subjects = [defined_subject].flatten
-        if includes_action?(defined_actions, action) && includes_subject?(defined_subjects, subject)
-          return block.call(base_behavior, defined_actions, defined_subjects, defined_conditions, defined_block)
-        end
+    def can_definitions
+      @can_definitions ||= []
+    end
+    
+    def matching_can_definition(action, subject)
+      can_definitions.reverse.detect do |can_definition|
+        can_definition.expand_actions(aliased_actions)
+        can_definition.matches? action, subject
       end
     end
     
@@ -220,48 +218,6 @@ module CanCan
         :create => [:new],
         :update => [:edit],
       }
-    end
-    
-    def expand_actions(actions)
-      [actions].flatten.map do |action|
-        if aliased_actions[action]
-          [action, *aliased_actions[action]]
-        else
-          action
-        end
-      end.flatten
-    end
-    
-    def can_perform_action?(action, subject, defined_actions, defined_subjects, defined_conditions, defined_block, extra_args)
-      if defined_block
-        block_args = []
-        block_args << action if defined_actions.include?(:manage)
-        block_args << (subject.class == Class ? subject : subject.class) if defined_subjects.include?(:all)
-        block_args << (subject.class == Class ? nil : subject)
-        block_args += extra_args
-        defined_block.call(*block_args)
-      elsif defined_conditions
-        if subject.class == Class
-          true
-        else
-          matches_conditions? subject, defined_conditions
-        end
-      else
-        true
-      end
-    end
-    
-    def matches_conditions?(subject, defined_conditions)
-      defined_conditions.all? do |name, value|
-        attribute = subject.send(name)
-        if value.kind_of?(Hash)
-          matches_conditions? attribute, value
-        elsif value.kind_of?(Array) || value.kind_of?(Range)
-          value.include? attribute
-        else
-          attribute == value
-        end
-      end
     end
     
     def includes_action?(actions, action)

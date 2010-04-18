@@ -1,4 +1,5 @@
 require 'cancan/ability'
+require 'cancan/can_definition'
 require 'cancan/controller_resource'
 require 'cancan/resource_authorization'
 require 'cancan/controller_additions'
