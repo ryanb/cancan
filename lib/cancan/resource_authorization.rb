@@ -1,7 +1,7 @@
 module CanCan
+  # Handle the load and authorization controller logic so we don't clutter up all controllers with non-interface methods.
+  # This class is used internally, so you do not need to call methods directly on it.
   class ResourceAuthorization # :nodoc:
-    attr_reader :params
-    
     def self.add_before_filter(controller_class, method, options = {})
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
         ResourceAuthorization.new(controller, controller.params, options.except(:only, :except)).send(method)
@@ -20,17 +20,17 @@ module CanCan
     end
     
     def load_resource
-      unless collection_actions.include? params[:action].to_sym
-        if new_actions.include? params[:action].to_sym
-          resource.build(params[model_name.to_sym])
-        elsif params[:id]
-          resource.find(params[:id])
+      unless collection_actions.include? @params[:action].to_sym
+        if new_actions.include? @params[:action].to_sym
+          resource.build(@params[model_name.to_sym])
+        elsif @params[:id]
+          resource.find(@params[:id])
         end
       end
     end
     
     def authorize_resource
-      @controller.authorize!(params[:action].to_sym, resource.model_instance || resource.model_class)
+      @controller.authorize!(@params[:action].to_sym, resource.model_instance || resource.model_class)
     end
     
     private
@@ -54,7 +54,7 @@ module CanCan
     end
     
     def model_name
-      params[:controller].sub("Controller", "").underscore.split('/').last.singularize
+      @params[:controller].sub("Controller", "").underscore.split('/').last.singularize
     end
     
     def collection_actions

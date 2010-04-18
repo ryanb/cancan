@@ -33,7 +33,7 @@ module CanCan
     end
     
     def matches_subject?(subject)
-      @subjects.include?(:all) || @subjects.include?(subject) || @subjects.any? { |c| c.kind_of?(Class) && subject.kind_of?(c) }
+      @subjects.include?(:all) || @subjects.include?(subject) || @subjects.any? { |sub| sub.kind_of?(Class) && subject.kind_of?(sub) }
     end
     
     def can_without_base_behavior?(action, subject, extra_args)

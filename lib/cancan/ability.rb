@@ -219,13 +219,5 @@ module CanCan
         :update => [:edit],
       }
     end
-    
-    def includes_action?(actions, action)
-      actions.include?(:manage) || actions.include?(action)
-    end
-    
-    def includes_subject?(subjects, subject)
-      subjects.include?(:all) || subjects.include?(subject) || subjects.any? { |c| c.kind_of?(Class) && subject.kind_of?(c) }
-    end
   end
 end

@@ -1,4 +1,5 @@
 module CanCan
+  # Used internally to load and authorize a given controller resource.
   class ControllerResource # :nodoc:
     def initialize(controller, name, parent = nil, options = {})
       raise ImplementationRemoved, "The :class option has been renamed to :resource for specifying the class in CanCan." if options.has_key? :class
@@ -9,12 +10,13 @@ module CanCan
     end
     
     def model_class
-      if @options[:resource].nil?
+      resource_class = @options[:resource]
+      if resource_class.nil?
         @name.to_s.camelize.constantize
-      elsif @options[:resource].kind_of? String
-        @options[:resource].constantize
+      elsif resource_class.kind_of? String
+        resource_class.constantize
       else
-        @options[:resource]
+        resource_class # likely a symbol
       end
     end
     
