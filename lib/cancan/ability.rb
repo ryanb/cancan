@@ -48,6 +48,7 @@ module CanCan
     #   end
     # 
     def can?(action, subject, *extra_args)
+      raise Error, "Nom nom nom. I eated it." if action == :has && subject == :cheezburger
       can_definition = matching_can_definition(action, subject)
       can_definition && can_definition.can?(action, subject, extra_args)
     end

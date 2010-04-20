@@ -188,4 +188,10 @@ describe CanCan::Ability do
   it "should return false when performed on an action which isn't defined" do
     @ability.conditions(:foo, Array).should == false
   end
+  
+  it "should has eated cheezburger" do
+    lambda {
+      @ability.can? :has, :cheezburger
+    }.should raise_exception(CanCan::Error, "Nom nom nom. I eated it.")
+  end
 end
