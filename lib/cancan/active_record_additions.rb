@@ -21,10 +21,11 @@ module CanCan
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
         conditions = ability.conditions(action, self) || {:id => nil}
+        joins = ability.association_joins(action, self)
         if respond_to? :where
-          where(conditions)
+          where(conditions).joins(joins)
         else
-          scoped(:conditions => conditions)
+          scoped(:conditions => conditions, :joins => joins)
         end
       end
     end

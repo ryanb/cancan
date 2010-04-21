@@ -1,3 +1,5 @@
+* Adding joins clause to accessible_by when conditions are across associations
+
 1.1.1 (April 17, 2010)
 
 * Fixing behavior in Rails 3 by properly initializing ResourceAuthorization

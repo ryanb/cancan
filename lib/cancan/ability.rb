@@ -200,6 +200,16 @@ module CanCan
       end
     end
     
+    # Returns the associations used in conditions. This is usually used in the :joins option for a search.
+    # See ActiveRecordAdditions#accessible_by for use in Active Record.
+    def association_joins(action, subject)
+      can_definition = matching_can_definition(action, subject)
+      if can_definition
+        raise Error, "Cannot determine association joins from block for #{action.inspect} #{subject.inspect}" if can_definition.block
+        can_definition.association_joins
+      end
+    end
+
     private
     
     def can_definitions

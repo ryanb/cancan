@@ -25,6 +25,21 @@ module CanCan
       result = can_without_base_behavior?(action, subject, extra_args)
       @base_behavior ? result : !result
     end
+
+    def association_joins(conditions = @conditions)
+      joins = []
+      conditions.each do |name, value|
+        if value.kind_of? Hash
+          nested = association_joins(value)
+          if nested
+            joins << {name => nested}
+          else
+            joins << name
+          end
+        end
+      end
+      joins unless joins.empty?
+    end
     
     private
     
