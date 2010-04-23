@@ -168,6 +168,12 @@ describe CanCan::Ability do
     @ability.can?(:read, ["test1", "foo"]).should be_true
   end
   
+  it "should allow nested hash of arrays and match any element" do
+    @ability.can :read, Array, :first => { :to_i => 3 }
+    @ability.can?(:read, [[1, 2, 3]]).should be_true
+    @ability.can?(:read, [[4, 5, 6]]).should be_false
+  end
+  
   it "should return conditions for a given ability" do
     @ability.can :read, Array, :first => 1, :last => 3
     @ability.conditions(:show, Array).should == {:first => 1, :last => 3}

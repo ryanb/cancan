@@ -65,7 +65,11 @@ module CanCan
       conditions.all? do |name, value|
         attribute = subject.send(name)
         if value.kind_of?(Hash)
-          matches_conditions? attribute, value
+          if attribute.kind_of? Array
+            attribute.any? { |element| matches_conditions? element, value }
+          else
+            matches_conditions? attribute, value
+          end
         elsif value.kind_of?(Array) || value.kind_of?(Range)
           value.include? attribute
         else

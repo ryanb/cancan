@@ -1,3 +1,5 @@
+* Support has_many association or arrays in can conditions hash
+
 * Adding joins clause to accessible_by when conditions are across associations
 
 1.1.1 (April 17, 2010)
