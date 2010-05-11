@@ -30,4 +30,10 @@ describe CanCan::CanDefinition do
     @conditions[:foo] = {:bar => {1 => 2}}
     @can.association_joins.should == [{:foo => [:bar]}]
   end
+  
+  it "should return table names in conditions for association joins" do
+    @conditions[:foo] = {:bar => 1}
+    @conditions[:test] = 1
+    @can.conditions(:tableize => true).should == { :foos => { :bar => 1}, :test => 1 }
+  end
 end

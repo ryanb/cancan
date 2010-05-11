@@ -1,7 +1,8 @@
 module CanCan
   # This class is used internally and should only be called through Ability.
   class CanDefinition # :nodoc:
-    attr_reader :conditions, :block
+    include ActiveSupport::Inflector
+    attr_reader :block
     
     def initialize(base_behavior, action, subject, conditions, block)
       @base_behavior = base_behavior
@@ -24,6 +25,19 @@ module CanCan
     def can?(action, subject, extra_args)
       result = can_without_base_behavior?(action, subject, extra_args)
       @base_behavior ? result : !result
+    end
+    
+    def conditions(options = {})
+      if options[:tableize] and @conditions.kind_of? Hash
+        @conditions.inject({}) do |tableized_conditions, (name, value)|
+          name = tableize(name).to_sym if value.kind_of? Hash
+          
+          tableized_conditions[name] = value
+          tableized_conditions
+        end
+      else
+        @conditions
+      end
     end
 
     def association_joins(conditions = @conditions)

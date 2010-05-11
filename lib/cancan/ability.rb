@@ -190,11 +190,11 @@ module CanCan
     # If the ability is not defined then false is returned so be sure to take that into consideration.
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
     # determined from that.
-    def conditions(action, subject)
+    def conditions(action, subject, options = {})
       can_definition = matching_can_definition(action, subject)
       if can_definition
         raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}" if can_definition.block
-        can_definition.conditions || {}
+        can_definition.conditions(options) || {}
       else
         false
       end
