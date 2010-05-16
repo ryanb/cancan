@@ -16,13 +16,27 @@ describe CanCan::Ability do
     @ability.can?(:foodfight, String).should be_false
   end
   
-  it "should return what block returns on a can call" do
+  it "should return what block returns on a can call, except for nil and false" do
+    @ability.can :read, :all
+    @ability.can :read, Symbol do |sym|
+      [ sym ]
+    end
+    @ability.can?(:read, Symbol).should == [ nil ]
+    @ability.can?(:read, :some_symbol).should == [ :some_symbol ]
+  end
+  
+  it "should pass to previous can definition, if block returns false or nil" do
     @ability.can :read, :all
     @ability.can :read, Symbol do |sym|
       sym
     end
-    @ability.can?(:read, Symbol).should be_nil
+    @ability.can :read, Integer do |i|
+      i > 0
+    end
+    @ability.can?(:read, Symbol).should be_true
     @ability.can?(:read, :some_symbol).should == :some_symbol
+    @ability.can?(:read, 1).should be_true
+    @ability.can?(:read, -1).should be_true
   end
   
   it "should pass class with object if :all objects are accepted" do
@@ -121,6 +135,30 @@ describe CanCan::Ability do
     @ability.can?(:read, 123).should be_false
   end
   
+  it "should pass to previous can definition, if block returns false or nil" do
+    #same as previous
+    @ability.can :read, :all
+    @ability.cannot :read, Integer do |int|
+      int > 10 ? nil : ( int > 5 )
+    end
+    @ability.can?(:read, "foo").should be_true
+    @ability.can?(:read, 3).should be_true
+    @ability.can?(:read, 8).should be_false
+    @ability.can?(:read, 123).should be_true
+    
+  end
+  
+  it "should pass to previous cannot definition, if block returns false or nil" do
+    @ability.cannot :read, :all
+    @ability.can :read, Integer do |int|
+      int > 10 ? nil : ( int > 5 )
+    end
+    @ability.can?(:read, "foo").should be_false
+    @ability.can?(:read, 3).should be_false
+    @ability.can?(:read, 10).should be_true
+    @ability.can?(:read, 123).should be_false
+  end
+
   it "should append aliased actions" do
     @ability.alias_action :update, :to => :modify
     @ability.alias_action :destroy, :to => :modify
@@ -174,25 +212,46 @@ describe CanCan::Ability do
     @ability.can?(:read, [[4, 5, 6]]).should be_false
   end
   
-  it "should return conditions for a given ability" do
+  it "should return array of behavior and conditions for a given ability" do
     @ability.can :read, Array, :first => 1, :last => 3
-    @ability.conditions(:show, Array).should == {:first => 1, :last => 3}
+    @ability.conditions(:show, Array).should == [[true, {:first => 1, :last => 3}]]
   end
   
-  it "should raise an exception when a block is used on condition" do
+  it "should raise an exception when a block is used on condition, and no" do
     @ability.can :read, Array do |a|
       true
     end
     lambda { @ability.conditions(:show, Array) }.should raise_error(CanCan::Error, "Cannot determine ability conditions from block for :show Array")
   end
   
-  it "should return an empty hash for conditions when there are no conditions" do
+  it "should return an array with just behavior for conditions when there are no conditions" do
     @ability.can :read, Array
-    @ability.conditions(:show, Array).should == {}
+    @ability.conditions(:show, Array).should == [ [true, nil] ]
   end
   
   it "should return false when performed on an action which isn't defined" do
     @ability.conditions(:foo, Array).should == false
+  end
+  
+  it "should return appropriate sql conditions" do
+    obj = Class.new do
+      def self.sanitize_sql(hash_cond)
+        case hash_cond
+        when Hash then hash_cond.map{|name, value| "#{name}=#{value}"}
+        when Array
+          hash_cond.shift.gsub('?'){"#{hash_cond.shift.inspect}"}
+        when String then hash_cond
+        end
+      end
+    end
+    @ability.can :read, obj
+    @ability.can :manage, obj, :id => 1
+    @ability.can :update, obj, :manager_id => 1
+    @ability.cannot :update, obj, :self_managed => true
+    
+    @ability.sql_conditions(:update, obj).should == 'not (self_managed=true) AND ((manager_id=1) OR (id=1))'
+    @ability.sql_conditions(:manage, obj).should == {:id=>1}
+    @ability.sql_conditions(:read, obj).should == 'true=true'
   end
   
   it "should has eated cheezburger" do

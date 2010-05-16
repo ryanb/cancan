@@ -49,8 +49,12 @@ module CanCan
     # 
     def can?(action, subject, *extra_args)
       raise Error, "Nom nom nom. I eated it." if action == :has && subject == :cheezburger
-      can_definition = matching_can_definition(action, subject)
-      can_definition && can_definition.can?(action, subject, extra_args)
+      matching_can_definition(action, subject) do |can_definition|
+        unless (can = can_definition.can?(action, subject, extra_args)) == :_NOT_MATCHED
+          return can
+        end
+      end
+      false
     end
     
     # Convenience method which works the same as "can?" but returns the opposite value.
@@ -179,11 +183,15 @@ module CanCan
       @aliased_actions = {}
     end
     
-    # Returns a hash of conditions which match the given ability. This is useful if you need to generate a database
-    # query based on the current ability.
+    # Returns an array of arrays composing from desired action and hash of conditions which match the given ability.
+    # This is useful if you need to generate a database query based on the current ability.
     # 
     #   can :read, Article, :visible => true
-    #   conditions :read, Article # returns { :visible => true }
+    #   conditions :read, Article # returns [ [ true, { :visible => true } ] ]
+    #
+    #   can :read, Article, :visible => true
+    #   cannot :read, Article, :blocked => true
+    #   conditions :read, Article # returns [ [ false, { :blocked => true } ], [ true, { :visible => true } ] ]
     # 
     # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#accessible_by method.
     # 
@@ -191,25 +199,74 @@ module CanCan
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
     # determined from that.
     def conditions(action, subject)
-      can_definition = matching_can_definition(action, subject)
-      if can_definition
-        raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}" if can_definition.block
-        can_definition.conditions || {}
+      matched = matching_can_definition(action, subject)
+      unless matched.empty?
+        if matched.any?{|can_definition| can_definition.conditions.nil? && can_definition.block }
+          raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}"
+        end
+        matched.map{|can_definition|
+            [can_definition.base_behavior, can_definition.conditions]
+        }
       else
         false
+      end
+    end
+    
+    # Returns sql conditions for object, which responds to :sanitize_sql .
+    # This is useful if you need to generate a database query based on the current ability.
+    # 
+    #   can :manage, User, :id => 1
+    #   can :manage, User, :manager_id => 1
+    #   cannot :manage, User, :self_managed => true
+    #   sql_conditions :manage, User # returns not (self_managed = 't') AND ((manager_id = 1) OR (id = 1))
+    #
+    # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#accessible_by method.
+    # 
+    # If the ability is not defined then false is returned so be sure to take that into consideration.
+    # If there is just one :can ability, it conditions returned untouched.
+    # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
+    # determined from that.   
+    def sql_conditions(action, subject)
+      conds = conditions(action, subject)
+      return false if conds == false
+      return (conds[0][1] || {}) if conds.size==1 && conds[0][0] == true # to match previous spec
+      
+      true_cond = subject.send(:sanitize_sql, ['?=?', true, true])
+      false_cond = subject.send(:sanitize_sql, ['?=?', true, false])
+      conds.reverse.inject(nil) do |sql, action|
+        behavior, condition = action
+        if condition
+          condition = "#{subject.send(:sanitize_sql, condition)}"
+          condition = "not (#{condition})" if behavior == false
+        else
+          condition = behavior ? true_cond : false_cond
+        end
+        case sql
+          when nil then condition
+          when true_cond
+            behavior ? true_cond : condition
+          when false_cond
+            behavior ? condition : false_cond
+          else
+            behavior ? "(#{condition}) OR (#{sql})" : "#{condition} AND (#{sql})"
+        end
       end
     end
     
     # Returns the associations used in conditions. This is usually used in the :joins option for a search.
     # See ActiveRecordAdditions#accessible_by for use in Active Record.
     def association_joins(action, subject)
-      can_definition = matching_can_definition(action, subject)
-      if can_definition
-        raise Error, "Cannot determine association joins from block for #{action.inspect} #{subject.inspect}" if can_definition.block
-        can_definition.association_joins
+      can_definitions = matching_can_definition(action, subject)
+      unless can_definitions.empty?
+        if can_definitions.any?{|can_definition| can_definition.conditions.nil? && can_definition.block }
+          raise Error, "Cannot determine association joins from block for #{action.inspect} #{subject.inspect}"
+        end
+        collect_association_joins(can_definitions)
+      else
+        nil
       end
     end
-
+    
     private
     
     def can_definitions
@@ -217,9 +274,18 @@ module CanCan
     end
     
     def matching_can_definition(action, subject)
-      can_definitions.reverse.detect do |can_definition|
-        can_definition.expand_actions(aliased_actions)
-        can_definition.matches? action, subject
+      if block_given?
+        can_definitions.reverse.each do |can_definition|
+          can_definition.expand_actions(aliased_actions)
+          if can_definition.matches? action, subject
+            yield can_definition
+            break if can_definition.conditions.nil? && can_definition.block.nil?
+          end
+        end
+      else
+        matched = []
+        matching_can_definition(action, subject){|can_definition| matched << can_definition}
+        matched
       end
     end
     
@@ -230,5 +296,32 @@ module CanCan
         :update => [:edit],
       }
     end
+    
+    def collect_association_joins(can_definitions)
+      joins = []
+      can_definitions.each do |can_definition|
+        merge_association_joins(joins, can_definition.association_joins || [])
+      end
+      clear_association_joins(joins)
+    end
+    
+    def merge_association_joins(what, with)
+      with.each do |join|
+        name, nested = join.each_pair.first
+        if at = what.detect{|h| h.has_key?(name) }
+          at[name] = merge_association_joins(at[name], nested)
+        else
+          what << join
+        end
+      end
+    end
+    
+    def clear_association_joins(joins)
+      joins.map do |join| 
+        name, nested = join.each_pair.first
+        nested.empty? ? name : {name => clear_association_joins(nested)}
+      end
+    end
+
   end
 end

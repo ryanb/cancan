@@ -1,7 +1,7 @@
 module CanCan
   # This class is used internally and should only be called through Ability.
   class CanDefinition # :nodoc:
-    attr_reader :conditions, :block
+    attr_reader :conditions, :block, :base_behavior, :definitive
     
     def initialize(base_behavior, action, subject, conditions, block)
       @base_behavior = base_behavior
@@ -23,18 +23,19 @@ module CanCan
     
     def can?(action, subject, extra_args)
       result = can_without_base_behavior?(action, subject, extra_args)
+      return :_NOT_MATCHED if result == :_NOT_MATCHED || !result
       @base_behavior ? result : !result
     end
 
     def association_joins(conditions = @conditions)
       joins = []
-      conditions.each do |name, value|
+      (conditions || []).each do |name, value|
         if value.kind_of? Hash
           nested = association_joins(value)
           if nested
             joins << {name => nested}
           else
-            joins << name
+            joins << {name => []}
           end
         end
       end
@@ -54,8 +55,10 @@ module CanCan
     def can_without_base_behavior?(action, subject, extra_args)
       if @block
         call_block(action, subject, extra_args)
-      elsif @conditions && subject.class != Class
-        matches_conditions? subject
+      elsif @conditions.kind_of?(Hash) && subject.class != Class
+        matches_conditions?(subject)
+      elsif [true, false, :_NOT_MATCHES].include? @conditions
+        @conditions
       else
         true
       end

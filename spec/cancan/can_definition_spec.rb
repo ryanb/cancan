@@ -17,7 +17,7 @@ describe CanCan::CanDefinition do
 
   it "should return single association for joins" do
     @conditions[:foo] = {:bar => 1}
-    @can.association_joins.should == [:foo]
+    @can.association_joins.should == [{:foo=>[]}]
   end
 
   it "should return multiple associations for joins" do
@@ -28,6 +28,6 @@ describe CanCan::CanDefinition do
 
   it "should return nested associations for joins" do
     @conditions[:foo] = {:bar => {1 => 2}}
-    @can.association_joins.should == [{:foo => [:bar]}]
+    @can.association_joins.should == [{:foo => [{:bar=>[]}]}]
   end
 end
