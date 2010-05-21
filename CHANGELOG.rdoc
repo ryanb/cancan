@@ -1,4 +1,4 @@
-* Fix issue when using accessible_by with nil can conditions (thanks jrallison) - see issue #66
+* Fixing issue when using accessible_by with nil can conditions (thanks jrallison) - see issue #66
 
 * Pluralize table name for belongs_to associations in can conditions hash (thanks logandk) - see issue #62
 
