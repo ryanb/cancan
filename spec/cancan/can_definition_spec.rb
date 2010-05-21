@@ -36,4 +36,9 @@ describe CanCan::CanDefinition do
     @conditions[:test] = 1
     @can.conditions(:tableize => true).should == { :foos => { :bar => 1}, :test => 1 }
   end
+  
+  it "should return no association joins if conditions is nil" do
+    can = CanCan::CanDefinition.new(true, :read, Integer, nil, nil)
+    can.association_joins.should be_nil
+  end
 end

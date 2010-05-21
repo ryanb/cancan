@@ -8,7 +8,7 @@ module CanCan
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
-      @conditions = conditions
+      @conditions = conditions || {}
       @block = block
     end
   

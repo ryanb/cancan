@@ -1,3 +1,7 @@
+* Fix issue when using accessible_by with nil can conditions (thanks jrallison) - see issue #66
+
+* Pluralize table name for belongs_to associations in can conditions hash (thanks logandk) - see issue #62
+
 * Support has_many association or arrays in can conditions hash
 
 * Adding joins clause to accessible_by when conditions are across associations
