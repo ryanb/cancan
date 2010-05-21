@@ -86,10 +86,21 @@ describe CanCan::ResourceAuthorization do
   end
 
   it "should load nested resource and fetch other resource through the association" do
-    stub(Person).find(456).stub!.abilities.stub!.find(123) { :some_ability }
+    person = Object.new
+    stub(Person).find(456) { person }
+    stub(person).abilities.stub!.find(123) { :some_ability }
     authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "show", :id => 123, :person_id => 456}, {:nested => :person})
     authorization.load_resource
+    @controller.instance_variable_get(:@person).should == person
     @controller.instance_variable_get(:@ability).should == :some_ability
+  end
+
+  it "should load nested resource for collection action" do
+    person = Object.new
+    stub(Person).find(456) { person }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "abilities", :action => "index", :person_id => 456}, {:nested => :person})
+    authorization.load_resource
+    @controller.instance_variable_get(:@person).should == person
   end
 
   it "should load nested resource and build resource through a deep association" do

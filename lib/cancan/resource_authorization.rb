@@ -20,7 +20,9 @@ module CanCan
     end
 
     def load_resource
-      unless collection_actions.include? @params[:action].to_sym
+      if collection_actions.include? @params[:action].to_sym
+        parent_resource
+      else
         if new_actions.include? @params[:action].to_sym
           resource.build(@params[model_name.to_sym])
         elsif @params[:id]
