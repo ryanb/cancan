@@ -59,6 +59,11 @@ module CanCan
       #
       #     load_resource :nested => [:publisher, :author]
       #
+      # [:+name+]
+      #   The name of the resource if it cannot be determined from controller (string or symbol).
+      #
+      #     load_resource :name => :article
+      #
       # [:+resource+]
       #   The class to use for the model (string or constant).
       #
@@ -101,6 +106,11 @@ module CanCan
       #
       # [:+except+]
       #   Does not apply before filter to given actions.
+      #
+      # [:+name+]
+      #   The name of the resource if it cannot be determined from controller (string or symbol).
+      #
+      #     load_resource :name => :article
       #
       # [:+resource+]
       #   The class to use for the model (string or constant). Alternatively pass a symbol

@@ -114,4 +114,11 @@ describe CanCan::ResourceAuthorization do
     authorization.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
+
+  it "should use :name option to determine resource name" do
+    stub(Ability).find(123) { :some_resource }
+    authorization = CanCan::ResourceAuthorization.new(@controller, {:controller => "foo", :action => "show", :id => 123}, {:name => :ability})
+    authorization.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
 end

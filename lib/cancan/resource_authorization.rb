@@ -54,7 +54,7 @@ module CanCan
     end
 
     def model_name
-      @params[:controller].sub("Controller", "").underscore.split('/').last.singularize
+      @options[:name] || @params[:controller].sub("Controller", "").underscore.split('/').last.singularize
     end
 
     def collection_actions

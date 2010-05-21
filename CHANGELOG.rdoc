@@ -1,3 +1,5 @@
+* Adding :name option to load_and_authorize_resource if it does not match controller - see issue #65
+
 * Fixing issue when using accessible_by with nil can conditions (thanks jrallison) - see issue #66
 
 * Pluralize table name for belongs_to associations in can conditions hash (thanks logandk) - see issue #62
