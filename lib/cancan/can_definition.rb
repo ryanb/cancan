@@ -51,7 +51,16 @@ module CanCan
       end
     end
 
+    def definitive?
+      conditions_empty? && @block.nil?
+    end
+
+    def conditions_empty?
+      @conditions == {} || @conditions.nil?
+    end
+
     def association_joins(conditions = @conditions)
+      return nil unless conditions.kind_of?(Hash)
       joins = []
       conditions.each do |name, value|
         if value.kind_of? Hash
@@ -81,8 +90,6 @@ module CanCan
         call_block(action, subject, extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class != Class
         matches_conditions?(subject)
-      elsif [true, false, :_NOT_MATCHES].include? @conditions
-        @conditions
       else
         true
       end
