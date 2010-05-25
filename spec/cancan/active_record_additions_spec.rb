@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe CanCan::ActiveRecordAdditions do
   before(:each) do
-    @model_class = Class.new
+    @model_class = Class.new(SqlSanitizer)
     stub(@model_class).scoped { :scoped_stub }
     @model_class.send(:include, CanCan::ActiveRecordAdditions)
     @ability = Object.new
@@ -23,6 +23,29 @@ describe CanCan::ActiveRecordAdditions do
   it "should default to :read ability and use scoped when where isn't available" do
     @ability.can :read, @model_class, :foo => {:bar => 1}
     stub(@model_class).scoped(:conditions => {:foos => {:bar => 1}}, :joins => [:foo]) { :found_records }
+    @model_class.accessible_by(@ability).should == :found_records
+  end
+  
+  it "should merge association joins and sanitize conditions" do
+    @ability.can :read, @model_class, :foo => {:bar => 1}
+    @ability.can :read, @model_class, :too => {:car => 1, :far => {:bar => 1}}
+    
+    condition_variants = [
+        '(toos.far.bar=1 AND toos.car=1) OR (foos.bar=1)', # faked sql sanitizer is stupid ;-)
+        '(toos.car=1 AND toos.far.bar=1) OR (foos.bar=1)'
+    ]
+    joins_variants = [
+        [:foo, {:too => [:far]}],
+        [{:too => [:far]}, :foo]
+    ]
+    
+    condition_variants.each do |condition|
+      joins_variants.each do |joins|
+        stub(@model_class).scoped( :conditions => condition, :joins => joins ) { :found_records }
+      end
+    end
+    @ability.sql_conditions(:read, @model_class).should == '(too.car=1 AND too.far.bar=1) OR (foo.bar=1)'
+    @ability.association_joins(:read, @model_class).should == [{:too => [:far]}, :foo]
     @model_class.accessible_by(@ability).should == :found_records
   end
 end
