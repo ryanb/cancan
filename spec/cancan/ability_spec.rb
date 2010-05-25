@@ -270,6 +270,21 @@ describe CanCan::Ability do
     @ability.sql_conditions(:read, SqlSanitizer).should == 'true=true'
   end
   
+  it "should accept array condition for use in sql" do
+    @ability.can :read, SqlSanitizer, ["user_id = ?", 1]
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == ['user_id = ?', 1]
+    @ability.association_joins(:read, SqlSanitizer).should be_nil
+  end
+  
+  it "should accept array condition for use in sql and do sanitizing in complex conditions" do
+    @ability.cannot :read, SqlSanitizer
+    @ability.can :read, SqlSanitizer, ["user_id = ?", 1]
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'user_id = 1'
+    @ability.association_joins(:read, SqlSanitizer).should be_nil
+  end
+  
   it "should has eated cheezburger" do
     lambda {
       @ability.can? :has, :cheezburger

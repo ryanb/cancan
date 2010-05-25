@@ -302,7 +302,8 @@ module CanCan
       can_definitions.each do |can_definition|
         merge_association_joins(joins, can_definition.association_joins || [])
       end
-      clear_association_joins(joins)
+      joins = clear_association_joins(joins)
+      joins unless joins.empty?
     end
     
     def merge_association_joins(what, with)
