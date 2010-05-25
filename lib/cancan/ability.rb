@@ -202,7 +202,7 @@ module CanCan
     def conditions(action, subject, options = {})
       matched = matching_can_definition(action, subject)
       unless matched.empty?
-        if matched.any?{|can_definition| can_definition.conditions_empty? && can_definition.block }
+        if matched.any?{|can_definition| can_definition.only_block? }
           raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}"
         end
         matched.map{|can_definition|
@@ -258,7 +258,7 @@ module CanCan
     def association_joins(action, subject)
       can_definitions = matching_can_definition(action, subject)
       unless can_definitions.empty?
-        if can_definitions.any?{|can_definition| can_definition.conditions_empty? && can_definition.block }
+        if can_definitions.any?{|can_definition| can_definition.only_block? }
           raise Error, "Cannot determine association joins from block for #{action.inspect} #{subject.inspect}"
         end
         collect_association_joins(can_definitions)

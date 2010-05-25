@@ -54,6 +54,10 @@ module CanCan
     def definitive?
       conditions_empty? && @block.nil?
     end
+    
+    def only_block?
+      conditions_empty? && !@block.nil?
+    end
 
     def conditions_empty?
       @conditions == {} || @conditions.nil?
