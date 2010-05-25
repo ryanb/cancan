@@ -233,25 +233,41 @@ describe CanCan::Ability do
     @ability.conditions(:foo, Array).should == false
   end
   
-  it "should return appropriate sql conditions" do
-    obj = Class.new do
-      def self.sanitize_sql(hash_cond)
-        case hash_cond
-        when Hash then hash_cond.map{|name, value| "#{name}=#{value}"}
-        when Array
-          hash_cond.shift.gsub('?'){"#{hash_cond.shift.inspect}"}
-        when String then hash_cond
-        end
-      end
-    end
-    @ability.can :read, obj
-    @ability.can :manage, obj, :id => 1
-    @ability.can :update, obj, :manager_id => 1
-    @ability.cannot :update, obj, :self_managed => true
+  it "should return hash for single `can` definition" do
+    @ability.can :read, SqlSanitizer, :blocked => false, :user_id => 1
     
-    @ability.sql_conditions(:update, obj).should == 'not (self_managed=true) AND ((manager_id=1) OR (id=1))'
-    @ability.sql_conditions(:manage, obj).should == {:id=>1}
-    @ability.sql_conditions(:read, obj).should == 'true=true'
+    @ability.sql_conditions(:read, SqlSanitizer).should == { :blocked => false, :user_id => 1 }    
+  end
+  
+  it "should return `not (sql)` for single `cannot` definition" do
+    @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'not (blocked=true AND user_id=1)'
+  end
+  
+  it "should return `sql` for single `can` definition in front of default cannot condition" do
+    @ability.cannot :read, SqlSanitizer
+    @ability.can :read, SqlSanitizer, :blocked => false, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'blocked=false AND user_id=1'
+  end 
+
+  it "should return `not (sql)` for single `cannot` definition in front of default can condition" do
+    @ability.can :read, SqlSanitizer
+    @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'not (blocked=true AND user_id=1)'
+  end
+  
+  it "should return appropriate sql conditions in complex case" do
+    @ability.can :read, SqlSanitizer
+    @ability.can :manage, SqlSanitizer, :id => 1
+    @ability.can :update, SqlSanitizer, :manager_id => 1
+    @ability.cannot :update, SqlSanitizer, :self_managed => true
+    
+    @ability.sql_conditions(:update, SqlSanitizer).should == 'not (self_managed=true) AND ((manager_id=1) OR (id=1))'
+    @ability.sql_conditions(:manage, SqlSanitizer).should == {:id=>1}
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'true=true'
   end
   
   it "should has eated cheezburger" do

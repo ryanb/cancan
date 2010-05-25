@@ -237,9 +237,9 @@ module CanCan
       conds.reverse.inject(nil) do |sql, action|
         behavior, condition = action
         if condition && condition != {}
-          condition = "#{subject.send(:sanitize_sql, condition)}"
+          condition = subject.send(:sanitize_sql, condition)
           case sql
-            when nil then condition
+            when nil then behavior ? condition : "not (#{condition})"
             when true_cond
               behavior ? true_cond : "not (#{condition})"
             when false_cond
