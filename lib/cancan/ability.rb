@@ -234,12 +234,11 @@ module CanCan
       
       true_cond = subject.send(:sanitize_sql, ['?=?', true, true])
       false_cond = subject.send(:sanitize_sql, ['?=?', true, false])
-      conds.reverse.inject(nil) do |sql, action|
+      conds.reverse.inject(false_cond) do |sql, action|
         behavior, condition = action
         if condition && condition != {}
           condition = subject.send(:sanitize_sql, condition)
           case sql
-            when nil then behavior ? condition : "not (#{condition})"
             when true_cond
               behavior ? true_cond : "not (#{condition})"
             when false_cond

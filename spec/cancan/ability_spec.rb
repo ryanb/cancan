@@ -239,20 +239,34 @@ describe CanCan::Ability do
     @ability.sql_conditions(:read, SqlSanitizer).should == { :blocked => false, :user_id => 1 }    
   end
   
-  it "should return `not (sql)` for single `cannot` definition" do
-    @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
-    
-    @ability.sql_conditions(:read, SqlSanitizer).should == 'not (blocked=true AND user_id=1)'
-  end
-  
-  it "should return `sql` for single `can` definition in front of default cannot condition" do
+  it "should return `sql` for single `can` definition in front of default `cannot` condition" do
     @ability.cannot :read, SqlSanitizer
     @ability.can :read, SqlSanitizer, :blocked => false, :user_id => 1
     
     @ability.sql_conditions(:read, SqlSanitizer).should == 'blocked=false AND user_id=1'
   end 
 
-  it "should return `not (sql)` for single `cannot` definition in front of default can condition" do
+  it "should return `true condition` for single `can` definition in front of default `can` condition" do
+    @ability.can :read, SqlSanitizer
+    @ability.can :read, SqlSanitizer, :blocked => false, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'true=true'
+  end 
+
+  it "should return `false condition` for single `cannot` definition" do
+    @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'true=false'
+  end
+  
+  it "should return `false condition` for single `cannot` definition in front of default `cannot` condition" do
+    @ability.cannot :read, SqlSanitizer
+    @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
+    
+    @ability.sql_conditions(:read, SqlSanitizer).should == 'true=false'
+  end
+  
+  it "should return `not (sql)` for single `cannot` definition in front of default `can` condition" do
     @ability.can :read, SqlSanitizer
     @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
     
