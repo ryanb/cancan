@@ -148,6 +148,16 @@ describe CanCan::Ability do
     
   end
   
+  it "should always return `false` for single cannot definition" do
+    @ability.cannot :read, Integer do |int|
+      int > 10 ? nil : ( int > 5 )
+    end
+    @ability.can?(:read, "foo").should be_false
+    @ability.can?(:read, 3).should be_false
+    @ability.can?(:read, 8).should be_false
+    @ability.can?(:read, 123).should be_false
+  end
+  
   it "should pass to previous cannot definition, if block returns false or nil" do
     @ability.cannot :read, :all
     @ability.can :read, Integer do |int|
