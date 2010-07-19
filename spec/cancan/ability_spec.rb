@@ -68,6 +68,13 @@ describe CanCan::Ability do
     @ability.can?(:destroy, 123).should == :modify_called
   end
 
+  it "should allow deeply nested aliased actions" do
+    @ability.alias_action :increment, :to => :sort
+    @ability.alias_action :sort, :to => :modify
+    @ability.can :modify, :all
+    @ability.can?(:increment, 123).should be_true
+  end
+
   it "should return block result for action, object_class, and object for any action" do
     @ability.can :manage, :all do |action, object_class, object|
       [action, object_class, object]

@@ -267,6 +267,15 @@ module CanCan
     end
     
     private
+    
+    # Accepts a hash of aliased actions and returns an array of actions which match.
+    # This should be called before "matches?" and other checking methods since they
+    # rely on the actions to be expanded.
+    def expand_actions(actions)
+      actions.map do |action|
+        aliased_actions[action] ? [action, *expand_actions(aliased_actions[action])] : action
+      end.flatten
+    end
 
     def can_definitions
       @can_definitions ||= []
@@ -275,7 +284,7 @@ module CanCan
     def matching_can_definition(action, subject)
       if block_given?
         can_definitions.reverse.each do |can_definition|
-          can_definition.expand_actions(aliased_actions)
+          can_definition.expanded_actions = expand_actions(can_definition.actions)
           if can_definition.matches? action, subject
             yield can_definition
             break if can_definition.definitive?
