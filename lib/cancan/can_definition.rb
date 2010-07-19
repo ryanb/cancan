@@ -5,6 +5,8 @@ module CanCan
   class CanDefinition # :nodoc:
     include ActiveSupport::Inflector
     attr_reader :block
+    attr_reader :actions
+    attr_writer :expanded_actions
     
     # The first argument when initializing is the base_behavior which is a true/false
     # value. True for "can" and false for "cannot". The next two arguments are the action
@@ -16,15 +18,6 @@ module CanCan
       @subjects = [subject].flatten
       @conditions = conditions || {}
       @block = block
-    end
-
-    # Accepts a hash of aliased actions and returns an array of actions which match.
-    # This should be called before "matches?" and other checking methods since they
-    # rely on the actions to be expanded.
-    def expand_actions(aliased_actions)
-      @expanded_actions = @actions.map do |action|
-        aliased_actions[action] ? [action, *aliased_actions[action]] : action
-      end.flatten
     end
 
     def matches?(action, subject)

@@ -1,3 +1,5 @@
+* Supporting deeply nested aliases - see issue #98
+
 1.2.0 (July 16, 2010)
 
 * Load nested parent resources on collection actions such as "index" (thanks dohzya)
