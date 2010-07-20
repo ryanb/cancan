@@ -21,11 +21,10 @@ module CanCan
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
         query = ability.query(action, self)
-        conditions = query.sql_conditions || {:id => nil}
         if respond_to? :where
-          where(conditions).joins(query.association_joins)
+          where(query.conditions).joins(query.joins)
         else
-          scoped(:conditions => conditions, :joins => query.association_joins)
+          scoped(:conditions => query.conditions, :joins => query.joins)
         end
       end
     end

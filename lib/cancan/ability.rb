@@ -183,8 +183,10 @@ module CanCan
     end
 
     # Returns a CanCan::Query instance to help generate database queries based on the ability.
+    # If any relevant can definitions use a block then an exception will be raised because an
+    # SQL query cannot be generated from blocks of code.
     def query(action, subject)
-      Query.new(subject, relevant_can_definitions_without_block(action, subject))
+      Query.new(subject, relevant_can_definitions_for_query(action, subject))
     end
     
     private
@@ -211,7 +213,7 @@ module CanCan
       end
     end
 
-    def relevant_can_definitions_without_block(action, subject)
+    def relevant_can_definitions_for_query(action, subject)
       relevant_can_definitions(action, subject).each do |can_definition|
         if can_definition.only_block?
           raise Error, "Cannot determine SQL conditions or joins from block for #{action.inspect} #{subject.inspect}"

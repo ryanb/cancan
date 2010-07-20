@@ -7,82 +7,61 @@ module CanCan
       @sanitizer = sanitizer
       @can_definitions = can_definitions
     end
-
-    # Returns an array of arrays composing from desired action and hash of conditions which match the given ability.
-    # This is useful if you need to generate a database query based on the current ability.
-    # 
-    #   can :read, Article, :visible => true
-    #   conditions :read, Article # returns [ [ true, { :visible => true } ] ]
-    #
-    #   can :read, Article, :visible => true
-    #   cannot :read, Article, :blocked => true
-    #   conditions :read, Article # returns [ [ false, { :blocked => true } ], [ true, { :visible => true } ] ]
-    # 
-    # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#accessible_by method.
-    #
-    # If the ability is not defined then false is returned so be sure to take that into consideration.
-    # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
-    # determined from that.
-    def conditions
-      unless @can_definitions.empty?
-        @can_definitions.map do |can_definition|
-          [can_definition.base_behavior, can_definition.tableized_conditions]
-        end
-      else
-        false
-      end
-    end
     
-    # Returns sql conditions for object, which responds to :sanitize_sql .
-    # This is useful if you need to generate a database query based on the current ability.
+    # Returns a string of SQL conditions which match the ability query.
     # 
     #   can :manage, User, :id => 1
     #   can :manage, User, :manager_id => 1
     #   cannot :manage, User, :self_managed => true
-    #   sql_conditions :manage, User # returns not (self_managed = 't') AND ((manager_id = 1) OR (id = 1))
+    #   query(:manage, User).conditions # => "not (self_managed = 't') AND ((manager_id = 1) OR (id = 1))"
     #
-    # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#accessible_by method.
+    # Normally you will not call this method directly, but instead go through ActiveRecordAdditions#accessible_by.
     # 
-    # If the ability is not defined then false is returned so be sure to take that into consideration.
     # If there is just one :can ability, it conditions returned untouched.
-    # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
-    # determined from that.
-    def sql_conditions
-      conds = conditions
-      return false if conds == false
-      return (conds[0][1] || {}) if conds.size==1 && conds[0][0] == true # to match previous spec
-      
-      true_cond = sanitize_sql(['?=?', true, true])
-      false_cond = sanitize_sql(['?=?', true, false])
-      conds.reverse.inject(false_cond) do |sql, action|
-        behavior, condition = action
-        if condition && condition != {}
-          condition = sanitize_sql(condition)
-          case sql
-            when true_cond
-              behavior ? true_cond : "not (#{condition})"
-            when false_cond
-              behavior ? condition : false_cond
-            else
-              behavior ? "(#{condition}) OR (#{sql})" : "not (#{condition}) AND (#{sql})"
-          end
-        else
-          behavior ? true_cond : false_cond
+    def conditions
+      if @can_definitions.size == 1 && @can_definitions.first.base_behavior
+        # Return the conditions directly if there's just one definition
+        @can_definitions.first.tableized_conditions
+      else
+        @can_definitions.reverse.inject(false_sql) do |sql, can_definition|
+          merge_conditions(sql, can_definition.tableized_conditions, can_definition.base_behavior)
         end
       end
     end
     
-    # Returns the associations used in conditions. This is usually used in the :joins option for a search.
+    # Returns the associations used in conditions for the :joins option of a search
     # See ActiveRecordAdditions#accessible_by for use in Active Record.
-    def association_joins
+    def joins
       unless @can_definitions.empty?
         collect_association_joins(@can_definitions)
-      else
-        nil
       end
     end
     
     private
+    
+    def merge_conditions(sql, conditions_hash, behavior)
+      if conditions_hash.blank?
+        behavior ? true_sql : false_sql
+      else
+        conditions = sanitize_sql(conditions_hash)
+        case sql
+        when true_sql
+          behavior ? true_sql : "not (#{conditions})"
+        when false_sql
+          behavior ? conditions : false_sql
+        else
+          behavior ? "(#{conditions}) OR (#{sql})" : "not (#{conditions}) AND (#{sql})"
+        end
+      end
+    end
+
+    def false_sql
+      sanitize_sql(['?=?', true, false])
+    end
+
+    def true_sql
+      sanitize_sql(['?=?', true, true])
+    end
 
     def sanitize_sql(conditions)
       @sanitizer.sanitize_sql(conditions)

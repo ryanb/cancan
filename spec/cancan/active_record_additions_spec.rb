@@ -9,9 +9,9 @@ describe CanCan::ActiveRecordAdditions do
     @ability.extend(CanCan::Ability)
   end
 
-  it "should call where(:id => nil) when no ability is defined so no records are found" do
-    stub(@model_class).where(:id => nil).stub!.joins(nil) { :no_where }
-    @model_class.accessible_by(@ability, :read).should == :no_where
+  it "should call where('true=false') when no ability is defined so no records are found" do
+    stub(@model_class).where('true=false').stub!.joins(nil) { :no_match }
+    @model_class.accessible_by(@ability, :read).should == :no_match
   end
 
   it "should call where with matching ability conditions" do
@@ -44,7 +44,7 @@ describe CanCan::ActiveRecordAdditions do
         stub(@model_class).scoped( :conditions => condition, :joins => joins ) { :found_records }
       end
     end
-    # @ability.sql_conditions(:read, @model_class).should == '(too.car=1 AND too.far.bar=1) OR (foo.bar=1)'
+    # @ability.conditions(:read, @model_class).should == '(too.car=1 AND too.far.bar=1) OR (foo.bar=1)'
     # @ability.association_joins(:read, @model_class).should == [{:too => [:far]}, :foo]
     @model_class.accessible_by(@ability).should == :found_records
   end
