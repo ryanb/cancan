@@ -18,12 +18,8 @@ class Ability
   end
 end
 
-# this class helps out in testing nesting
+# this class helps out in testing nesting and SQL conditions
 class Person
-end
-
-# Maybe we can use ActiveRecord directly here instead of duplicating the behavior
-class SqlSanitizer
   def self.sanitize_sql(hash_cond)
     case hash_cond
     when Hash 
@@ -34,7 +30,6 @@ class SqlSanitizer
     end
   end
   
-  private
   def self.sanitize_hash(hash)
     hash.map do |name, value|
       if Hash === value
