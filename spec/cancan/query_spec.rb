@@ -84,19 +84,4 @@ describe CanCan::Query do
     @ability.query(:manage, Person).sql_conditions.should == {:id=>1}
     @ability.query(:read, Person).sql_conditions.should == 'true=true'
   end
-  
-  it "should accept array condition for use in sql" do
-    @ability.can :read, Person, ["user_id = ?", 1]
-    
-    @ability.query(:read, Person).sql_conditions.should == ['user_id = ?', 1]
-    @ability.query(:read, Person).association_joins.should be_nil
-  end
-  
-  it "should accept array condition for use in sql and do sanitizing in complex conditions" do
-    @ability.cannot :read, Person
-    @ability.can :read, Person, ["user_id = ?", 1]
-    
-    @ability.query(:read, Person).sql_conditions.should == 'user_id = 1'
-    @ability.query(:read, Person).association_joins.should be_nil
-  end
 end

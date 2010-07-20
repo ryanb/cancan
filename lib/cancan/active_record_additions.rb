@@ -20,7 +20,7 @@ module CanCan
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
-        query = ability.query(action, self, :tableize => true)
+        query = ability.query(action, self)
         conditions = query.sql_conditions || {:id => nil}
         if respond_to? :where
           where(conditions).joins(query.association_joins)

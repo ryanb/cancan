@@ -183,8 +183,8 @@ module CanCan
     end
 
     # Returns a CanCan::Query instance to help generate database queries based on the ability.
-    def query(action, subject, options = {})
-      Query.new(relevant_can_definitions_without_block(action, subject), subject, options)
+    def query(action, subject)
+      Query.new(subject, relevant_can_definitions_without_block(action, subject))
     end
     
     private

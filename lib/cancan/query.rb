@@ -3,10 +3,9 @@ module CanCan
   # Generates the sql conditions and association joins for use in ActiveRecord queries.
   # Normally you will not use this class directly, but instead through ActiveRecordAdditions#accessible_by.
   class Query
-    def initialize(can_definitions, sanitizer, options)
-      @can_definitions = can_definitions
+    def initialize(sanitizer, can_definitions)
       @sanitizer = sanitizer
-      @options = options
+      @can_definitions = can_definitions
     end
 
     # Returns an array of arrays composing from desired action and hash of conditions which match the given ability.
@@ -27,7 +26,7 @@ module CanCan
     def conditions
       unless @can_definitions.empty?
         @can_definitions.map do |can_definition|
-          [can_definition.base_behavior, can_definition.conditions(@options)]
+          [can_definition.base_behavior, can_definition.tableized_conditions]
         end
       else
         false

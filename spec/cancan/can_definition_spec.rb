@@ -34,7 +34,7 @@ describe CanCan::CanDefinition do
   it "should return table names in conditions for association joins" do
     @conditions[:foo] = {:bar => 1}
     @conditions[:test] = 1
-    @can.conditions(:tableize => true).should == { :foos => { :bar => 1}, :test => 1 }
+    @can.tableized_conditions.should == { :foos => { :bar => 1}, :test => 1 }
   end
 
   it "should return no association joins if conditions is nil" do

@@ -4,7 +4,6 @@ module CanCan
   # helpful methods to determine permission checking and conditions hash generation.
   class CanDefinition # :nodoc:
     attr_reader :conditions, :block, :base_behavior
-    include ActiveSupport::Inflector
     attr_reader :block
     attr_reader :actions
     attr_writer :expanded_actions
@@ -37,17 +36,14 @@ module CanCan
       end
     end
 
-    # Returns a hash of conditions. If the ":tableize => true" option is passed
-    # it will pluralize the association conditions to match the table name.
-    def conditions(options = {})
-      if options[:tableize] && @conditions.kind_of?(Hash)
+    # Returns a hash of conditions, pluralizing the table names
+    def tableized_conditions
+      if @conditions
         @conditions.inject({}) do |tableized_conditions, (name, value)|
-          name = tableize(name).to_sym if value.kind_of? Hash
+          name = name.to_s.tableize.to_sym if value.kind_of? Hash
           tableized_conditions[name] = value
           tableized_conditions
         end
-      else
-        @conditions
       end
     end
 
