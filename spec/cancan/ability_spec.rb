@@ -16,56 +16,63 @@ describe CanCan::Ability do
     @ability.can?(:foodfight, String).should be_false
   end
   
-  it "should return what block returns on a can call, except for nil and false" do
+  it "should pass true to `can?` when non false/nil is returned in block" do
     @ability.can :read, :all
     @ability.can :read, Symbol do |sym|
-      [ sym ]
+      "foo" # TODO test that sym is nil when no instance is passed
     end
-    @ability.can?(:read, Symbol).should == [ nil ]
-    @ability.can?(:read, :some_symbol).should == [ :some_symbol ]
+    @ability.can?(:read, :some_symbol).should == true
   end
   
   it "should pass to previous can definition, if block returns false or nil" do
-    @ability.can :read, :all
-    @ability.can :read, Symbol do |sym|
-      sym
+    @ability.can :read, Symbol
+    @ability.can :read, Integer do |i|
+      i < 5
     end
     @ability.can :read, Integer do |i|
-      i > 0
+      i > 10
     end
     @ability.can?(:read, Symbol).should be_true
-    @ability.can?(:read, :some_symbol).should == :some_symbol
+    @ability.can?(:read, 11).should be_true
     @ability.can?(:read, 1).should be_true
-    @ability.can?(:read, -1).should be_true
+    @ability.can?(:read, 6).should be_false
   end
 
   it "should pass class with object if :all objects are accepted" do
     @ability.can :preview, :all do |object_class, object|
-      [object_class, object]
+      object_class.should == Fixnum
+      object.should == 123
+      @block_called = true
     end
-    @ability.can?(:preview, 123).should == [Fixnum, 123]
+    @ability.can?(:preview, 123)
+    @block_called.should be_true
   end
 
   it "should pass class with no object if :all objects are accepted and class is passed directly" do
     @ability.can :preview, :all do |object_class, object|
-      [object_class, object]
+      object_class.should == Hash
+      object.should be_nil
+      @block_called = true
     end
-    @ability.can?(:preview, Hash).should == [Hash, nil]
+    @ability.can?(:preview, Hash)
+    @block_called.should be_true
   end
 
   it "should pass action and object for global manage actions" do
     @ability.can :manage, Array do |action, object|
-      [action, object]
+      action.should == :stuff
+      object.should == [1, 2]
+      @block_called = true
     end
-    @ability.can?(:stuff, [1, 2]).should == [:stuff, [1, 2]]
-    @ability.can?(:stuff, Array).should == [:stuff, nil]
+    @ability.can?(:stuff, [1, 2]).should
+    @block_called.should be_true
   end
 
   it "should alias update or destroy actions to modify action" do
     @ability.alias_action :update, :destroy, :to => :modify
-    @ability.can(:modify, :all) { :modify_called }
-    @ability.can?(:update, 123).should == :modify_called
-    @ability.can?(:destroy, 123).should == :modify_called
+    @ability.can :modify, :all
+    @ability.can?(:update, 123).should be_true
+    @ability.can?(:destroy, 123).should be_true
   end
 
   it "should allow deeply nested aliased actions" do
@@ -77,10 +84,13 @@ describe CanCan::Ability do
 
   it "should return block result for action, object_class, and object for any action" do
     @ability.can :manage, :all do |action, object_class, object|
-      [action, object_class, object]
+      action.should == :foo
+      object_class.should == Fixnum
+      object.should == 123
+      @block_called = true
     end
-    @ability.can?(:foo, 123).should == [:foo, Fixnum, 123]
-    @ability.can?(:bar, Fixnum).should == [:bar, Fixnum, nil]
+    @ability.can?(:foo, 123)
+    @block_called.should be_true
   end
 
   it "should automatically alias index and show into read calls" do
@@ -90,10 +100,10 @@ describe CanCan::Ability do
   end
 
   it "should automatically alias new and edit into create and update respectively" do
-    @ability.can(:create, :all) { :create_called }
-    @ability.can(:update, :all) { :update_called }
-    @ability.can?(:new, 123).should == :create_called
-    @ability.can?(:edit, 123).should == :update_called
+    @ability.can :create, :all
+    @ability.can :update, :all
+    @ability.can?(:new, 123).should be_true
+    @ability.can?(:edit, 123).should be_true
   end
 
   it "should not respond to prepare (now using initialize)" do
@@ -260,7 +270,10 @@ describe CanCan::Ability do
     @ability.cannot :read, SqlSanitizer
     @ability.can :read, SqlSanitizer, :blocked => false, :user_id => 1
     
-    @ability.sql_conditions(:read, SqlSanitizer).should == 'blocked=false AND user_id=1'
+    result = @ability.sql_conditions(:read, SqlSanitizer)
+    result.should include("blocked=false")
+    result.should include(" AND ")
+    result.should include("user_id=1")
   end 
 
   it "should return `true condition` for single `can` definition in front of default `can` condition" do
@@ -287,7 +300,11 @@ describe CanCan::Ability do
     @ability.can :read, SqlSanitizer
     @ability.cannot :read, SqlSanitizer, :blocked => true, :user_id => 1
     
-    @ability.sql_conditions(:read, SqlSanitizer).should == 'not (blocked=true AND user_id=1)'
+    result = @ability.sql_conditions(:read, SqlSanitizer)
+    result.should include("not ")
+    result.should include("blocked=true")
+    result.should include(" AND ")
+    result.should include("user_id=1")
   end
   
   it "should return appropriate sql conditions in complex case" do

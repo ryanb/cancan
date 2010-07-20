@@ -50,12 +50,10 @@ module CanCan
     # Also see the RSpec Matchers to aid in testing.
     def can?(action, subject, *extra_args)
       raise Error, "Nom nom nom. I eated it." if action == :has && subject == :cheezburger
-      matching_can_definition(action, subject) do |can_definition|
-        unless (can = can_definition.can?(action, subject, extra_args)) == :_NOT_MATCHED
-          return can
-        end
+      match = relevant_can_definitions(action, subject).detect do |can_definition|
+        can_definition.matches_conditions?(action, subject, extra_args)
       end
-      false
+      match ? match.base_behavior : false
     end
 
     # Convenience method which works the same as "can?" but returns the opposite value.
@@ -200,12 +198,12 @@ module CanCan
     # If the ability is defined using a block then this will raise an exception since a hash of conditions cannot be
     # determined from that.
     def conditions(action, subject, options = {})
-      matched = matching_can_definition(action, subject)
-      unless matched.empty?
-        if matched.any?{|can_definition| can_definition.only_block? }
+      relevant = relevant_can_definitions(action, subject)
+      unless relevant.empty?
+        if relevant.any?{|can_definition| can_definition.only_block? }
           raise Error, "Cannot determine ability conditions from block for #{action.inspect} #{subject.inspect}"
         end
-        matched.map{|can_definition|
+        relevant.map{|can_definition|
             [can_definition.base_behavior, can_definition.conditions(options)]
         }
       else
@@ -255,7 +253,7 @@ module CanCan
     # Returns the associations used in conditions. This is usually used in the :joins option for a search.
     # See ActiveRecordAdditions#accessible_by for use in Active Record.
     def association_joins(action, subject)
-      can_definitions = matching_can_definition(action, subject)
+      can_definitions = relevant_can_definitions(action, subject)
       unless can_definitions.empty?
         if can_definitions.any?{|can_definition| can_definition.only_block? }
           raise Error, "Cannot determine association joins from block for #{action.inspect} #{subject.inspect}"
@@ -281,19 +279,12 @@ module CanCan
       @can_definitions ||= []
     end
 
-    def matching_can_definition(action, subject)
-      if block_given?
-        can_definitions.reverse.each do |can_definition|
-          can_definition.expanded_actions = expand_actions(can_definition.actions)
-          if can_definition.matches? action, subject
-            yield can_definition
-            break if can_definition.definitive?
-          end
-        end
-      else
-        matched = []
-        matching_can_definition(action, subject){|can_definition| matched << can_definition}
-        matched
+    # Returns an array of CanDefinition instances which match the action and subject
+    # This does not take into consideration any hash conditions or block statements
+    def relevant_can_definitions(action, subject)
+      can_definitions.reverse.select do |can_definition|
+        can_definition.expanded_actions = expand_actions(can_definition.actions)
+        can_definition.relevant? action, subject
       end
     end
 

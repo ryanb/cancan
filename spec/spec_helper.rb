@@ -22,6 +22,7 @@ end
 class Person
 end
 
+# Maybe we can use ActiveRecord directly here instead of duplicating the behavior
 class SqlSanitizer
   def self.sanitize_sql(hash_cond)
     case hash_cond

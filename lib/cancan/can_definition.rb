@@ -3,7 +3,7 @@ module CanCan
   # it holds the information about a "can" call made on Ability and provides
   # helpful methods to determine permission checking and conditions hash generation.
   class CanDefinition # :nodoc:
-    attr_reader :conditions, :block, :base_behavior, :definitive
+    attr_reader :conditions, :block, :base_behavior
     include ActiveSupport::Inflector
     attr_reader :block
     attr_reader :actions
@@ -21,14 +21,20 @@ module CanCan
       @block = block
     end
 
-    def matches?(action, subject)
+    # Matches both the subject and action, not necessarily the conditions
+    def relevant?(action, subject)
       matches_action?(action) && matches_subject?(subject)
     end
 
-    def can?(action, subject, extra_args)
-      result = can_without_base_behavior?(action, subject, extra_args)
-      return :_NOT_MATCHED if result == :_NOT_MATCHED || !result
-      @base_behavior ? result : !result
+    # Matches the block or conditions hash
+    def matches_conditions?(action, subject, extra_args)
+      if @block
+        call_block(action, subject, extra_args)
+      elsif @conditions.kind_of?(Hash) && subject.class != Class
+        matches_conditions_hash?(subject)
+      else
+        true
+      end
     end
 
     # Returns a hash of conditions. If the ":tableize => true" option is passed
@@ -43,10 +49,6 @@ module CanCan
       else
         @conditions
       end
-    end
-
-    def definitive?
-      conditions_empty? && @block.nil?
     end
 
     def only_block?
@@ -83,24 +85,14 @@ module CanCan
       @subjects.include?(:all) || @subjects.include?(subject) || @subjects.any? { |sub| sub.kind_of?(Class) && subject.kind_of?(sub) }
     end
 
-    def can_without_base_behavior?(action, subject, extra_args)
-      if @block
-        call_block(action, subject, extra_args)
-      elsif @conditions.kind_of?(Hash) && subject.class != Class
-        matches_conditions?(subject)
-      else
-        true
-      end
-    end
-
-    def matches_conditions?(subject, conditions = @conditions)
+    def matches_conditions_hash?(subject, conditions = @conditions)
       conditions.all? do |name, value|
         attribute = subject.send(name)
         if value.kind_of?(Hash)
           if attribute.kind_of? Array
-            attribute.any? { |element| matches_conditions? element, value }
+            attribute.any? { |element| matches_conditions_hash? element, value }
           else
-            matches_conditions? attribute, value
+            matches_conditions_hash? attribute, value
           end
         elsif value.kind_of?(Array) || value.kind_of?(Range)
           value.include? attribute
