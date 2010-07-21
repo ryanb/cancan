@@ -1,3 +1,5 @@
+* Supporting multiple "can" and "cannot" calls with accessible_by - see issue #71
+
 * Supporting deeply nested aliases - see issue #98
 
 1.2.0 (July 16, 2010)
