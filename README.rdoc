@@ -1,6 +1,6 @@
 = CanCan
 
-Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan] | Metrics[http://getcaliper.com/caliper/project?repo=git%3A%2F%2Fgithub.com%2Fryanb%2Fcancan.git]
+Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
 CanCan is an authorization solution for Ruby on Rails. This restricts what a given user is allowed to access throughout the application. It is completely decoupled from any role based implementation and focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
 
