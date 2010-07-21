@@ -9,9 +9,13 @@ This assumes you already have authentication (such as Authlogic[http://github.co
 
 == Installation
 
-CanCan is provided as a gem. Simply include it in your environment.rb or Gemfile.
+CanCan is provided as a gem. Simply include it in the environment.rb for Rails 2.3.
 
   config.gem "cancan"
+
+Or the Gemfile in Rails 3.
+
+  gem "cancan"
 
 Alternatively it can be installed as a plugin.
 
