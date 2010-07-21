@@ -188,9 +188,9 @@ module CanCan
     def query(action, subject)
       Query.new(subject, relevant_can_definitions_for_query(action, subject))
     end
-    
+
     private
-    
+
     # Accepts a hash of aliased actions and returns an array of actions which match.
     # This should be called before "matches?" and other checking methods since they
     # rely on the actions to be expanded.

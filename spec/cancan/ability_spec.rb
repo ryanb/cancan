@@ -15,7 +15,7 @@ describe CanCan::Ability do
   it "should not have permission to do something it doesn't know about" do
     @ability.can?(:foodfight, String).should be_false
   end
-  
+
   it "should pass true to `can?` when non false/nil is returned in block" do
     @ability.can :read, :all
     @ability.can :read, Symbol do |sym|
@@ -23,7 +23,7 @@ describe CanCan::Ability do
     end
     @ability.can?(:read, :some_symbol).should == true
   end
-  
+
   it "should pass to previous can definition, if block returns false or nil" do
     @ability.can :read, Symbol
     @ability.can :read, Integer do |i|
@@ -151,7 +151,7 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_true
     @ability.can?(:read, 123).should be_false
   end
-  
+
   it "should pass to previous can definition, if block returns false or nil" do
     #same as previous
     @ability.can :read, :all
@@ -162,9 +162,9 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_true
     @ability.can?(:read, 8).should be_false
     @ability.can?(:read, 123).should be_true
-    
+
   end
-  
+
   it "should always return `false` for single cannot definition" do
     @ability.cannot :read, Integer do |int|
       int > 10 ? nil : ( int > 5 )
@@ -174,7 +174,7 @@ describe CanCan::Ability do
     @ability.can?(:read, 8).should be_false
     @ability.can?(:read, 123).should be_false
   end
-  
+
   it "should pass to previous cannot definition, if block returns false or nil" do
     @ability.cannot :read, :all
     @ability.can :read, Integer do |int|
@@ -238,7 +238,7 @@ describe CanCan::Ability do
     @ability.can?(:read, [[1, 2, 3]]).should be_true
     @ability.can?(:read, [[4, 5, 6]]).should be_false
   end
-  
+
   it "should has eated cheezburger" do
     lambda {
       @ability.can? :has, :cheezburger

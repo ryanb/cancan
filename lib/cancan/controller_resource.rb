@@ -10,7 +10,7 @@ module CanCan
       @parent = parent
       @options = options
     end
-    
+
     # Returns the class used for this resource. This can be overriden by the :resource option.
     # Sometimes one will use a symbol as the resource if a class does not exist for it. In that
     # case "find" and "build" should not be called on it.
@@ -24,27 +24,27 @@ module CanCan
         resource_class # could be a symbol
       end
     end
-    
+
     def find(id)
       self.model_instance ||= base.find(id)
     end
-    
+
     # Build a new instance of this resource. If it is a class we just call "new" otherwise
     # it's an associaiton and "build" is used.
     def build(attributes)
       self.model_instance ||= (base.kind_of?(Class) ? base.new(attributes) : base.build(attributes))
     end
-    
+
     def model_instance
       @controller.instance_variable_get("@#{@name}")
     end
-    
+
     def model_instance=(instance)
       @controller.instance_variable_set("@#{@name}", instance)
     end
-    
+
     private
-    
+
     # The object that methods (such as "find", "new" or "build") are called on.
     # If there is a parent it will be the association, otherwise it will be the model's class.
     def base

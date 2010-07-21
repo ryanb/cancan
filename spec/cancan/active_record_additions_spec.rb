@@ -25,11 +25,11 @@ describe CanCan::ActiveRecordAdditions do
     stub(@model_class).scoped(:conditions => {:foos => {:bar => 1}}, :joins => [:foo]) { :found_records }
     @model_class.accessible_by(@ability).should == :found_records
   end
-  
+
   it "should merge association joins and sanitize conditions" do
     @ability.can :read, @model_class, :foo => {:bar => 1}
     @ability.can :read, @model_class, :too => {:car => 1, :far => {:bar => 1}}
-    
+
     condition_variants = [
         '(toos.far.bar=1 AND toos.car=1) OR (foos.bar=1)', # faked sql sanitizer is stupid ;-)
         '(toos.car=1 AND toos.far.bar=1) OR (foos.bar=1)'
@@ -38,7 +38,7 @@ describe CanCan::ActiveRecordAdditions do
         [:foo, {:too => [:far]}],
         [{:too => [:far]}, :foo]
     ]
-    
+
     condition_variants.each do |condition|
       joins_variants.each do |joins|
         stub(@model_class).scoped( :conditions => condition, :joins => joins ) { :found_records }

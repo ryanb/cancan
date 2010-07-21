@@ -24,7 +24,7 @@ First, define a class called +Ability+ in "models/ability.rb". It should look so
 
   class Ability
     include CanCan::Ability
-  
+
     def initialize(user)
       if user.admin?
         can :manage, :all
@@ -55,7 +55,7 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
 
   class ArticlesController < ApplicationController
     load_and_authorize_resource
-    
+
     def show
       # @article is already loaded and authorized
     end
