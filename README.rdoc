@@ -148,4 +148,4 @@ See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for
 
 == Special Thanks
 
-CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Many thanks to the authors and contributors.
+CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Also many thanks to the CanCan contributors[http://github.com/ryanb/cancan/contributors]. See the CHANGELOG[http://github.com/ryanb/cancan/blob/master/CHANGELOG.rdoc] for the full list.
