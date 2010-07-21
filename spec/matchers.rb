@@ -1,6 +1,6 @@
 Spec::Matchers.define :orderlessly_match do |original_string|
   match do |given_string|
-    original_string.bytes.sum == given_string.bytes.sum
+    original_string.split('').sort == given_string.split('').sort
   end
 
   failure_message_for_should do |given_string|

@@ -242,6 +242,6 @@ describe CanCan::Ability do
   it "should has eated cheezburger" do
     lambda {
       @ability.can? :has, :cheezburger
-    }.should raise_exception(CanCan::Error, "Nom nom nom. I eated it.")
+    }.should raise_error(CanCan::Error, "Nom nom nom. I eated it.")
   end
 end
