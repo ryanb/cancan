@@ -3,9 +3,7 @@ module CanCan
   # it holds the information about a "can" call made on Ability and provides
   # helpful methods to determine permission checking and conditions hash generation.
   class CanDefinition # :nodoc:
-    attr_reader :conditions, :block, :base_behavior
-    attr_reader :block
-    attr_reader :actions
+    attr_reader :base_behavior, :actions
     attr_writer :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
@@ -55,20 +53,12 @@ module CanCan
       @conditions == {} || @conditions.nil?
     end
 
-    def association_joins(conditions = @conditions)
-      return nil unless conditions.kind_of?(Hash)
-      joins = []
-      conditions.each do |name, value|
-        if value.kind_of? Hash
-          nested = association_joins(value)
-          if nested
-            joins << {name => nested}
-          else
-            joins << {name => []}
-          end
-        end
+    def associations_hash(conditions = @conditions)
+      hash = {}
+      conditions.map do |name, value|
+        hash[name] = associations_hash(value) if value.kind_of? Hash
       end
-      joins unless joins.empty?
+      hash
     end
 
     private

@@ -32,9 +32,11 @@ module CanCan
     # Returns the associations used in conditions for the :joins option of a search
     # See ActiveRecordAdditions#accessible_by for use in Active Record.
     def joins
-      unless @can_definitions.empty?
-        collect_association_joins(@can_definitions)
+      joins_hash = {}
+      @can_definitions.each do |can_definition|
+        merge_joins(joins_hash, can_definition.associations_hash)
       end
+      clean_joins(joins_hash) unless joins_hash.empty?
     end
     
     private
@@ -67,31 +69,22 @@ module CanCan
       @sanitizer.sanitize_sql(conditions)
     end
     
-    def collect_association_joins(can_definitions)
-      joins = []
-      @can_definitions.each do |can_definition|
-        merge_association_joins(joins, can_definition.association_joins || [])
-      end
-      joins = clear_association_joins(joins)
-      joins unless joins.empty?
-    end
-    
-    def merge_association_joins(what, with)
-      with.each do |join|
-        name, nested = join.each_pair.first
-        if at = what.detect{|h| h.has_key?(name) }
-          at[name] = merge_association_joins(at[name], nested)
+    def merge_joins(base, add)
+      add.each do |name, nested|
+        if base[name].is_a?(Hash) && !nested.empty?
+          merge_joins(base[name], nested)
         else
-          what << join
+          base[name] = nested
         end
       end
     end
     
-    def clear_association_joins(joins)
-      joins.map do |join| 
-        name, nested = join.each_pair.first
-        nested.empty? ? name : {name => clear_association_joins(nested)}
+    def clean_joins(joins_hash)
+      joins = []
+      joins_hash.each do |name, nested|
+        joins << (nested.empty? ? name : {name => clean_joins(nested)})
       end
+      joins
     end
   end
 end

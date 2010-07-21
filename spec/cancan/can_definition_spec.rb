@@ -7,38 +7,38 @@ describe CanCan::CanDefinition do
   end
 
   it "should return no association joins if none exist" do
-    @can.association_joins.should be_nil
+    @can.associations_hash.should == {}
   end
 
   it "should return no association for joins if just attributes" do
     @conditions[:foo] = :bar
-    @can.association_joins.should be_nil
+    @can.associations_hash.should == {}
   end
 
   it "should return single association for joins" do
     @conditions[:foo] = {:bar => 1}
-    @can.association_joins.should == [{:foo=>[]}]
+    @can.associations_hash.should == {:foo => {}}
   end
 
   it "should return multiple associations for joins" do
     @conditions[:foo] = {:bar => 1}
     @conditions[:test] = {1 => 2}
-    @can.association_joins.map(&:to_s).sort.should == [:foo, :test].map(&:to_s).sort
+    @can.associations_hash.should == {:foo => {}, :test => {}}
   end
 
   it "should return nested associations for joins" do
     @conditions[:foo] = {:bar => {1 => 2}}
-    @can.association_joins.should == [{:foo => [{:bar=>[]}]}]
+    @can.associations_hash.should == {:foo => {:bar => {}}}
   end
 
   it "should return table names in conditions for association joins" do
     @conditions[:foo] = {:bar => 1}
     @conditions[:test] = 1
-    @can.tableized_conditions.should == { :foos => { :bar => 1}, :test => 1 }
+    @can.tableized_conditions.should == {:foos => {:bar => 1}, :test => 1}
   end
 
   it "should return no association joins if conditions is nil" do
     can = CanCan::CanDefinition.new(true, :read, Integer, nil, nil)
-    can.association_joins.should be_nil
+    can.associations_hash.should == {}
   end
 end

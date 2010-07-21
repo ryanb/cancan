@@ -45,7 +45,7 @@ describe CanCan::ActiveRecordAdditions do
       end
     end
     # @ability.conditions(:read, @model_class).should == '(too.car=1 AND too.far.bar=1) OR (foo.bar=1)'
-    # @ability.association_joins(:read, @model_class).should == [{:too => [:far]}, :foo]
+    # @ability.associations_hash(:read, @model_class).should == [{:too => [:far]}, :foo]
     @model_class.accessible_by(@ability).should == :found_records
   end
 end
