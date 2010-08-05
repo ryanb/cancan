@@ -137,6 +137,13 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
+  it "should only authorize :read action on parent resource" do
+    stub(Person).find(123) { :some_person }
+    stub(@controller).authorize!(:read, :some_person) { raise CanCan::AccessDenied }
+    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "new", :person_id => 123}, :person)
+    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
+  end
+
   it "should load the model using a custom class" do
     stub(Person).find(123) { :some_resource }
     resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:class => Person})
@@ -148,7 +155,6 @@ describe CanCan::ControllerResource do
     stub(@controller).authorize!(:show, :ability) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:class => false})
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
-
   end
 
   it "should raise ImplementationRemoved when adding :name option" do

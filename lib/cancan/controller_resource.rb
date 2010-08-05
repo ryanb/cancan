@@ -30,7 +30,7 @@ module CanCan
     end
 
     def authorize_resource
-      @controller.authorize!(@params[:action].to_sym, resource_instance || resource_class)
+      @controller.authorize!(authorization_action, resource_instance || resource_class)
     end
 
     def parent?
@@ -41,14 +41,14 @@ module CanCan
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
-        resource_base.kind_of?(Class) ? resource_base.new(attributes) : resource_base.build(attributes)
+        resource_base.kind_of?(Class) ? resource_base.new(@params[name.to_sym]) : resource_base.build(@params[name.to_sym])
       elsif id_param
         resource_base.find(id_param)
       end
     end
 
-    def attributes
-      @params[name.to_sym]
+    def authorization_action
+      parent? ? :read : @params[:action].to_sym
     end
 
     def id_param

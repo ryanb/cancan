@@ -1,3 +1,5 @@
+* Parent resources are now authorized with :read action.
+
 * Changing :resource option in load/authorize_resource back to :class with ability to pass false
 
 * Removing :nested option in favor of :through option with separate load/authorize call
