@@ -11,11 +11,11 @@ module CanCan
       #     load_and_authorize_resource
       #   end
       #
-      def load_and_authorize_resource(options = {})
-        ResourceAuthorization.add_before_filter(self, :load_and_authorize_resource, options)
+      def load_and_authorize_resource(*args)
+        ControllerResource.add_before_filter(self, :load_and_authorize_resource, *args)
       end
 
-      # Sets up a before filter which loads the appropriate model resource into an instance variable.
+      # Sets up a before filter which loads the model resource into an instance variable.
       # For example, given an ArticlesController it will load the current article into the @article
       # instance variable. It does this by either calling Article.find(params[:id]) or
       # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
@@ -41,6 +41,20 @@ module CanCan
       #     end
       #   end
       #
+      # If a name is provided which does not match the controller it assumes it is a parent resource. Child
+      # resources can then be loaded through it.
+      #
+      #   class BooksController < ApplicationController
+      #     load_resource :author
+      #     load_resource :book, :through => :author
+      #   end
+      #
+      # Here the author resource will be loaded before each action using params[:author_id]. The book resource
+      # will then be loaded through the @author instance variable.
+      #
+      # That first argument is optional and will default to the singular name of the controller.
+      # A hash of options (see below) can also be passed to this method to further customize it.
+      #
       # See load_and_authorize_resource to automatically authorize the resource too.
       #
       # Options:
@@ -50,27 +64,22 @@ module CanCan
       # [:+except+]
       #   Does not apply before filter to given actions.
       #
-      # [:+nested+]
-      #   Specify which resource this is nested under.
+      # [:+through+]
+      #   Load this resource through another one. This should match the name of the parent instance variable.
       #
-      #     load_resource :nested => :author
+      # [:+parent+]
+      #   True or false depending on if the resource is considered a parent resource. This defaults to +true+ if a resource
+      #   name is given which does not match the controller.
       #
-      #   Deep nesting can be defined in an array.
-      #
-      #     load_resource :nested => [:publisher, :author]
-      #
-      # [:+name+]
-      #   The name of the resource if it cannot be determined from controller (string or symbol).
-      #
-      #     load_resource :name => :article
-      #
-      # [:+resource+]
+      # [:+class+]
       #   The class to use for the model (string or constant).
+      #
+      # [:+instance_name+]
+      #   The name of the instance variable to load the resource into.
       #
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
-      #   is usually not necessary because it will try to guess depending on if an :+id+
-      #   is present in +params+.
+      #   is usually not necessary because it will try to guess depending on if the id param is present.
       #
       #     load_resource :collection => [:sort, :list]
       #
@@ -81,11 +90,11 @@ module CanCan
       #
       #     load_resource :new => :build
       #
-      def load_resource(options = {})
-        ResourceAuthorization.add_before_filter(self, :load_resource, options)
+      def load_resource(*args)
+        ControllerResource.add_before_filter(self, :load_resource, *args)
       end
 
-      # Sets up a before filter which authorizes the current resource using the instance variable.
+      # Sets up a before filter which authorizes the resource using the instance variable.
       # For example, if you have an ArticlesController it will check the @article instance variable
       # and ensure the user can perform the current action on it. Under the hood it is doing
       # something like the following.
@@ -98,6 +107,19 @@ module CanCan
       #     authorize_resource
       #   end
       #
+      # If you pass in the name of a resource which does not match the controller it will assume
+      # it is a parent resource.
+      #
+      #   class BooksController < ApplicationController
+      #     authorize_resource :author
+      #     authorize_resource :book
+      #   end
+      #
+      # Here it will authorize :+show+, @+author+ on every action before authorizing the book.
+      #
+      # That first argument is optional and will default to the singular name of the controller.
+      # A hash of options (see below) can also be passed to this method to further customize it.
+      #
       # See load_and_authorize_resource to automatically load the resource too.
       #
       # Options:
@@ -107,17 +129,23 @@ module CanCan
       # [:+except+]
       #   Does not apply before filter to given actions.
       #
-      # [:+name+]
-      #   The name of the resource if it cannot be determined from controller (string or symbol).
+      # [:+parent+]
+      #   True or false depending on if the resource is considered a parent resource. This defaults to +true+ if a resource
+      #   name is given which does not match the controller.
       #
-      #     load_resource :name => :article
+      # [:+class+]
+      #   The class to use for the model (string or constant). This passed in when the instance variable is not set.
+      #   Pass +false+ if there is no associated class for this resource and it will use a symbol of the resource name.
+      #
+      # [:+instance_name+]
+      #   The name of the instance variable for this resource.
       #
       # [:+resource+]
       #   The class to use for the model (string or constant). Alternatively pass a symbol
       #   to represent a resource which does not have a class.
       #
-      def authorize_resource(options = {})
-        ResourceAuthorization.add_before_filter(self, :authorize_resource, options)
+      def authorize_resource(*args)
+        ControllerResource.add_before_filter(self, :authorize_resource, *args)
       end
     end
 

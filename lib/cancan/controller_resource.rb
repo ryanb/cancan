@@ -1,54 +1,105 @@
 module CanCan
-  # Used internally to load and authorize a given controller resource.
-  # This manages finding or building an instance of the resource. If a
-  # parent is given it will go through the association.
+  # Handle the load and authorization controller logic so we don't clutter up all controllers with non-interface methods.
+  # This class is used internally, so you do not need to call methods directly on it.
   class ControllerResource # :nodoc:
-    def initialize(controller, name, parent = nil, options = {})
-      raise ImplementationRemoved, "The :class option has been renamed to :resource for specifying the class in CanCan." if options.has_key? :class
-      @controller = controller
-      @name = name
-      @parent = parent
-      @options = options
-    end
-
-    # Returns the class used for this resource. This can be overriden by the :resource option.
-    # Sometimes one will use a symbol as the resource if a class does not exist for it. In that
-    # case "find" and "build" should not be called on it.
-    def model_class
-      resource_class = @options[:resource]
-      if resource_class.nil?
-        @name.to_s.camelize.constantize
-      elsif resource_class.kind_of? String
-        resource_class.constantize
-      else
-        resource_class # could be a symbol
+    def self.add_before_filter(controller_class, method, options = {})
+      controller_class.before_filter(options.slice(:only, :except)) do |controller|
+        ControllerResource.new(controller, controller.params, options.except(:only, :except)).send(method)
       end
     end
 
-    def find(id)
-      self.model_instance ||= base.find(id)
+    def initialize(controller, params, *args)
+      @controller = controller
+      @params = params
+      @options = args.extract_options!
+      @name = args.first
+      raise CanCan::ImplementationRemoved, "The :nested option is no longer supported, instead use :through with separate load/authorize call." if @options[:nested]
+      raise CanCan::ImplementationRemoved, "The :name option is no longer supported, instead pass the name as the first argument." if @options[:name]
+      raise CanCan::ImplementationRemoved, "The :resource option has been renamed back to :class, use false if no class." if @options[:resource]
     end
 
-    # Build a new instance of this resource. If it is a class we just call "new" otherwise
-    # it's an associaiton and "build" is used.
-    def build(attributes)
-      self.model_instance ||= (base.kind_of?(Class) ? base.new(attributes) : base.build(attributes))
+    def load_and_authorize_resource
+      load_resource
+      authorize_resource
     end
 
-    def model_instance
-      @controller.instance_variable_get("@#{@name}")
+    def load_resource
+      if !resource_instance && (parent? || member_action?)
+        @controller.instance_variable_set("@#{name}", load_resource_instance)
+      end
     end
 
-    def model_instance=(instance)
-      @controller.instance_variable_set("@#{@name}", instance)
+    def authorize_resource
+      @controller.authorize!(@params[:action].to_sym, resource_instance || resource_class)
+    end
+
+    def parent?
+      @options[:parent] || @name && @name != name_from_controller.to_sym
     end
 
     private
 
+    def load_resource_instance
+      if !parent? && new_actions.include?(@params[:action].to_sym)
+        resource_base.kind_of?(Class) ? resource_base.new(attributes) : resource_base.build(attributes)
+      elsif id_param
+        resource_base.find(id_param)
+      end
+    end
+
+    def attributes
+      @params[name.to_sym]
+    end
+
+    def id_param
+      @params[parent? ? :"#{name}_id" : :id]
+    end
+
+    def member_action?
+      !collection_actions.include? @params[:action].to_sym
+    end
+
+    # Returns the class used for this resource. This can be overriden by the :class option.
+    # If +false+ is passed in it will use the resource name as a symbol in which case it should
+    # only be used for authorization, not loading since there's no class to load through.
+    def resource_class
+      case @options[:class]
+      when false  then name.to_sym
+      when nil    then name.to_s.camelize.constantize
+      when String then @options[:class].constantize
+      else @options[:class]
+      end
+    end
+
+    def resource_instance
+      @controller.instance_variable_get("@#{name}")
+    end
+
     # The object that methods (such as "find", "new" or "build") are called on.
-    # If there is a parent it will be the association, otherwise it will be the model's class.
-    def base
-      @parent ? @parent.model_instance.send(@name.to_s.pluralize) : model_class
+    # If the :through option is passed it will go through an association on that instance.
+    def resource_base
+      through_resource ? through_resource.send(name.to_s.pluralize) : resource_class
+    end
+
+    # The object to load this resource through.
+    def through_resource
+      @options[:through] && @controller.instance_variable_get("@#{@options[:through]}")
+    end
+
+    def name
+      @name || name_from_controller
+    end
+
+    def name_from_controller
+      @params[:controller].sub("Controller", "").underscore.split('/').last.singularize
+    end
+
+    def collection_actions
+      [:index] + [@options[:collection]].flatten
+    end
+
+    def new_actions
+      [:new, :create] + [@options[:new]].flatten
     end
   end
 end

@@ -1,3 +1,9 @@
+* Changing :resource option in load/authorize_resource back to :class with ability to pass false
+
+* Removing :nested option in favor of :through option with separate load/authorize call
+
+* Moving internal logic from ResourceAuthorization to ControllerResource class
+
 * Supporting multiple "can" and "cannot" calls with accessible_by (thanks funny-falcon) - see issue #71
 
 * Supporting deeply nested aliases - see issue #98
