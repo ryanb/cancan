@@ -41,7 +41,7 @@ module CanCan
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
-        resource_base.kind_of?(Class) ? resource_base.new(@params[name.to_sym]) : resource_base.build(@params[name.to_sym])
+        @params[name.to_sym] ? resource_base.new(@params[name.to_sym]) : resource_base.new
       elsif id_param
         resource_base.find(id_param)
       end

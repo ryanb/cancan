@@ -40,8 +40,8 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
-  it "should build a new resource even if attribute hash isn't specified" do
-    stub(Ability).new(nil) { :some_resource }
+  it "should build a new resource with no arguments if attribute hash isn't specified" do
+    mock(Ability).new { :some_resource }
     resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "new")
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
@@ -80,7 +80,7 @@ describe CanCan::ControllerResource do
   end
 
   it "should build a resource when on custom new action even when params[:id] exists" do
-    stub(Ability).new(nil) { :some_resource }
+    stub(Ability).new { :some_resource }
     resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "build", :id => 123}, {:new => :build})
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
