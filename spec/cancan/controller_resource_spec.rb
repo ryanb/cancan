@@ -2,176 +2,198 @@ require "spec_helper"
 
 describe CanCan::ControllerResource do
   before(:each) do
+    @params = HashWithIndifferentAccess.new(:controller => "abilities")
     @controller = Object.new # simple stub for now
+    stub(@controller).params { @params }
   end
 
   it "should load the resource into an instance variable if params[:id] is specified" do
+    @params.merge!(:action => "show", :id => 123)
     stub(Ability).find(123) { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "show", :id => 123)
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should not load resource into an instance variable if already set" do
+    @params.merge!(:action => "show", :id => 123)
     @controller.instance_variable_set(:@ability, :some_ability)
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "show", :id => 123)
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
   it "should properly load resource for namespaced controller" do
+    @params.merge!(:controller => "admin/abilities", :action => "show", :id => 123)
     stub(Ability).find(123) { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "admin/abilities", :action => "show", :id => 123)
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should properly load resource for namespaced controller when using '::' for namespace" do
+    @params.merge!(:controller => "Admin::AbilitiesController", :action => "show", :id => 123)
     stub(Ability).find(123) { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "Admin::AbilitiesController", :action => "show", :id => 123)
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should build a new resource with hash if params[:id] is not specified" do
-    stub(Ability).new(:foo => "bar") { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "create", :ability => {:foo => "bar"})
+    @params.merge!(:action => "create", :ability => {:foo => "bar"})
+    stub(Ability).new("foo" => "bar") { :some_resource }
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should build a new resource with no arguments if attribute hash isn't specified" do
+    @params[:action] = "new"
     mock(Ability).new { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "new")
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should not build a resource when on index action" do
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "index")
+    @params[:action] = "index"
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should be_nil
   end
 
   it "should perform authorization using controller action and loaded model" do
+    @params[:action] = "show"
     @controller.instance_variable_set(:@ability, :some_resource)
     stub(@controller).authorize!(:show, :some_resource) { raise CanCan::AccessDenied }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "show")
+    resource = CanCan::ControllerResource.new(@controller)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should perform authorization using controller action and non loaded model" do
+    @params[:action] = "show"
     stub(@controller).authorize!(:show, Ability) { raise CanCan::AccessDenied }
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "show")
+    resource = CanCan::ControllerResource.new(@controller)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should call load_resource and authorize_resource for load_and_authorize_resource" do
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "show")
+    @params[:action] = "show"
+    resource = CanCan::ControllerResource.new(@controller)
     mock(resource).load_resource
     mock(resource).authorize_resource
     resource.load_and_authorize_resource
   end
 
   it "should not build a resource when on custom collection action" do
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "sort"}, {:collection => [:sort, :list]})
+    @params[:action] = "sort"
+    resource = CanCan::ControllerResource.new(@controller, :collection => [:sort, :list])
     resource.load_resource
     @controller.instance_variable_get(:@ability).should be_nil
   end
 
   it "should build a resource when on custom new action even when params[:id] exists" do
+    @params.merge!(:action => "build", :id => 123)
     stub(Ability).new { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "build", :id => 123}, {:new => :build})
+    resource = CanCan::ControllerResource.new(@controller, :new => :build)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should not try to load resource for other action if params[:id] is undefined" do
-    resource = CanCan::ControllerResource.new(@controller, :controller => "abilities", :action => "list")
+    @params[:action] = "list"
+    resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should be_nil
   end
 
   it "should be a parent resource when name is provided which doesn't match controller" do
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities"}, :person)
+    resource = CanCan::ControllerResource.new(@controller, :person)
     resource.should be_parent
   end
 
   it "should not be a parent resource when name is provided which matches controller" do
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities"}, :ability)
+    resource = CanCan::ControllerResource.new(@controller, :ability)
     resource.should_not be_parent
   end
 
   it "should be parent if specified in options" do
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities"}, :ability, {:parent => true})
+    resource = CanCan::ControllerResource.new(@controller, :ability, {:parent => true})
     resource.should be_parent
   end
 
   it "should load parent resource through proper id parameter when supplying a resource with a different name" do
+    @params.merge!(:action => "index", :person_id => 123)
     stub(Person).find(123) { :some_person }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "index", :person_id => 123}, :person)
+    resource = CanCan::ControllerResource.new(@controller, :person)
     resource.load_resource
     @controller.instance_variable_get(:@person).should == :some_person
   end
 
   it "should load parent resource for collection action" do
+    @params.merge!(:action => "index", :person_id => 456)
     stub(Person).find(456) { :some_person }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "index", :person_id => 456}, :person)
+    resource = CanCan::ControllerResource.new(@controller, :person)
     resource.load_resource
     @controller.instance_variable_get(:@person).should == :some_person
   end
 
   it "should load resource through the association of another parent resource" do
+    @params.merge!(:action => "show", :id => 123)
     person = Object.new
     @controller.instance_variable_set(:@person, person)
     stub(person).abilities.stub!.find(123) { :some_ability }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:through => :person})
+    resource = CanCan::ControllerResource.new(@controller, :through => :person)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
   it "should not load through parent resource if instance isn't loaded" do
+    @params.merge!(:action => "show", :id => 123)
     stub(Ability).find(123) { :some_ability }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:through => :person})
+    resource = CanCan::ControllerResource.new(@controller, :through => :person)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
   it "should only authorize :read action on parent resource" do
+    @params.merge!(:action => "new", :person_id => 123)
     stub(Person).find(123) { :some_person }
     stub(@controller).authorize!(:read, :some_person) { raise CanCan::AccessDenied }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "new", :person_id => 123}, :person)
+    resource = CanCan::ControllerResource.new(@controller, :person)
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should load the model using a custom class" do
+    @params.merge!(:action => "show", :id => 123)
     stub(Person).find(123) { :some_resource }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:class => Person})
+    resource = CanCan::ControllerResource.new(@controller, :class => Person)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
   it "should authorize based on resource name if class is false" do
+    @params.merge!(:action => "show", :id => 123)
     stub(@controller).authorize!(:show, :ability) { raise CanCan::AccessDenied }
-    resource = CanCan::ControllerResource.new(@controller, {:controller => "abilities", :action => "show", :id => 123}, {:class => false})
+    resource = CanCan::ControllerResource.new(@controller, :class => false)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should raise ImplementationRemoved when adding :name option" do
     lambda {
-      CanCan::ControllerResource.new(@controller, {}, {:name => :foo})
+      CanCan::ControllerResource.new(@controller, :name => :foo)
     }.should raise_error(CanCan::ImplementationRemoved)
   end
 
   it "should raise ImplementationRemoved exception when specifying :resource option since it is no longer used" do
     lambda {
-      CanCan::ControllerResource.new(@controller, {}, {:resource => Person})
+      CanCan::ControllerResource.new(@controller, :resource => Person)
     }.should raise_error(CanCan::ImplementationRemoved)
   end
 
   it "should raise ImplementationRemoved exception when passing :nested option" do
     lambda {
-      CanCan::ControllerResource.new(@controller, {}, {:nested => :person})
+      CanCan::ControllerResource.new(@controller, :nested => :person)
     }.should raise_error(CanCan::ImplementationRemoved)
   end
 end

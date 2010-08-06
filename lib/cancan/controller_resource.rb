@@ -4,13 +4,13 @@ module CanCan
   class ControllerResource # :nodoc:
     def self.add_before_filter(controller_class, method, options = {})
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
-        ControllerResource.new(controller, controller.params, options.except(:only, :except)).send(method)
+        ControllerResource.new(controller, options.except(:only, :except)).send(method)
       end
     end
 
-    def initialize(controller, params, *args)
+    def initialize(controller, *args)
       @controller = controller
-      @params = params
+      @params = controller.params
       @options = args.extract_options!
       @name = args.first
       raise CanCan::ImplementationRemoved, "The :nested option is no longer supported, instead use :through with separate load/authorize call." if @options[:nested]
@@ -41,7 +41,7 @@ module CanCan
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
-        @params[name.to_sym] ? resource_base.new(@params[name.to_sym]) : resource_base.new
+        @params[name] ? resource_base.new(@params[name]) : resource_base.new
       elsif id_param
         resource_base.find(id_param)
       end
