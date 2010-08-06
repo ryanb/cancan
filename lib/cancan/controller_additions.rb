@@ -148,10 +148,6 @@ module CanCan
       # [:+instance_name+]
       #   The name of the instance variable for this resource.
       #
-      # [:+resource+]
-      #   The class to use for the model (string or constant). Alternatively pass a symbol
-      #   to represent a resource which does not have a class.
-      #
       def authorize_resource(*args)
         ControllerResource.add_before_filter(self, :authorize_resource, *args)
       end
