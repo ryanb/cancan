@@ -2,14 +2,14 @@
 
 Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
-CanCan is an authorization solution for Ruby on Rails. This restricts what a given user is allowed to access throughout the application. It is completely decoupled from any role based implementation and focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
+CanCan is an authorization solution for Ruby on Rails for restricting what a given user is allowed to access throughout the application. It does not care how your user roles are defined, it simply focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
 
-This assumes you already have authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]) that provides a +current_user+ method which CanCan relies on. See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
+By default, the +current_user+ method is required, so if you have not already, set up some authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
 
 
 == Installation
 
-CanCan is provided as a gem. Simply include it in the environment.rb for Rails 2.3.
+To install CanCan, include the gem in the environment.rb in Rails 2.3.
 
   config.gem "cancan"
 
@@ -24,7 +24,7 @@ Alternatively it can be installed as a plugin.
 
 == Getting Started
 
-First, define a class called +Ability+ in "models/ability.rb". It should look something like this.
+First, define a class called +Ability+ in "models/ability.rb" or anywhere else in the load path. It should look something like this.
 
   class Ability
     include CanCan::Ability
@@ -140,7 +140,8 @@ See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for
 
 == Additional Docs
 
-* {Upgrading to 1.1}[http://wiki.github.com/ryanb/cancan/upgrading-to-11]
+* {Upgrading to 1.3}[http://wiki.github.com/ryanb/cancan/upgrading-to-13]
+* {Nested Resources}[http://wiki.github.com/ryanb/cancan/nested-resources]
 * {Testing Abilities}[http://wiki.github.com/ryanb/cancan/testing-abilities]
 * {Accessing Request Data}[http://wiki.github.com/ryanb/cancan/accessing-request-data]
 * {Admin Namespace}[http://wiki.github.com/ryanb/cancan/admin-namespace]
