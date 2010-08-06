@@ -122,6 +122,11 @@ describe CanCan::ControllerResource do
     resource.should be_parent
   end
 
+  it "should not be parent if specified in options" do
+    resource = CanCan::ControllerResource.new(@controller, :person, {:parent => false})
+    resource.should_not be_parent
+  end
+
   it "should load parent resource through proper id parameter when supplying a resource with a different name" do
     @params.merge!(:action => "index", :person_id => 123)
     stub(Person).find(123) { :some_person }

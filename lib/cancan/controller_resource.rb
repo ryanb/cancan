@@ -34,7 +34,7 @@ module CanCan
     end
 
     def parent?
-      @options[:parent] || @name && @name != name_from_controller.to_sym
+      @options.has_key?(:parent) ? @options[:parent] : @name && @name != name_from_controller.to_sym
     end
 
     private
