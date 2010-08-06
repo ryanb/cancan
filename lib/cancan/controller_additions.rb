@@ -67,6 +67,9 @@ module CanCan
       # [:+through+]
       #   Load this resource through another one. This should match the name of the parent instance variable.
       #
+      # [:+singular+]
+      #   Pass +true+ if this is a singular resource through a +has_one+ association.
+      #
       # [:+parent+]
       #   True or false depending on if the resource is considered a parent resource. This defaults to +true+ if a resource
       #   name is given which does not match the controller.

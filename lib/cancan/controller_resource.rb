@@ -41,10 +41,19 @@ module CanCan
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
-        @params[name] ? resource_base.new(@params[name]) : resource_base.new
-      elsif id_param
-        resource_base.find(id_param)
+        build_resource
+      elsif id_param || @options[:singular]
+        find_resource
       end
+    end
+
+    def build_resource
+      method_name = @options[:singular] ? "build_#{name}" : "new"
+      resource_base.send(*[method_name, @params[name]].compact)
+    end
+
+    def find_resource
+      @options[:singular] ? resource_base.send(name) : resource_base.find(id_param)
     end
 
     def authorization_action
@@ -77,8 +86,13 @@ module CanCan
 
     # The object that methods (such as "find", "new" or "build") are called on.
     # If the :through option is passed it will go through an association on that instance.
+    # If the :singular option is passed it won't use the association because it needs to be handled later.
     def resource_base
-      through_resource ? through_resource.send(name.to_s.pluralize) : resource_class
+      if through_resource
+        @options[:singular] ? through_resource : through_resource.send(name.to_s.pluralize)
+      else
+        resource_class
+      end
     end
 
     # The object to load this resource through.
