@@ -83,7 +83,7 @@ module CanCan
 
     # The object to load this resource through.
     def through_resource
-      @options[:through] && @controller.instance_variable_get("@#{@options[:through]}")
+      @options[:through] && [@options[:through]].flatten.map { |i| @controller.instance_variable_get("@#{i}") }.compact.first
     end
 
     def name

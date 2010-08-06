@@ -156,6 +156,16 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
+  it "should load through first matching if multiple are given" do
+    @params.merge!(:action => "show", :id => 123)
+    person = Object.new
+    @controller.instance_variable_set(:@person, person)
+    stub(person).abilities.stub!.find(123) { :some_ability }
+    resource = CanCan::ControllerResource.new(@controller, :through => [:thing, :person])
+    resource.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_ability
+  end
+
   it "should only authorize :read action on parent resource" do
     @params.merge!(:action => "new", :person_id => 123)
     stub(Person).find(123) { :some_person }
