@@ -179,6 +179,15 @@ describe CanCan::ControllerResource do
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
+  it "should load and authorize using custom instance name" do
+    @params.merge!(:action => "show", :id => 123)
+    stub(Ability).find(123) { :some_ability }
+    stub(@controller).authorize!(:show, :some_ability) { raise CanCan::AccessDenied }
+    resource = CanCan::ControllerResource.new(@controller, :instance_name => :custom_ability)
+    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
+    @controller.instance_variable_get(:@custom_ability).should == :some_ability
+  end
+
   it "should raise ImplementationRemoved when adding :name option" do
     lambda {
       CanCan::ControllerResource.new(@controller, :name => :foo)

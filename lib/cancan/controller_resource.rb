@@ -25,7 +25,7 @@ module CanCan
 
     def load_resource
       if !resource_instance && (parent? || member_action?)
-        @controller.instance_variable_set("@#{name}", load_resource_instance)
+        @controller.instance_variable_set("@#{instance_name}", load_resource_instance)
       end
     end
 
@@ -72,7 +72,7 @@ module CanCan
     end
 
     def resource_instance
-      @controller.instance_variable_get("@#{name}")
+      @controller.instance_variable_get("@#{instance_name}")
     end
 
     # The object that methods (such as "find", "new" or "build") are called on.
@@ -92,6 +92,10 @@ module CanCan
 
     def name_from_controller
       @params[:controller].sub("Controller", "").underscore.split('/').last.singularize
+    end
+
+    def instance_name
+      @options[:instance_name] || name
     end
 
     def collection_actions
