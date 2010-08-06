@@ -1,6 +1,6 @@
 * Adding :find_by option to load_resource - see issue #19
 
-* Adding :singular option to load_resource - see issue #93
+* Adding :singleton option to load_resource - see issue #93
 
 * Supporting multiple resources in :through option for polymorphic
 associations - see issue #73

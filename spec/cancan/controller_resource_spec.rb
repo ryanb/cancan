@@ -166,22 +166,22 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
-  it "should find record through has_one association with :singular option" do
+  it "should find record through has_one association with :singleton option" do
     @params.merge!(:action => "show")
     person = Object.new
     @controller.instance_variable_set(:@person, person)
     stub(person).ability { :some_ability }
-    resource = CanCan::ControllerResource.new(@controller, :through => :person, :singular => true)
+    resource = CanCan::ControllerResource.new(@controller, :through => :person, :singleton => true)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
-  it "should build record through has_one association with :singular option" do
+  it "should build record through has_one association with :singleton option" do
     @params.merge!(:action => "create", :ability => :ability_attributes)
     person = Object.new
     @controller.instance_variable_set(:@person, person)
     stub(person).build_ability(:ability_attributes) { :new_ability }
-    resource = CanCan::ControllerResource.new(@controller, :through => :person, :singular => true)
+    resource = CanCan::ControllerResource.new(@controller, :through => :person, :singleton => true)
     resource.load_resource
     @controller.instance_variable_get(:@ability).should == :new_ability
   end

@@ -42,18 +42,18 @@ module CanCan
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
         build_resource
-      elsif id_param || @options[:singular]
+      elsif id_param || @options[:singleton]
         find_resource
       end
     end
 
     def build_resource
-      method_name = @options[:singular] ? "build_#{name}" : "new"
+      method_name = @options[:singleton] ? "build_#{name}" : "new"
       resource_base.send(*[method_name, @params[name]].compact)
     end
 
     def find_resource
-      if @options[:singular]
+      if @options[:singleton]
         resource_base.send(name)
       else
         @options[:find_by] ? resource_base.send("find_by_#{@options[:find_by]}!", id_param) : resource_base.find(id_param)
@@ -90,10 +90,10 @@ module CanCan
 
     # The object that methods (such as "find", "new" or "build") are called on.
     # If the :through option is passed it will go through an association on that instance.
-    # If the :singular option is passed it won't use the association because it needs to be handled later.
+    # If the :singleton option is passed it won't use the association because it needs to be handled later.
     def resource_base
       if through_resource
-        @options[:singular] ? through_resource : through_resource.send(name.to_s.pluralize)
+        @options[:singleton] ? through_resource : through_resource.send(name.to_s.pluralize)
       else
         resource_class
       end
