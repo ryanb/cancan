@@ -53,7 +53,11 @@ module CanCan
     end
 
     def find_resource
-      @options[:singular] ? resource_base.send(name) : resource_base.find(id_param)
+      if @options[:singular]
+        resource_base.send(name)
+      else
+        @options[:find_by] ? resource_base.send("find_by_#{@options[:find_by]}!", id_param) : resource_base.find(id_param)
+      end
     end
 
     def authorization_action

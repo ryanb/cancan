@@ -80,6 +80,11 @@ module CanCan
       # [:+instance_name+]
       #   The name of the instance variable to load the resource into.
       #
+      # [:+find_by+]
+      #   Find using a different attribute other than id. For example.
+      #
+      #     load_resource :find_by => :permalink # will use find_by_permlink!(params[:id])
+      #
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
       #   is usually not necessary because it will try to guess depending on if the id param is present.

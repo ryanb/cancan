@@ -218,6 +218,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@custom_ability).should == :some_ability
   end
 
+  it "should load resource using custom find_by attribute" do
+    @params.merge!(:action => "show", :id => 123)
+    stub(Ability).find_by_name!(123) { :some_resource }
+    resource = CanCan::ControllerResource.new(@controller, :find_by => :name)
+    resource.load_resource
+    @controller.instance_variable_get(:@ability).should == :some_resource
+  end
+
   it "should raise ImplementationRemoved when adding :name option" do
     lambda {
       CanCan::ControllerResource.new(@controller, :name => :foo)
