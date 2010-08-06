@@ -135,6 +135,13 @@ describe CanCan::Ability do
     @ability.can?(:read, :nonstats).should be_false
   end
 
+  it "should check ancestors of class" do
+    @ability.can :read, Numeric
+    @ability.can?(:read, Integer).should be_true
+    @ability.can?(:read, 1.23).should be_true
+    @ability.can?(:read, "foo").should be_false
+  end
+
   it "should support 'cannot' method to define what user cannot do" do
     @ability.can :read, :all
     @ability.cannot :read, Integer
