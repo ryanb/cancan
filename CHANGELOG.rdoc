@@ -1,3 +1,16 @@
+* Adding :find_by option to load_resource - see issue #19
+
+* Adding :singular option to load_resource - see issue #93
+
+* Supporting multiple resources in :through option for polymorphic
+associations - see issue #73
+
+* Supporting Single Table Inheritance for "can" comparisons - see issue #55
+
+* Adding :instance_name option to load/authorize_resource - see issue #44
+
+* Don't pass nil to "new" to keep MongoMapper happy - see issue #63
+
 * Parent resources are now authorized with :read action.
 
 * Changing :resource option in load/authorize_resource back to :class with ability to pass false
