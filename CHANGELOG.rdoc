@@ -1,3 +1,8 @@
+1.3.2 (August 7, 2010)
+
+* Fixing slice error when passing in custom resource name - see issue #112
+
+
 1.3.1 (August 6, 2010)
 
 * Fixing protected sanitize_sql error - see issue #111
