@@ -71,7 +71,7 @@ module CanCan
     end
 
     def sanitize_sql(conditions)
-      @sanitizer.sanitize_sql(conditions)
+      @sanitizer.send(:sanitize_sql, conditions)
     end
 
     # Takes two hashes and does a deep merge.

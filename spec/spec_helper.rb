@@ -19,25 +19,29 @@ class Ability
   end
 end
 
-# this class helps out in testing nesting and SQL conditions
+# this class helps out in testing SQL conditions
 class Person
-  def self.sanitize_sql(hash_cond)
-    case hash_cond
-    when Hash
-      sanitize_hash(hash_cond).join(' AND ')
-    when Array
-      hash_cond.shift.gsub('?'){"#{hash_cond.shift.inspect}"}
-    when String then hash_cond
-    end
-  end
+  class << self
+    protected
 
-  def self.sanitize_hash(hash)
-    hash.map do |name, value|
-      if Hash === value
-        sanitize_hash(value).map{|cond| "#{name}.#{cond}"}
-      else
-        "#{name}=#{value}"
+    def sanitize_sql(hash_cond)
+      case hash_cond
+      when Hash
+        sanitize_hash(hash_cond).join(' AND ')
+      when Array
+        hash_cond.shift.gsub('?'){"#{hash_cond.shift.inspect}"}
+      when String then hash_cond
       end
-    end.flatten
+    end
+
+    def sanitize_hash(hash)
+      hash.map do |name, value|
+        if Hash === value
+          sanitize_hash(value).map{|cond| "#{name}.#{cond}"}
+        else
+          "#{name}=#{value}"
+        end
+      end.flatten
+    end
   end
 end
