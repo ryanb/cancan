@@ -2,9 +2,11 @@ module CanCan
   # Handle the load and authorization controller logic so we don't clutter up all controllers with non-interface methods.
   # This class is used internally, so you do not need to call methods directly on it.
   class ControllerResource # :nodoc:
-    def self.add_before_filter(controller_class, method, options = {})
+    def self.add_before_filter(controller_class, method, *args)
+      options = args.extract_options!
+      resource_name = args.first
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
-        ControllerResource.new(controller, options.except(:only, :except)).send(method)
+        ControllerResource.new(controller, resource_name, options.except(:only, :except)).send(method)
       end
     end
 
