@@ -34,16 +34,21 @@ module CanCan
       end
     end
 
-    # Returns a hash of conditions, pluralizing the table names
-    def tableized_conditions
-      if @conditions
-        @conditions.inject({}) do |tableized_conditions, (name, value)|
-          name = name.to_s.tableize.to_sym if value.kind_of? Hash
-          tableized_conditions[name] = value
-          tableized_conditions
-        end
-      end
-    end
+    def tableized_conditions(c=nil)
+      conditions = c || @conditions
+      if conditions
+        conditions.inject({}) do |tableized_conditions, (name, value)|
+          if value.kind_of? Hash
+            name = name.to_s.tableize.to_sym 
+            value = tableized_conditions(value)
+          end 
+        tableized_conditions[name] = value
+        tableized_conditions
+        end 
+      end 
+    end 
+
+
 
     def only_block?
       conditions_empty? && !@block.nil?

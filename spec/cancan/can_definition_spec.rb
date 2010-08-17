@@ -30,6 +30,16 @@ describe CanCan::CanDefinition do
     @conditions[:foo] = {:bar => {1 => 2}}
     @can.associations_hash.should == {:foo => {:bar => {}}}
   end
+  it "should tableize correctly for absurdly complex permissions" do
+    @conditions[:unit] = {:property=>{:landlord=>{:weasle_id=>560}}}
+    @conditions[:test] = 1
+    @can.tableized_conditions.should == {:units => {:properties => {:landlords=>{:weasle_id=>560}}}, :test => 1}
+  end
+  it "should tableize correctly for complex permissions" do
+    @conditions[:unit] = {:property=>{:landlord_id=>560}}
+    @conditions[:test] = 1
+    @can.tableized_conditions.should == {:units => {:properties => {:landlord_id=>560}}, :test => 1}
+  end
 
   it "should return table names in conditions for association joins" do
     @conditions[:foo] = {:bar => 1}
