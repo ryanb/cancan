@@ -1,4 +1,5 @@
-Spec::Matchers.define :be_able_to do |*args|
+RSpec = Spec unless defined? RSpec # for RSpec 1 compatability
+RSpec::Matchers.define :be_able_to do |*args|
   match do |ability|
     ability.can?(*args)
   end
