@@ -31,8 +31,8 @@ describe CanCan::ActiveRecordAdditions do
     @ability.can :read, @model_class, :too => {:car => 1, :far => {:bar => 1}}
 
     condition_variants = [
-        '(toos.far.bar=1 AND toos.car=1) OR (foos.bar=1)', # faked sql sanitizer is stupid ;-)
-        '(toos.car=1 AND toos.far.bar=1) OR (foos.bar=1)'
+        '(toos.fars.bar=1 AND toos.car=1) OR (foos.bar=1)', # faked sql sanitizer is stupid ;-)
+        '(toos.car=1 AND toos.fars.bar=1) OR (foos.bar=1)'
     ]
     joins_variants = [
         [:foo, {:too => [:far]}],
