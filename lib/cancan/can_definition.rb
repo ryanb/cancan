@@ -30,7 +30,7 @@ module CanCan
       elsif @conditions.kind_of?(Hash) && subject.class != Class
         matches_conditions_hash?(subject)
       else
-        true
+        @base_behavior
       end
     end
 
