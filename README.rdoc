@@ -135,7 +135,7 @@ In the controller +index+ action you may want to fetch only the records which th
 
   @articles = Article.accessible_by(current_ability)
 
-See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for more information.
+This will only work when abilities are defined using hash conditions, not blocks. See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for more information.
 
 
 == Additional Docs
