@@ -249,8 +249,8 @@ describe CanCan::Ability do
   it "should not stop at cannot definition when comparing class" do
     @ability.can :read, Array
     @ability.cannot :read, Array, :first => 1
-    @ability.can?(:read, [2,3,5]).should be_true
-    @ability.can?(:read, [1,3,5]).should be_false
+    @ability.can?(:read, [2, 3, 5]).should be_true
+    @ability.can?(:read, [1, 3, 5]).should be_false
     @ability.can?(:read, Array).should be_true
   end
 
