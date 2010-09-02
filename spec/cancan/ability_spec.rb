@@ -79,12 +79,25 @@ describe CanCan::Ability do
     @ability.can?(:increment, 123).should be_true
   end
 
-  it "should return block result and only pass object for any action" do
-    @ability.can :manage, :all do |object|
+  it "should always call block with arguments when passing no arguments to can" do
+    @ability.can do |action, object_class, object|
+      action.should == :foo
+      object_class.should == 123.class
       object.should == 123
       @block_called = true
     end
     @ability.can?(:foo, 123)
+    @block_called.should be_true
+  end
+
+  it "should pass nil to object when comparing class with can check" do
+    @ability.can do |action, object_class, object|
+      action.should == :foo
+      object_class.should == Hash
+      object.should be_nil
+      @block_called = true
+    end
+    @ability.can?(:foo, Hash)
     @block_called.should be_true
   end
 

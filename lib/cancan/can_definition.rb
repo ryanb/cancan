@@ -11,6 +11,7 @@ module CanCan
     # and subject respectively (such as :read, @project). The third argument is a hash
     # of conditions and the last one is the block passed to the "can" call.
     def initialize(base_behavior, action, subject, conditions, block)
+      @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
@@ -20,12 +21,14 @@ module CanCan
 
     # Matches both the subject and action, not necessarily the conditions
     def relevant?(action, subject)
-      matches_action?(action) && matches_subject?(subject)
+      @match_all || (matches_action?(action) && matches_subject?(subject))
     end
 
     # Matches the block or conditions hash
     def matches_conditions?(action, subject, extra_args)
-      if @block && subject.class != Class
+      if @match_all
+        call_block_with_all(action, subject, extra_args)
+      elsif @block && subject.class != Class
         @block.call(subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class != Class
         matches_conditions_hash?(subject)
@@ -89,6 +92,14 @@ module CanCan
         else
           attribute == value
         end
+      end
+    end
+    
+    def call_block_with_all(action, subject, extra_args)
+      if subject.class == Class
+        @block.call(action, subject, nil, *extra_args)
+      else
+        @block.call(action, subject.class, subject, *extra_args)
       end
     end
   end

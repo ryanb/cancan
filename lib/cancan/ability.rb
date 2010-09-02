@@ -117,7 +117,7 @@ module CanCan
     #   can :read, :stats
     #   can? :read, :stats # => true
     #
-    def can(action, subject, conditions = nil, &block)
+    def can(action = nil, subject = nil, conditions = nil, &block)
       can_definitions << CanDefinition.new(true, action, subject, conditions, block)
     end
 
@@ -133,7 +133,7 @@ module CanCan
     #     product.invisible?
     #   end
     #
-    def cannot(action, subject, conditions = nil, &block)
+    def cannot(action = nil, subject = nil, conditions = nil, &block)
       can_definitions << CanDefinition.new(false, action, subject, conditions, block)
     end
 
