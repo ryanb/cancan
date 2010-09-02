@@ -38,9 +38,8 @@ describe CanCan::Ability do
     @ability.can?(:read, 6).should be_false
   end
 
-  it "should pass class with object if :all objects are accepted" do
-    @ability.can :preview, :all do |object_class, object|
-      object_class.should == Fixnum
+  it "should not pass class with object if :all objects are accepted" do
+    @ability.can :preview, :all do |object|
       object.should == 123
       @block_called = true
     end
@@ -48,14 +47,13 @@ describe CanCan::Ability do
     @block_called.should be_true
   end
 
-  it "should pass class with no object if :all objects are accepted and class is passed directly" do
-    @ability.can :preview, :all do |object_class, object|
-      object_class.should == Hash
-      object.should be_nil
+  it "should not call block when only class is passed, only return true" do
+    @block_called = false
+    @ability.can :preview, :all do |object|
       @block_called = true
     end
-    @ability.can?(:preview, Hash)
-    @block_called.should be_true
+    @ability.can?(:preview, Hash).should be_true
+    @block_called.should be_false
   end
 
   it "should pass action and object for global manage actions" do
@@ -83,9 +81,8 @@ describe CanCan::Ability do
   end
 
   it "should return block result for action, object_class, and object for any action" do
-    @ability.can :manage, :all do |action, object_class, object|
+    @ability.can :manage, :all do |action, object|
       action.should == :foo
-      object_class.should == Fixnum
       object.should == 123
       @block_called = true
     end
