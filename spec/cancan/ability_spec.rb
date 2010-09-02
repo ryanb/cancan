@@ -56,9 +56,8 @@ describe CanCan::Ability do
     @block_called.should be_false
   end
 
-  it "should pass action and object for global manage actions" do
-    @ability.can :manage, Array do |action, object|
-      action.should == :stuff
+  it "should pass only object for global manage actions" do
+    @ability.can :manage, Array do |object|
       object.should == [1, 2]
       @block_called = true
     end
@@ -80,9 +79,8 @@ describe CanCan::Ability do
     @ability.can?(:increment, 123).should be_true
   end
 
-  it "should return block result for action, object_class, and object for any action" do
-    @ability.can :manage, :all do |action, object|
-      action.should == :foo
+  it "should return block result and only pass object for any action" do
+    @ability.can :manage, :all do |object|
       object.should == 123
       @block_called = true
     end

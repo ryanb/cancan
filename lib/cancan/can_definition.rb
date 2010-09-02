@@ -26,7 +26,7 @@ module CanCan
     # Matches the block or conditions hash
     def matches_conditions?(action, subject, extra_args)
       if @block && subject.class != Class
-        call_block(action, subject, extra_args)
+        @block.call(subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class != Class
         matches_conditions_hash?(subject)
       else
@@ -90,14 +90,6 @@ module CanCan
           attribute == value
         end
       end
-    end
-
-    def call_block(action, subject, extra_args)
-      block_args = []
-      block_args << action if @expanded_actions.include?(:manage)
-      block_args << (subject.class == Class ? nil : subject)
-      block_args += extra_args
-      @block.call(*block_args)
     end
   end
 end
