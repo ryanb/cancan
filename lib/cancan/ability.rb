@@ -206,6 +206,14 @@ module CanCan
       message.blank? ? nil : message
     end
 
+    def attributes_for(action, subject)
+      attributes = {}
+      relevant_can_definitions(action, subject).map do |can_definition|
+        attributes.merge!(can_definition.new_attributes) if can_definition.base_behavior
+      end
+      attributes
+    end
+
     private
 
     def unauthorized_message_keys(action, subject)

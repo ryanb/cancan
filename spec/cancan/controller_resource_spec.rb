@@ -5,6 +5,7 @@ describe CanCan::ControllerResource do
     @params = HashWithIndifferentAccess.new(:controller => "abilities")
     @controller = Object.new # simple stub for now
     stub(@controller).params { @params }
+    stub(@controller).current_ability.stub!.attributes_for { {} }
   end
 
   it "should load the resource into an instance variable if params[:id] is specified" do
@@ -47,12 +48,16 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_resource
   end
 
-  it "should build a new resource with no arguments if attribute hash isn't specified" do
+  it "should build a new resource with attributes from current ability" do
+    @params[:controller] = "people"
     @params[:action] = "new"
-    mock(Ability).new { :some_resource }
+    person = Object.new
+    mock(Person).new { person }
+    mock(person).name = "foobar"
+    stub(@controller).current_ability.stub!.attributes_for(:new, Person) { {:name => "foobar"} }
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@ability).should == :some_resource
+    @controller.instance_variable_get(:@person).should == person
   end
 
   it "should not build a resource when on index action" do

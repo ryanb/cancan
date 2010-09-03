@@ -257,6 +257,14 @@ describe CanCan::Ability do
     @ability.can?(:read, 123 => Range).should be_true
   end
 
+  it "should have initial attributes based on hash conditions of 'new' action" do
+    @ability.can :manage, Range, :foo => "foo", :hash => {:skip => "hashes"}
+    @ability.can :create, Range, :bar => 123, :array => %w[skip arrays]
+    @ability.can :new, Range, :baz => "baz", :range => 1..3
+    @ability.cannot :new, Range, :ignore => "me"
+    @ability.attributes_for(:new, Range).should == {:foo => "foo", :bar => 123, :baz => "baz"}
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil

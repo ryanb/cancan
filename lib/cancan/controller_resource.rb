@@ -51,7 +51,15 @@ module CanCan
 
     def build_resource
       method_name = @options[:singleton] ? "build_#{name}" : "new"
-      resource_base.send(*[method_name, @params[name]].compact)
+      resource = resource_base.send(*[method_name, @params[name]].compact)
+      initial_attributes.each do |name, value|
+        resource.send("#{name}=", value)
+      end
+      resource
+    end
+
+    def initial_attributes
+      @controller.current_ability.attributes_for(@params[:action].to_sym, resource_class)
     end
 
     def find_resource

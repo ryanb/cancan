@@ -67,6 +67,14 @@ module CanCan
       hash
     end
 
+    def new_attributes
+      attributes = {}
+      @conditions.each do |key, value|
+        attributes[key] = value unless [Array, Range, Hash].include? value.class
+      end
+      attributes
+    end
+
     private
 
     def subject_class?(subject)
