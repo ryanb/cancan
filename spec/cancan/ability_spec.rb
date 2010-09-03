@@ -265,6 +265,34 @@ describe CanCan::Ability do
     @ability.attributes_for(:new, Range).should == {:foo => "foo", :bar => 123, :baz => "baz"}
   end
 
+  it "should raise access denied exception if ability us unauthorized to perform a certain action" do
+    begin
+      @ability.authorize! :read, :foo, 1, 2, 3, :message => "Access denied!"
+    rescue CanCan::AccessDenied => e
+      e.message.should == "Access denied!"
+      e.action.should == :read
+      e.subject.should == :foo
+    else
+      fail "Expected CanCan::AccessDenied exception to be raised"
+    end
+  end
+
+  it "should not raise access denied exception if ability is authorized to perform an action" do
+    @ability.can :read, :foo
+    lambda { @ability.authorize!(:read, :foo) }.should_not raise_error
+  end
+
+  it "should raise access denied exception with default message if not specified" do
+    begin
+      @ability.authorize! :read, :foo
+    rescue CanCan::AccessDenied => e
+      e.default_message = "Access denied!"
+      e.message.should == "Access denied!"
+    else
+      fail "Expected CanCan::AccessDenied exception to be raised"
+    end
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil

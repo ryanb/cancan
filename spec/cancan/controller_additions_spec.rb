@@ -14,33 +14,10 @@ describe CanCan::ControllerAdditions do
     lambda { @controller.unauthorized! }.should raise_error(CanCan::ImplementationRemoved)
   end
 
-  it "should raise access denied exception if ability us unauthorized to perform a certain action" do
-    # TODO this should probably be moved into Ability spec
-    begin
-      @controller.authorize! :read, :foo, 1, 2, 3, :message => "Access denied!"
-    rescue CanCan::AccessDenied => e
-      e.message.should == "Access denied!"
-      e.action.should == :read
-      e.subject.should == :foo
-    else
-      fail "Expected CanCan::AccessDenied exception to be raised"
-    end
-  end
-
-  it "should not raise access denied exception if ability is authorized to perform an action" do
-    @controller.current_ability.can :read, :foo
-    lambda { @controller.authorize!(:read, :foo) }.should_not raise_error
-  end
-
-  it "should raise access denied exception with default message if not specified" do
-    begin
-      @controller.authorize! :read, :foo
-    rescue CanCan::AccessDenied => e
-      e.default_message = "Access denied!"
-      e.message.should == "Access denied!"
-    else
-      fail "Expected CanCan::AccessDenied exception to be raised"
-    end
+  it "authorize! should assign @_authorized instance variable and pass args to current ability" do
+    mock(@controller.current_ability).authorize!(:foo, :bar)
+    @controller.authorize!(:foo, :bar)
+    @controller.instance_variable_get(:@_authorized).should be_true
   end
 
   it "should have a current_ability method which generates an ability for the current user" do
@@ -75,5 +52,26 @@ describe CanCan::ControllerAdditions do
     stub(CanCan::ControllerResource).new(@controller, nil, :foo => :bar).mock!.load_resource
     mock(@controller_class).before_filter(:only => [:show, :index]) { |options, block| block.call(@controller) }
     @controller_class.load_resource :foo => :bar, :only => [:show, :index]
+  end
+
+  it "skip_authorization should set up a before filter which sets @_authorized to true" do
+    mock(@controller_class).before_filter(:filter_options) { |options, block| block.call(@controller) }
+    @controller_class.skip_authorization(:filter_options)
+    @controller.instance_variable_get(:@_authorized).should be_true
+  end
+
+  it "check_authorization should trigger AuthorizationNotPerformed in after filter" do
+    mock(@controller_class).after_filter(:some_options) { |options, block| block.call(@controller) }
+    lambda {
+      @controller_class.check_authorization(:some_options)
+    }.should raise_error(CanCan::AuthorizationNotPerformed)
+  end
+
+  it "check_authorization should not raise error when @_authorized is set" do
+    @controller.instance_variable_set(:@_authorized, true)
+    mock(@controller_class).after_filter(:some_options) { |options, block| block.call(@controller) }
+    lambda {
+      @controller_class.check_authorization(:some_options)
+    }.should_not raise_error(CanCan::AuthorizationNotPerformed)
   end
 end

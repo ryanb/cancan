@@ -151,6 +151,20 @@ module CanCan
       def authorize_resource(*args)
         ControllerResource.add_before_filter(self, :authorize_resource, *args)
       end
+
+      def skip_authorization(*args)
+        self.before_filter(*args) do |controller|
+          controller.instance_variable_set(:@_authorized, true)
+        end
+      end
+
+      def check_authorization(*args)
+        self.after_filter(*args) do |controller|
+          unless controller.instance_variable_defined?(:@_authorized)
+            raise AuthorizationNotPerformed, "This action does not authorize the user. Add authorize! or authorize_resource to the controller."
+          end
+        end
+      end
     end
 
     def self.included(base)
@@ -186,6 +200,7 @@ module CanCan
     # See the load_and_authorize_resource method to automatically add the authorize! behavior
     # to the default RESTful actions.
     def authorize!(*args)
+      @_authorized = true
       current_ability.authorize!(*args)
     end
 
