@@ -41,23 +41,26 @@ describe CanCan::ControllerResource do
   end
 
   it "should build a new resource with hash if params[:id] is not specified" do
-    @params.merge!(:action => "create", :project => {:foo => "bar"})
-    stub(Project).new("foo" => "bar") { :some_project }
+    @params.merge!(:action => "create", :project => {:name => "foobar"})
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
   it "should build a new resource with attributes from current ability" do
-    @params[:controller] = "projects"
-    @params[:action] = "new"
-    project = Object.new
-    mock(Project).new { project }
-    mock(project).name = "foobar"
+    @params.merge!(:action => "new")
+    stub(@controller).current_ability.stub!.attributes_for(:new, Project) { {:name => "from conditions"} }
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "from conditions"
+  end
+
+  it "should override initial attributes with params" do
+    @params.merge!(:action => "new", :project => {:name => "from params"})
     stub(@controller).current_ability.stub!.attributes_for(:new, Project) { {:name => "foobar"} }
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == project
+    @controller.instance_variable_get(:@project).name.should == "from params"
   end
 
   it "should not build a resource when on index action" do
@@ -188,13 +191,13 @@ describe CanCan::ControllerResource do
   end
 
   it "should build record through has_one association with :singleton option" do
-    @params.merge!(:action => "create", :project => :project_attributes)
+    @params.merge!(:action => "create", :project => {:name => "foobar"})
     category = Object.new
     @controller.instance_variable_set(:@category, category)
-    stub(category).build_project(:project_attributes) { :new_project }
+    stub(category).build_project { Project.new }
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :new_project
+    @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
   it "should only authorize :read action on parent resource" do

@@ -50,11 +50,11 @@ module CanCan
     end
 
     def build_resource
-      method_name = @options[:singleton] ? "build_#{name}" : "new"
-      resource = resource_base.send(*[method_name, @params[name]].compact)
+      resource = resource_base.send(@options[:singleton] ? "build_#{name}" : "new")
       initial_attributes.each do |name, value|
         resource.send("#{name}=", value)
       end
+      resource.attributes = @params[name] if @params[name]
       resource
     end
 
