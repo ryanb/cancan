@@ -209,7 +209,7 @@ module CanCan
     def attributes_for(action, subject)
       attributes = {}
       relevant_can_definitions(action, subject).map do |can_definition|
-        attributes.merge!(can_definition.new_attributes) if can_definition.base_behavior
+        attributes.merge!(can_definition.attributes_from_conditions) if can_definition.base_behavior
       end
       attributes
     end

@@ -19,8 +19,18 @@ class Ability
   end
 end
 
-# this class helps out in testing SQL conditions
-class Person
+# Generic class to mimic a model
+class Project
+  attr_accessor :name
+
+  def initialize(attributes = {})
+    @name = attributes[:name]
+  end
+
+  def attributes=(attributes)
+    @name = attributes[:name] if attributes[:name]
+  end
+
   class << self
     protected
 

@@ -67,7 +67,7 @@ module CanCan
       hash
     end
 
-    def new_attributes
+    def attributes_from_conditions
       attributes = {}
       @conditions.each do |key, value|
         attributes[key] = value unless [Array, Range, Hash].include? value.class

@@ -2,7 +2,7 @@ require "spec_helper"
 
 describe CanCan::ActiveRecordAdditions do
   before(:each) do
-    @model_class = Class.new(Person)
+    @model_class = Class.new(Project)
     stub(@model_class).scoped { :scoped_stub }
     @model_class.send(:include, CanCan::ActiveRecordAdditions)
     @ability = Object.new

@@ -1,5 +1,6 @@
 require "spec_helper"
 
+# Most of CanDefinition functionality is tested in Ability specs
 describe CanCan::CanDefinition do
   before(:each) do
     @conditions = {}
