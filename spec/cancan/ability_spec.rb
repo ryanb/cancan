@@ -254,6 +254,7 @@ describe CanCan::Ability do
     @ability.can :read, Range, :string => {:length => 3}
     @ability.can?(:read, "foo" => Range).should be_true
     @ability.can?(:read, "foobar" => Range).should be_false
+    @ability.can?(:read, 123 => Range).should be_true
   end
 
   describe "unauthorized message" do
