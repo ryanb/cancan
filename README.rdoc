@@ -126,7 +126,7 @@ Notice the +edit+ action is aliased to +update+. If the user is able to update a
   can :modify, Comment
   can? :update, Comment # => true
 
-See {Custom Actions}[http://wiki.github.com/ryanb/cancan/custom-actions] for information on adding other actions.
+The +alias_action+ method is an instance method and usually called in +initialize+. See {Custom Actions}[http://wiki.github.com/ryanb/cancan/custom-actions] for information on adding other actions.
 
 
 == Fetching Records
