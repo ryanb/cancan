@@ -21,6 +21,10 @@ module CanCan
       # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
       # action.
       #
+      # If a conditions hash is used in the Ability, the +new+ and +create+ actions will set
+      # the initial attributes based on these conditions. This way these actions will satisfy
+      # the ability restrictions.
+      #
       # Call this method directly on the controller class.
       #
       #   class BooksController < ApplicationController
@@ -148,21 +152,42 @@ module CanCan
       # [:+instance_name+]
       #   The name of the instance variable for this resource.
       #
+      # [:+through+]
+      #   Authorize conditions on this parent resource when instance isn't available.
+      #
       def authorize_resource(*args)
         ControllerResource.add_before_filter(self, :authorize_resource, *args)
       end
 
-      def skip_authorization(*args)
-        self.before_filter(*args) do |controller|
-          controller.instance_variable_set(:@_authorized, true)
-        end
-      end
-
+      # Add this to a controller to ensure it performs authorization through +authorized+! or +authorize_resource+ call.
+      # If neither of these authorization methods are called, a CanCan::AuthorizationNotPerformed exception will be raised.
+      # This is normally added to the ApplicationController to ensure all controller actions do authorization.
+      #
+      #   class ApplicationController < ActionController::Base
+      #     check_authorization
+      #   end
+      #
+      # Any arguments are passed to the +after_filter+ it triggers.
+      #
+      # See skip_authorization to bypass this check on specific controller actions.
       def check_authorization(*args)
         self.after_filter(*args) do |controller|
           unless controller.instance_variable_defined?(:@_authorized)
-            raise AuthorizationNotPerformed, "This action does not authorize the user. Add authorize! or authorize_resource to the controller."
+            raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization to bypass this check."
           end
+        end
+      end
+
+      # Call this in the class of a controller to skip the check_authorization behavior on the actions.
+      #
+      #   class HomeController < ApplicationController
+      #     skip_authorization :only => :index
+      #   end
+      #
+      # Any arguments are passed to the +before_filter+ it triggers.
+      def skip_authorization(*args)
+        self.before_filter(*args) do |controller|
+          controller.instance_variable_set(:@_authorized, true)
         end
       end
     end
@@ -184,6 +209,16 @@ module CanCan
     # A :message option can be passed to specify a different message.
     #
     #   authorize! :read, @article, :message => "Not authorized to read #{@article.name}"
+    #
+    # You can also use I18n to customize the message. Action aliases defined in Ability work here.
+    #
+    #   en:
+    #     unauthorized:
+    #       manage:
+    #         all: "Not authorized to perform that action."
+    #         user: "Not allowed to manage other user accounts."
+    #       update:
+    #         project: "Not allowed to update this project."
     #
     # You can rescue from the exception in the controller to customize how unauthorized
     # access is displayed to the user.
@@ -231,6 +266,13 @@ module CanCan
     # You can also pass the class instead of an instance (if you don't have one handy).
     #
     #   <% if can? :create, Project %>
+    #     <%= link_to "New Project", new_project_path %>
+    #   <% end %>
+    #
+    # If it's a nested resource, you can pass the parent instance in a hash. This way it will
+    # check conditions which reach through that association.
+    #
+    #   <% if can? :create, @category => Project %>
     #     <%= link_to "New Project", new_project_path %>
     #   <% end %>
     #

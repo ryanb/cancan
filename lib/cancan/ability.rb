@@ -16,13 +16,18 @@ module CanCan
   #   end
   #
   module Ability
-    # Use to check if the user has permission to perform a given action on an object.
+    # Check if the user has permission to perform a given action on an object.
     #
     #   can? :destroy, @project
     #
     # You can also pass the class instead of an instance (if you don't have one handy).
     #
     #   can? :create, Project
+    #
+    # Nested resources can be passed through a hash, this way conditions which are
+    # dependent upon the association will work when using a class.
+    #
+    #   can? :create, @category => Project
     #
     # Any additional arguments will be passed into the "can" block definition. This
     # can be used to pass more information about the user's request for example.
@@ -69,52 +74,52 @@ module CanCan
     #   can :update, Article
     #
     # You can pass an array for either of these parameters to match any one.
+    # Here the user has the ability to update or destroy both articles and comments.
     #
     #   can [:update, :destroy], [Article, Comment]
     #
-    # In this case the user has the ability to update or destroy both articles and comments.
+    # You can pass :all to match any object and :manage to match any action. Here are some examples.
     #
-    # You can pass a hash of conditions as the third argument.
+    #   can :manage, :all
+    #   can :update, :all
+    #   can :manage, Project
+    #
+    # You can pass a hash of conditions as the third argument. Here the user can only see active projects which he owns.
     #
     #   can :read, Project, :active => true, :user_id => user.id
     #
-    # Here the user can only see active projects which he owns. See ActiveRecordAdditions#accessible_by
-    # for how to use this in database queries.
+    # See ActiveRecordAdditions#accessible_by for how to use this in database queries. These conditions
+    # are also used for initial attributes when building a record in ControllerAdditions#load_resource.
     #
-    # If the conditions hash does not give you enough control over defining abilities, you can use a block to
-    # write any Ruby code you want.
+    # If the conditions hash does not give you enough control over defining abilities, you can use a block
+    # along with any Ruby code you want.
     #
     #   can :update, Project do |project|
-    #     project && project.groups.include?(user.group)
+    #     project.groups.include?(user.group)
     #   end
     #
     # If the block returns true then the user has that :update ability for that project, otherwise he
-    # will be denied access. It's possible for the passed in model to be nil if one isn't specified,
-    # so be sure to take that into consideration.
+    # will be denied access. The downside to using a block is that it cannot be used to generate
+    # conditions for database queries.
     #
-    # The downside to using a block is that it cannot be used to generate conditions for database queries.
-    #
-    # You can pass :all to reference every type of object. In this case the object type will be passed
-    # into the block as well (just in case object is nil).
-    #
-    #   can :read, :all do |object_class, object|
-    #     object_class != Order
-    #   end
-    #
-    # Here the user has permission to read all objects except orders.
-    #
-    # You can also pass :manage as the action which will match any action. In this case the action is
-    # passed to the block.
-    #
-    #   can :manage, Comment do |action, comment|
-    #     action != :destroy
-    #   end
-    #
-    # You can pass custom objects into this "can" method, this is usually done through a symbol
+    # You can pass custom objects into this "can" method, this is usually done with a symbol
     # and is useful if a class isn't available to define permissions on.
     #
     #   can :read, :stats
     #   can? :read, :stats # => true
+    #
+    # IMPORTANT: Neither a hash of conditions or a block will be used when checking permission on a class.
+    #
+    #   can :update, Project, :priority => 3
+    #   can? :update, Project # => true
+    #
+    # If you pass no arguments to +can+, the action, class, and object will be passed to the block and the
+    # block will always be executed. This allows you to override the full behavior if the permissions are
+    # defined in an external source such as the database.
+    #
+    #   can do |action, object_class, object|
+    #     # check the database and return true/false
+    #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
       can_definitions << CanDefinition.new(true, action, subject, conditions, block)

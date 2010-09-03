@@ -1,3 +1,22 @@
+1.4.0 (not yet released)
+
+* Adding check_authorization and skip_authorization controller class methods to ensure authorization is performed (thanks justinko) - see issue #135
+
+* Setting initial attributes based on ability conditions in new/create actions - see issue #114
+
+* Check parent attributes for nested association in index action - see issue #121
+
+* Supporting nesting in can? method using hash - see issue #121
+
+* Adding I18n support for Access Denied messages (thanks EppO) - see issue #103
+
+* Passing no arguments to +can+ definition will pass action, class, and object to block - see issue #129
+
+* Don't pass action to block in +can+ definition when using :+manage+ option - see issue #129
+
+* No longer calling block in +can+ definition when checking on class - see issue #116
+
+
 1.3.4 (August 31, 2010)
 
 * Don't stop at +cannot+ with hash conditions when checking class (thanks tamoya) - see issue #131
