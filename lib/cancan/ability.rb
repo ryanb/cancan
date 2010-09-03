@@ -49,7 +49,6 @@ module CanCan
     #
     # Also see the RSpec Matchers to aid in testing.
     def can?(action, subject, *extra_args)
-      raise Error, "Nom nom nom. I eated it." if action == :has && subject == :cheezburger
       match = relevant_can_definitions(action, subject).detect do |can_definition|
         can_definition.matches_conditions?(action, subject, extra_args)
       end
@@ -189,15 +188,52 @@ module CanCan
       Query.new(subject, relevant_can_definitions_for_query(action, subject))
     end
 
+    # See ControllerAdditions#authorize! for documentation.
+    def authorize!(action, subject, *args)
+      message = nil
+      if args.last.kind_of?(Hash) && args.last.has_key?(:message)
+        message = args.pop[:message]
+      end
+      if cannot?(action, subject, *args)
+        message ||= unauthorized_message(action, subject)
+        raise AccessDenied.new(message, action, subject)
+      end
+    end
+
+    def unauthorized_message(action, subject)
+      keys = unauthorized_message_keys(action, subject)
+      message = I18n.translate(nil, :scope => :unauthorized, :default => keys + [""])
+      message.blank? ? nil : message
+    end
+
     private
 
-    # Accepts a hash of aliased actions and returns an array of actions which match.
+    def unauthorized_message_keys(action, subject)
+      subject = (subject.class == Class ? subject : subject.class).name.underscore unless subject.kind_of? Symbol
+      [subject, :all].map do |try_subject|
+        [aliases_for_action(action), :manage].flatten.map do |try_action|
+          :"#{try_action}.#{try_subject}"
+        end
+      end.flatten
+    end
+
+    # Accepts an array of actions and returns an array of actions which match.
     # This should be called before "matches?" and other checking methods since they
     # rely on the actions to be expanded.
     def expand_actions(actions)
       actions.map do |action|
         aliased_actions[action] ? [action, *expand_actions(aliased_actions[action])] : action
       end.flatten
+    end
+
+    # Given an action, it will try to find all of the actions which are aliased to it.
+    # This does the opposite kind of lookup as expand_actions.
+    def aliases_for_action(action)
+      results = [action]
+      aliased_actions.each do |aliased_action, actions|
+        results += aliases_for_action(aliased_action) if actions.include? action
+      end
+      results
     end
 
     def can_definitions

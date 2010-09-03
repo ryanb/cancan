@@ -157,18 +157,7 @@ describe CanCan::Ability do
     @ability.can?(:read, 123).should be_false
   end
 
-  it "should support block on 'cannot' method" do
-    @ability.can :read, :all
-    @ability.cannot :read, Integer do |int|
-      int > 5
-    end
-    @ability.can?(:read, "foo").should be_true
-    @ability.can?(:read, 3).should be_true
-    @ability.can?(:read, 123).should be_false
-  end
-
   it "should pass to previous can definition, if block returns false or nil" do
-    #same as previous
     @ability.can :read, :all
     @ability.cannot :read, Integer do |int|
       int > 10 ? nil : ( int > 5 )
@@ -177,7 +166,6 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_true
     @ability.can?(:read, 8).should be_false
     @ability.can?(:read, 123).should be_true
-
   end
 
   it "should always return `false` for single cannot definition" do
@@ -262,9 +250,39 @@ describe CanCan::Ability do
     @ability.can?(:read, Array).should be_true
   end
 
-  it "should has eated cheezburger" do
-    lambda {
-      @ability.can? :has, :cheezburger
-    }.should raise_error(CanCan::Error, "Nom nom nom. I eated it.")
+  describe "unauthorized message" do
+    after(:each) do
+      I18n.backend = nil
+    end
+
+    it "should use action/subject in i18n" do
+      I18n.backend.store_translations :en, :unauthorized => {:update => {:array => "foo"}}
+      @ability.unauthorized_message(:update, Array).should == "foo"
+      @ability.unauthorized_message(:update, [1, 2, 3]).should == "foo"
+      @ability.unauthorized_message(:update, :missing).should be_nil
+    end
+
+    it "should use symbol as subject directly" do
+      I18n.backend.store_translations :en, :unauthorized => {:has => {:cheezburger => "Nom nom nom. I eated it."}}
+      @ability.unauthorized_message(:has, :cheezburger).should == "Nom nom nom. I eated it."
+    end
+
+    it "should fall back to 'manage' and 'all'" do
+      I18n.backend.store_translations :en, :unauthorized => {
+        :manage => {:all => "manage all", :array => "manage array"},
+        :update => {:all => "update all", :array => "update array"}
+      }
+      @ability.unauthorized_message(:update, Array).should == "update array"
+      @ability.unauthorized_message(:update, Hash).should == "update all"
+      @ability.unauthorized_message(:foo, Array).should == "manage array"
+      @ability.unauthorized_message(:foo, Hash).should == "manage all"
+    end
+
+    it "should follow aliased actions" do
+      I18n.backend.store_translations :en, :unauthorized => {:modify => {:array => "modify array"}}
+      @ability.alias_action :update, :to => :modify
+      @ability.unauthorized_message(:update, Array).should == "modify array"
+      @ability.unauthorized_message(:edit, Array).should == "modify array"
+    end
   end
 end

@@ -94,7 +94,7 @@ module CanCan
         end
       end
     end
-    
+
     def call_block_with_all(action, subject, extra_args)
       if subject.class == Class
         @block.call(action, subject, nil, *extra_args)

@@ -185,12 +185,8 @@ module CanCan
     #
     # See the load_and_authorize_resource method to automatically add the authorize! behavior
     # to the default RESTful actions.
-    def authorize!(action, subject, *args)
-      message = nil
-      if args.last.kind_of?(Hash) && args.last.has_key?(:message)
-        message = args.pop[:message]
-      end
-      raise AccessDenied.new(message, action, subject) if cannot?(action, subject, *args)
+    def authorize!(*args)
+      current_ability.authorize!(*args)
     end
 
     def unauthorized!(message = nil)

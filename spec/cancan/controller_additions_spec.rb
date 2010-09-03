@@ -15,6 +15,7 @@ describe CanCan::ControllerAdditions do
   end
 
   it "should raise access denied exception if ability us unauthorized to perform a certain action" do
+    # TODO this should probably be moved into Ability spec
     begin
       @controller.authorize! :read, :foo, 1, 2, 3, :message => "Access denied!"
     rescue CanCan::AccessDenied => e
