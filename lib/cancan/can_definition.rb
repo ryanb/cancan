@@ -21,6 +21,7 @@ module CanCan
 
     # Matches both the subject and action, not necessarily the conditions
     def relevant?(action, subject)
+      subject = subject.values.first if subject.kind_of? Hash
       @match_all || (matches_action?(action) && matches_subject?(subject))
     end
 
@@ -28,9 +29,11 @@ module CanCan
     def matches_conditions?(action, subject, extra_args)
       if @match_all
         call_block_with_all(action, subject, extra_args)
-      elsif @block && subject.class != Class
+      elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
-      elsif @conditions.kind_of?(Hash) && subject.class != Class
+      elsif @conditions.kind_of?(Hash) && subject.kind_of?(Hash)
+        nested_subject_matches_conditions?(subject)
+      elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
         matches_conditions_hash?(subject)
       else
         @base_behavior
@@ -66,6 +69,10 @@ module CanCan
 
     private
 
+    def subject_class?(subject)
+      (subject.kind_of?(Hash) ? subject.values.first : subject).class == Class
+    end
+
     def matches_action?(action)
       @expanded_actions.include?(:manage) || @expanded_actions.include?(action)
     end
@@ -93,6 +100,11 @@ module CanCan
           attribute == value
         end
       end
+    end
+
+    def nested_subject_matches_conditions?(subject_hash)
+      parent, child = subject_hash.shift
+      matches_conditions_hash?(parent, @conditions[parent.class.name.downcase.to_sym])
     end
 
     def call_block_with_all(action, subject, extra_args)

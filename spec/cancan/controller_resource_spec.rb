@@ -161,6 +161,15 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@ability).should == :some_ability
   end
 
+  it "should authorize nested resource through parent association on index action" do
+    @params.merge!(:action => "index")
+    person = Object.new
+    @controller.instance_variable_set(:@person, person)
+    stub(@controller).authorize!(:index, person => Ability) { raise CanCan::AccessDenied }
+    resource = CanCan::ControllerResource.new(@controller, :through => :person)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+  end
+
   it "should load through first matching if multiple are given" do
     @params.merge!(:action => "show", :id => 123)
     person = Object.new

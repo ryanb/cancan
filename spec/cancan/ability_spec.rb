@@ -57,11 +57,11 @@ describe CanCan::Ability do
   end
 
   it "should pass only object for global manage actions" do
-    @ability.can :manage, Array do |object|
-      object.should == [1, 2]
+    @ability.can :manage, String do |object|
+      object.should == "foo"
       @block_called = true
     end
-    @ability.can?(:stuff, [1, 2]).should
+    @ability.can?(:stuff, "foo").should
     @block_called.should be_true
   end
 
@@ -130,9 +130,9 @@ describe CanCan::Ability do
   end
 
   it "should be able to specify multiple classes and match any" do
-    @ability.can :update, [String, Array]
+    @ability.can :update, [String, Range]
     @ability.can?(:update, "foo").should be_true
-    @ability.can?(:update, []).should be_true
+    @ability.can?(:update, 1..3).should be_true
     @ability.can?(:update, 123).should be_false
   end
 
@@ -210,44 +210,50 @@ describe CanCan::Ability do
   end
 
   it "should use conditions as third parameter and determine abilities from it" do
-    @ability.can :read, Array, :first => 1, :last => 3
-    @ability.can?(:read, [1, 2, 3]).should be_true
-    @ability.can?(:read, [1, 2, 3, 4]).should be_false
-    @ability.can?(:read, Array).should be_true
+    @ability.can :read, Range, :begin => 1, :end => 3
+    @ability.can?(:read, 1..3).should be_true
+    @ability.can?(:read, 1..4).should be_false
+    @ability.can?(:read, Range).should be_true
   end
 
   it "should allow an array of options in conditions hash" do
-    @ability.can :read, Array, :first => [1, 3, 5]
-    @ability.can?(:read, [1, 2, 3]).should be_true
-    @ability.can?(:read, [2, 3]).should be_false
-    @ability.can?(:read, [3, 4]).should be_true
+    @ability.can :read, Range, :begin => [1, 3, 5]
+    @ability.can?(:read, 1..3).should be_true
+    @ability.can?(:read, 2..4).should be_false
+    @ability.can?(:read, 3..5).should be_true
   end
 
   it "should allow a range of options in conditions hash" do
-    @ability.can :read, Array, :first => 1..3
-    @ability.can?(:read, [1, 2, 3]).should be_true
-    @ability.can?(:read, [3, 4]).should be_true
-    @ability.can?(:read, [4, 5]).should be_false
+    @ability.can :read, Range, :begin => 1..3
+    @ability.can?(:read, 1..10).should be_true
+    @ability.can?(:read, 3..30).should be_true
+    @ability.can?(:read, 4..40).should be_false
   end
 
   it "should allow nested hashes in conditions hash" do
-    @ability.can :read, Array, :first => { :length => 5 }
-    @ability.can?(:read, ["foo", "bar"]).should be_false
-    @ability.can?(:read, ["test1", "foo"]).should be_true
+    @ability.can :read, Range, :begin => { :to_i => 5 }
+    @ability.can?(:read, 5..7).should be_true
+    @ability.can?(:read, 6..8).should be_false
   end
 
-  it "should allow nested hash of arrays and match any element" do
-    @ability.can :read, Array, :first => { :to_i => 3 }
-    @ability.can?(:read, [[1, 2, 3]]).should be_true
-    @ability.can?(:read, [[4, 5, 6]]).should be_false
+  it "should match any element passed in to nesting if it's an array (for has_many associations)" do
+    @ability.can :read, Range, :to_a => { :to_i => 3 }
+    @ability.can?(:read, 1..5).should be_true
+    @ability.can?(:read, 4..6).should be_false
   end
 
   it "should not stop at cannot definition when comparing class" do
-    @ability.can :read, Array
-    @ability.cannot :read, Array, :first => 1
-    @ability.can?(:read, [2, 3, 5]).should be_true
-    @ability.can?(:read, [1, 3, 5]).should be_false
-    @ability.can?(:read, Array).should be_true
+    @ability.can :read, Range
+    @ability.cannot :read, Range, :begin => 1
+    @ability.can?(:read, 2..5).should be_true
+    @ability.can?(:read, 1..5).should be_false
+    @ability.can?(:read, Range).should be_true
+  end
+
+  it "passing a hash of subjects should check permissions through association" do
+    @ability.can :read, Range, :string => {:length => 3}
+    @ability.can?(:read, "foo" => Range).should be_true
+    @ability.can?(:read, "foobar" => Range).should be_false
   end
 
   describe "unauthorized message" do
