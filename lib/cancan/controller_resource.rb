@@ -28,6 +28,8 @@ module CanCan
     def load_resource
       if !resource_instance && (parent? || member_action?)
         @controller.instance_variable_set("@#{instance_name}", load_resource_instance)
+      elsif load_collection?
+        @controller.instance_variable_set("@#{instance_name.pluralize}", load_collection)
       end
     end
 
@@ -47,6 +49,16 @@ module CanCan
       elsif id_param || @options[:singleton]
         find_resource
       end
+    end
+
+    def load_collection?
+      !parent? && collection_actions.include?(@params[:action].to_sym) &&
+      resource_base.respond_to?(:accessible_by) &&
+      !@controller.current_ability.has_block?(authorization_action, resource_class)
+    end
+
+    def load_collection
+      resource_base.accessible_by(@controller.current_ability)
     end
 
     def build_resource

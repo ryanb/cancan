@@ -221,6 +221,10 @@ module CanCan
       attributes
     end
 
+    def has_block?(action, subject)
+      relevant_can_definitions(action, subject).any?(&:only_block?)
+    end
+
     private
 
     def unauthorized_message_keys(action, subject)

@@ -282,6 +282,15 @@ describe CanCan::Ability do
     lambda { @ability.authorize!(:read, :foo) }.should_not raise_error
   end
 
+  it "should know when block is used in conditions" do
+    @ability.can :read, :foo
+    @ability.should_not have_block(:read, :foo)
+    @ability.can :read, :foo do |foo|
+      false
+    end
+    @ability.should have_block(:read, :foo)
+  end
+
   it "should raise access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :foo

@@ -4,8 +4,9 @@ describe CanCan::ControllerResource do
   before(:each) do
     @params = HashWithIndifferentAccess.new(:controller => "projects")
     @controller = Object.new # simple stub for now
+    @ability = Ability.new(nil)
     stub(@controller).params { @params }
-    stub(@controller).current_ability.stub!.attributes_for { {} }
+    stub(@controller).current_ability { @ability }
   end
 
   it "should load the resource into an instance variable if params[:id] is specified" do
@@ -49,7 +50,7 @@ describe CanCan::ControllerResource do
 
   it "should build a new resource with attributes from current ability" do
     @params.merge!(:action => "new")
-    stub(@controller).current_ability.stub!.attributes_for(:new, Project) { {:name => "from conditions"} }
+    @ability.can(:create, Project, :name => "from conditions")
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "from conditions"
@@ -57,17 +58,37 @@ describe CanCan::ControllerResource do
 
   it "should override initial attributes with params" do
     @params.merge!(:action => "new", :project => {:name => "from params"})
-    stub(@controller).current_ability.stub!.attributes_for(:new, Project) { {:name => "foobar"} }
+    @ability.can(:create, Project, :name => "from conditions")
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "from params"
   end
 
-  it "should not build a resource when on index action" do
+  it "should build a collection when on index action when class responds to accessible_by" do
+    stub(Project).accessible_by(@ability) { :found_projects }
     @params[:action] = "index"
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
+    @controller.instance_variable_get(:@projects).should == :found_projects
+  end
+
+  it "should not build a collection when on index action when class does not respond to accessible_by" do
+    @params[:action] = "index"
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should be_nil
+    @controller.instance_variable_defined?(:@projects).should be_false
+  end
+
+  it "should not use accessible_by when defining abilities through a block" do
+    stub(Project).accessible_by(@ability) { :found_projects }
+    @params[:action] = "index"
+    @ability.can(:read, Project) { |p| false }
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should be_nil
+    @controller.instance_variable_defined?(:@projects).should be_false
   end
 
   it "should perform authorization using controller action and loaded model" do
