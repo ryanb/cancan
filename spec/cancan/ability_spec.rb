@@ -327,5 +327,11 @@ describe CanCan::Ability do
       @ability.unauthorized_message(:update, Array).should == "modify array"
       @ability.unauthorized_message(:edit, Array).should == "modify array"
     end
+
+    it "should have variables for action and subject" do
+      I18n.backend.store_translations :en, :unauthorized => {:manage => {:all => "{{action}} {{subject}}"}} # old syntax for now in case testing with old I18n
+      @ability.unauthorized_message(:update, Array).should == "update array"
+      @ability.unauthorized_message(:edit, 1..3).should == "edit range"
+    end
   end
 end
