@@ -67,7 +67,7 @@ describe CanCan::ControllerResource do
   it "should build a collection when on index action when class responds to accessible_by" do
     stub(Project).accessible_by(@ability) { :found_projects }
     @params[:action] = "index"
-    resource = CanCan::ControllerResource.new(@controller)
+    resource = CanCan::ControllerResource.new(@controller, :project)
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
     @controller.instance_variable_get(:@projects).should == :found_projects

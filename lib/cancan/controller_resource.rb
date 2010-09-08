@@ -29,7 +29,7 @@ module CanCan
       if !resource_instance && (parent? || member_action?)
         @controller.instance_variable_set("@#{instance_name}", load_resource_instance)
       elsif load_collection?
-        @controller.instance_variable_set("@#{instance_name.pluralize}", load_collection)
+        @controller.instance_variable_set("@#{instance_name.to_s.pluralize}", load_collection)
       end
     end
 
