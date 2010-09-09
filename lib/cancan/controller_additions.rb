@@ -12,7 +12,7 @@ module CanCan
       #   end
       #
       def load_and_authorize_resource(*args)
-        ControllerResource.add_before_filter(self, :load_and_authorize_resource, *args)
+        cancan_resource_class.add_before_filter(self, :load_and_authorize_resource, *args)
       end
 
       # Sets up a before filter which loads the model resource into an instance variable.
@@ -103,7 +103,7 @@ module CanCan
       #     load_resource :new => :build
       #
       def load_resource(*args)
-        ControllerResource.add_before_filter(self, :load_resource, *args)
+        cancan_resource_class.add_before_filter(self, :load_resource, *args)
       end
 
       # Sets up a before filter which authorizes the resource using the instance variable.
@@ -156,7 +156,7 @@ module CanCan
       #   Authorize conditions on this parent resource when instance isn't available.
       #
       def authorize_resource(*args)
-        ControllerResource.add_before_filter(self, :authorize_resource, *args)
+        cancan_resource_class.add_before_filter(self, :authorize_resource, *args)
       end
 
       # Add this to a controller to ensure it performs authorization through +authorized+! or +authorize_resource+ call.
@@ -188,6 +188,14 @@ module CanCan
       def skip_authorization(*args)
         self.before_filter(*args) do |controller|
           controller.instance_variable_set(:@_authorized, true)
+        end
+      end
+
+      def cancan_resource_class
+        if ancestors.map(&:to_s).include? "InheritedResources::Actions"
+          InheritedResource
+        else
+          ControllerResource
         end
       end
     end

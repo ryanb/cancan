@@ -26,10 +26,10 @@ module CanCan
     end
 
     def load_resource
-      if !resource_instance && (parent? || member_action?)
-        @controller.instance_variable_set("@#{instance_name}", load_resource_instance)
+      if parent? || member_action?
+        self.resource_instance ||= load_resource_instance
       elsif load_collection?
-        @controller.instance_variable_set("@#{instance_name.to_s.pluralize}", load_collection)
+        self.collection_instance ||= load_collection
       end
     end
 
@@ -41,7 +41,7 @@ module CanCan
       @options.has_key?(:parent) ? @options[:parent] : @name && @name != name_from_controller.to_sym
     end
 
-    private
+    protected
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
@@ -52,7 +52,6 @@ module CanCan
     end
 
     def load_collection?
-      !parent? && collection_actions.include?(@params[:action].to_sym) &&
       resource_base.respond_to?(:accessible_by) &&
       !@controller.current_ability.has_block?(authorization_action, resource_class)
     end
@@ -110,8 +109,20 @@ module CanCan
       parent_resource ? {parent_resource => resource_class} : resource_class
     end
 
+    def resource_instance=(instance)
+      @controller.instance_variable_set("@#{instance_name}", instance)
+    end
+
     def resource_instance
       @controller.instance_variable_get("@#{instance_name}")
+    end
+
+    def collection_instance=(instance)
+      @controller.instance_variable_set("@#{instance_name.to_s.pluralize}", instance)
+    end
+
+    def collection_instance
+      @controller.instance_variable_get("@#{instance_name.to_s.pluralize}")
     end
 
     # The object that methods (such as "find", "new" or "build") are called on.

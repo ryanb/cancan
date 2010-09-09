@@ -74,4 +74,13 @@ describe CanCan::ControllerAdditions do
       @controller_class.check_authorization(:some_options)
     }.should_not raise_error(CanCan::AuthorizationNotPerformed)
   end
+
+  it "cancan_resource_class should be ControllerResource by default" do
+    @controller.class.cancan_resource_class.should == CanCan::ControllerResource
+  end
+
+  it "cancan_resource_class should be InheritedResource when class includes InheritedResources::Actions" do
+    stub(@controller.class).ancestors { ["InheritedResources::Actions"] }
+    @controller.class.cancan_resource_class.should == CanCan::InheritedResource
+  end
 end
