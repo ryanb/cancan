@@ -72,7 +72,7 @@ module CanCan
       attributes = {}
       @conditions.each do |key, value|
         attributes[key] = value unless [Array, Range, Hash].include? value.class
-      end if conditions.kind_of? Hash
+      end if @conditions.kind_of? Hash
       attributes
     end
 
