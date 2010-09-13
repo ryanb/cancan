@@ -249,6 +249,14 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..5).should be_false
     @ability.can?(:read, Range).should be_true
   end
+  
+  it "should allow to check ability for Module" do
+    module B; end
+    class A; include B; end
+    @ability.can :read, B
+    @ability.can?(:read, A).should be_true
+    @ability.can?(:read, A.new).should be_true
+  end
 
   it "passing a hash of subjects should check permissions through association" do
     @ability.can :read, Range, :string => {:length => 3}
