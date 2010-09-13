@@ -41,6 +41,7 @@ module CanCan
     end
 
     def tableized_conditions(conditions = @conditions)
+      return conditions unless conditions.kind_of? Hash
       conditions.inject({}) do |result_hash, (name, value)|
         if value.kind_of? Hash
           name = name.to_s.tableize.to_sym
@@ -63,7 +64,7 @@ module CanCan
       hash = {}
       conditions.map do |name, value|
         hash[name] = associations_hash(value) if value.kind_of? Hash
-      end
+      end if conditions.kind_of? Hash
       hash
     end
 
@@ -71,7 +72,7 @@ module CanCan
       attributes = {}
       @conditions.each do |key, value|
         attributes[key] = value unless [Array, Range, Hash].include? value.class
-      end
+      end if conditions.kind_of? Hash
       attributes
     end
 
