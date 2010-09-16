@@ -6,7 +6,7 @@ module CanCan
       options = args.extract_options!
       resource_name = args.first
       controller_class.before_filter(options.slice(:only, :except)) do |controller|
-        self.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).send(method)
+        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).send(method)
       end
     end
 
