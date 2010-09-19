@@ -23,6 +23,14 @@ describe CanCan::Ability do
     end
     @ability.can?(:read, :some_symbol).should == true
   end
+  
+  it "should pass nil to a block when no instance is passed" do
+    @ability.can :read, Symbol do |sym|
+      sym.should be_nil
+      true
+    end
+    @ability.can?(:read, Symbol).should be_true
+  end
 
   it "should pass to previous can definition, if block returns false or nil" do
     @ability.can :read, Symbol
@@ -256,6 +264,17 @@ describe CanCan::Ability do
     @ability.can :read, B
     @ability.can?(:read, A).should be_true
     @ability.can?(:read, A.new).should be_true
+  end
+  
+  it "should pass nil to a block for ability on Module when no instance is passed" do
+    module B; end
+    class A; include B; end
+    @ability.can :read, B do |sym|
+      sym.should be_nil
+      true
+    end
+    @ability.can?(:read, B).should be_true
+    @ability.can?(:read, A).should be_true
   end
 
   it "passing a hash of subjects should check permissions through association" do

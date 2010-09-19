@@ -79,7 +79,8 @@ module CanCan
     private
 
     def subject_class?(subject)
-      (subject.kind_of?(Hash) ? subject.values.first : subject).class == Class
+      klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
+      klass == Class || klass == Module
     end
 
     def matches_action?(action)
