@@ -1,5 +1,21 @@
 1.4.0 (not yet released)
 
+* The :through option will now call a method with that name if instance variable doesn't exist - see issue #146
+
+* Adding :shallow option to load_resource to bring back old behavior of fetching a child without a parent
+
+* Raise AccessDenied error when loading a child and parent resource isn't found
+
+* Abilities defined on a module will apply to anything that includes that module - see issue #150 and #152
+
+* Abilities can be defined with a string of SQL in addition to a block so accessible_by works with a block - see issue #150
+
+* Adding etter support for InheritedResource - see issue #23
+
+* Loading the collection instance variable with accessible_by - see issue #137
+
+* Adding action and subject variables to I18n unauthorized message - closes #142
+
 * Adding check_authorization and skip_authorization controller class methods to ensure authorization is performed (thanks justinko) - see issue #135
 
 * Setting initial attributes based on ability conditions in new/create actions - see issue #114

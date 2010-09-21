@@ -48,7 +48,7 @@ describe CanCan::ActiveRecordAdditions do
     # @ability.associations_hash(:read, @model_class).should == [{:too => [:far]}, :foo]
     @model_class.accessible_by(@ability).should == :found_records
   end
-  
+
   it "should allow to define sql conditions by not hash" do
     @ability.can :read, @model_class, :foo => 1
     @ability.can :read, @model_class, ['bar = ?', 1]

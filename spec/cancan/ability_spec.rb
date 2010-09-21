@@ -23,7 +23,7 @@ describe CanCan::Ability do
     end
     @ability.can?(:read, :some_symbol).should == true
   end
-  
+
   it "should pass nil to a block when no instance is passed" do
     @ability.can :read, Symbol do |sym|
       sym.should be_nil
@@ -257,7 +257,7 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..5).should be_false
     @ability.can?(:read, Range).should be_true
   end
-  
+
   it "should allow to check ability for Module" do
     module B; end
     class A; include B; end
@@ -265,7 +265,7 @@ describe CanCan::Ability do
     @ability.can?(:read, A).should be_true
     @ability.can?(:read, A.new).should be_true
   end
-  
+
   it "should pass nil to a block for ability on Module when no instance is passed" do
     module B; end
     class A; include B; end
