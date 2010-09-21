@@ -174,12 +174,22 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == :some_project
   end
 
-  it "should not load through parent resource if instance isn't loaded" do
+  it "should not load through parent resource if instance isn't loaded when shallow" do
+    @params.merge!(:action => "show", :id => 123)
+    stub(Project).find(123) { :some_project }
+    resource = CanCan::ControllerResource.new(@controller, :through => :category, :shallow => true)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == :some_project
+  end
+
+  it "should raise AccessDenied when attempting to load resource through nil" do
     @params.merge!(:action => "show", :id => 123)
     stub(Project).find(123) { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
-    resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    lambda {
+      resource.load_resource
+    }.should raise_error(CanCan::AccessDenied)
+    @controller.instance_variable_get(:@project).should be_nil
   end
 
   it "should authorize nested resource through parent association on index action" do

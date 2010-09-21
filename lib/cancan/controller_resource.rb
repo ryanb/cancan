@@ -127,10 +127,17 @@ module CanCan
 
     # The object that methods (such as "find", "new" or "build") are called on.
     # If the :through option is passed it will go through an association on that instance.
+    # If the :shallow option is passed it will use the resource_class if there's no parent
     # If the :singleton option is passed it won't use the association because it needs to be handled later.
     def resource_base
-      if parent_resource
-        @options[:singleton] ? parent_resource : parent_resource.send(name.to_s.pluralize)
+      if @options[:through]
+        if parent_resource
+          @options[:singleton] ? parent_resource : parent_resource.send(name.to_s.pluralize)
+        elsif @options[:shallow]
+          resource_class
+        else
+          raise AccessDenied # maybe this should be a record not found error instead?
+        end
       else
         resource_class
       end

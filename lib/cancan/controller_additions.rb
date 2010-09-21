@@ -71,6 +71,9 @@ module CanCan
       # [:+through+]
       #   Load this resource through another one. This should match the name of the parent instance variable.
       #
+      # [:+shallow+]
+      #   Pass +true+ to allow this resource to be loaded directly when parent is +nil+. Defaults to +false+.
+      #
       # [:+singleton+]
       #   Pass +true+ if this is a singleton resource through a +has_one+ association.
       #
