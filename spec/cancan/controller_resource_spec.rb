@@ -164,10 +164,20 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == :some_project
   end
 
-  it "should load resource through the association of another parent resource" do
+  it "should load resource through the association of another parent resource using instance variable" do
     @params.merge!(:action => "show", :id => 123)
     category = Object.new
     @controller.instance_variable_set(:@category, category)
+    stub(category).projects.stub!.find(123) { :some_project }
+    resource = CanCan::ControllerResource.new(@controller, :through => :category)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == :some_project
+  end
+
+  it "should load resource through the association of another parent resource using method" do
+    @params.merge!(:action => "show", :id => 123)
+    category = Object.new
+    stub(@controller).category { category }
     stub(category).projects.stub!.find(123) { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     resource.load_resource

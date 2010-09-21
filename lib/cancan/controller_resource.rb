@@ -145,7 +145,15 @@ module CanCan
 
     # The object to load this resource through.
     def parent_resource
-      @options[:through] && [@options[:through]].flatten.map { |i| @controller.instance_variable_get("@#{i}") }.compact.first
+      @options[:through] && [@options[:through]].flatten.map { |i| fetch_parent(i) }.compact.first
+    end
+
+    def fetch_parent(name)
+      if @controller.instance_variable_defined? "@#{name}"
+        @controller.instance_variable_get("@#{name}")
+      elsif @controller.respond_to? name
+        @controller.send(name)
+      end
     end
 
     def name

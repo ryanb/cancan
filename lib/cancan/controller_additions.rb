@@ -69,7 +69,7 @@ module CanCan
       #   Does not apply before filter to given actions.
       #
       # [:+through+]
-      #   Load this resource through another one. This should match the name of the parent instance variable.
+      #   Load this resource through another one. This should match the name of the parent instance variable or method.
       #
       # [:+shallow+]
       #   Pass +true+ to allow this resource to be loaded directly when parent is +nil+. Defaults to +false+.
