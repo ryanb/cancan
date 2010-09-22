@@ -82,7 +82,7 @@ module CanCan
     end
 
     def authorization_action
-      parent? ? :read : @params[:action].to_sym
+      parent? ? :modify : @params[:action].to_sym
     end
 
     def id_param
