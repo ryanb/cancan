@@ -280,7 +280,7 @@ module CanCan
       {
         :read => [:index, :show],
         :create => [:new],
-        :update => [:edit],
+        :update => [:edit]
       }
     end
   end
