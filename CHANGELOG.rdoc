@@ -10,9 +10,9 @@
 
 * Abilities can be defined with a string of SQL in addition to a block so accessible_by works with a block - see issue #150
 
-* Adding etter support for InheritedResource - see issue #23
+* Adding better support for InheritedResource - see issue #23
 
-* Loading the collection instance variable with accessible_by - see issue #137
+* Loading the collection instance variable (for index action) using accessible_by - see issue #137
 
 * Adding action and subject variables to I18n unauthorized message - closes #142
 

@@ -53,11 +53,11 @@ module CanCan
 
     def load_collection?
       resource_base.respond_to?(:accessible_by) &&
-      !@controller.current_ability.has_block?(authorization_action, resource_class)
+      !current_ability.has_block?(authorization_action, resource_class)
     end
 
     def load_collection
-      resource_base.accessible_by(@controller.current_ability)
+      resource_base.accessible_by(current_ability)
     end
 
     def build_resource
@@ -70,7 +70,7 @@ module CanCan
     end
 
     def initial_attributes
-      @controller.current_ability.attributes_for(@params[:action].to_sym, resource_class)
+      current_ability.attributes_for(@params[:action].to_sym, resource_class)
     end
 
     def find_resource
@@ -154,6 +154,10 @@ module CanCan
       elsif @controller.respond_to? name
         @controller.send(name)
       end
+    end
+
+    def current_ability
+      @controller.send(:current_ability)
     end
 
     def name
