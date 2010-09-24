@@ -54,7 +54,7 @@ module CanCan
     #
     # Also see the RSpec Matchers to aid in testing.
     def can?(action, subject, *extra_args)
-      match = relevant_can_definitions(action, subject).detect do |can_definition|
+      match = relevant_can_definitions_for_match(action, subject).detect do |can_definition|
         can_definition.matches_conditions?(action, subject, extra_args)
       end
       match ? match.base_behavior : false
@@ -224,6 +224,10 @@ module CanCan
     def has_block?(action, subject)
       relevant_can_definitions(action, subject).any?(&:only_block?)
     end
+    
+    def has_raw_sql?(action, subject)
+      relevant_can_definitions(action, subject).any?(&:only_raw_sql?)
+    end
 
     private
 
@@ -265,6 +269,14 @@ module CanCan
       can_definitions.reverse.select do |can_definition|
         can_definition.expanded_actions = expand_actions(can_definition.actions)
         can_definition.relevant? action, subject
+      end
+    end
+    
+    def relevant_can_definitions_for_match(action, subject)
+      relevant_can_definitions(action, subject).each do |can_definition|
+        if can_definition.only_raw_sql?
+          raise Error, "The can? and cannot? call cannot be used with a raw sql 'can' definition. The checking code cannot be determined for #{action.inspect} #{subject.inspect}"
+        end
       end
     end
 
