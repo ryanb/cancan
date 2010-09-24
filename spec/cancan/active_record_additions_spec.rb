@@ -56,4 +56,18 @@ describe CanCan::ActiveRecordAdditions do
     stub(@model_class).scoped{|*args| args.inspect}
     @model_class.accessible_by(@ability).should == :found_records
   end
+  
+  it "should not allow to fetch records when ability with just block present" do
+    @ability.can :read, @model_class do false end
+    lambda {
+      @model_class.accessible_by(@ability)
+    }.should raise_error(CanCan::Error)
+  end
+  
+  it "should not allow to check ability on object when nonhash sql ability definition without block present" do
+    @ability.can :read, @model_class, ['bar = ?', 1]
+    lambda {
+      @ability.can? :read, @model_class.new
+    }.should raise_error(CanCan::Error)
+  end
 end
