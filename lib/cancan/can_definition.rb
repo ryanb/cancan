@@ -36,7 +36,8 @@ module CanCan
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
         matches_conditions_hash?(subject)
       else
-        @base_behavior
+        # Don't stop at "cannot" definitions when there are conditions.
+        @conditions.empty? ? true : @base_behavior
       end
     end
 

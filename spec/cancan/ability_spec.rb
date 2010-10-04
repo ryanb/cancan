@@ -258,6 +258,13 @@ describe CanCan::Ability do
     @ability.can?(:read, Range).should be_true
   end
 
+  it "should stop at cannot definition when no hash is present" do
+    @ability.can :read, :all
+    @ability.cannot :read, Range
+    @ability.can?(:read, 1..5).should be_false
+    @ability.can?(:read, Range).should be_false
+  end
+
   it "should allow to check ability for Module" do
     module B; end
     class A; include B; end
