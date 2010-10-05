@@ -3,7 +3,6 @@ require 'bundler'
 Bundler.require(:default, :test)
 require 'active_support/all'
 require 'matchers'
-require 'cancan'
 require 'cancan/matchers'
 
 RSpec.configure do |config|
