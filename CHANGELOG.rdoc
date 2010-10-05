@@ -1,4 +1,4 @@
-1.4.0 (not yet released)
+1.4.0 (October 5, 2010)
 
 * Adding Gemfile; to get specs running just +bundle+ and +rake+ - see issue #163
 
