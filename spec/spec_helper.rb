@@ -1,14 +1,12 @@
 require 'rubygems'
-require 'spec'
-require 'active_support'
-require 'active_record'
-require 'action_controller'
-require 'action_view'
+require 'bundler'
+Bundler.require(:default, :test)
+require 'active_support/all'
 require 'matchers'
 require 'cancan'
 require 'cancan/matchers'
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   config.mock_with :rr
 end
 

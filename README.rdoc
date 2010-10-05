@@ -147,6 +147,14 @@ This will only work when abilities are defined using hash conditions, not blocks
 * {Admin Namespace}[http://wiki.github.com/ryanb/cancan/admin-namespace]
 * {See more}[http://wiki.github.com/ryanb/cancan/]
 
+
+== Questions or Problems?
+
+If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}. Or better yet, fork the project and make a pull request.
+
+To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework.
+
+
 == Special Thanks
 
 CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Also many thanks to the CanCan contributors[http://github.com/ryanb/cancan/contributors]. See the CHANGELOG[http://github.com/ryanb/cancan/blob/master/CHANGELOG.rdoc] for the full list.
