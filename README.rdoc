@@ -2,29 +2,29 @@
 
 Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
-CanCan is an authorization solution for Ruby on Rails for restricting what a given user is allowed to access throughout the application. It does not care how your user roles are defined, it simply focusses on keeping permission logic in a single location (the +Ability+ class) so it is not duplicated across controllers, views, and database queries.
-
-By default, the +current_user+ method is required, so if you have not already, set up some authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
+CanCan is an authorization library for Ruby on Rails which restricts what resources a given user is allowed to access. All permissions are defined in a single location (the +Ability+ class) and not duplicated across controllers, views, and database queries.
 
 
 == Installation
 
-To install CanCan, include the gem in the environment.rb in Rails 2.3.
-
-  config.gem "cancan"
-
-Or the Gemfile in Rails 3.
+In <b>Rails 3</b>, add this to your Gemfile.
 
   gem "cancan"
 
-Alternatively it can be installed as a plugin.
+In <b>Rails 2</b>, add this to your environment.rb file.
 
-  script/plugin install git://github.com/ryanb/cancan.git
+  config.gem "cancan"
+
+Alternatively, you can install it as a plugin.
+
+  rails plugin install git://github.com/ryanb/cancan.git
 
 
 == Getting Started
 
-First, define a class called +Ability+ in "models/ability.rb" or anywhere else in the load path. It should look something like this.
+CanCan expects a +current_user+ method to exist. If you have not already, set up some authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
+
+Next create a class called +Ability+ in "models/ability.rb" or anywhere else in the load path. It should look similar to this.
 
   class Ability
     include CanCan::Ability
@@ -38,7 +38,7 @@ First, define a class called +Ability+ in "models/ability.rb" or anywhere else i
     end
   end
 
-This is where all permissions will go. See the "Defining Abilities" section below for more information.
+The +current_user+ is passed in to this method which is where the abilities are defined. See the "Defining Abilities" section below for more information.
 
 The current user's permissions can be accessed using the "can?" and "cannot?" methods in the view and controller.
 
@@ -67,11 +67,11 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
 
 See {Authorizing Controller Actions}[http://wiki.github.com/ryanb/cancan/authorizing-controller-actions] for more information
 
-If the user authorization fails, a CanCan::AccessDenied exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
+If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
   class ApplicationController < ActionController::Base
     rescue_from CanCan::AccessDenied do |exception|
-      flash[:error] = exception.message
+      flash[:alert] = exception.message
       redirect_to root_url
     end
   end
@@ -81,7 +81,7 @@ See {Exception Handling}[http://wiki.github.com/ryanb/cancan/exception-handling]
 
 == Defining Abilities
 
-As shown above, the +Ability+ class is where all user permissions are defined. The user model is passed into the initialize method so the permissions can be modified based on any user attributes. CanCan makes no assumptions about how roles are handled in your application. See {Role Based Authorization}[http://wiki.github.com/ryanb/cancan/role-based-authorization] for an example.
+As shown above, the +Ability+ class is where all user permissions are defined. The current user model is passed into the initialize method so the permissions can be modified based on any user attributes. CanCan makes no assumption about how roles are handled in your application. See {Role Based Authorization}[http://wiki.github.com/ryanb/cancan/role-based-authorization] for an example.
 
 The +can+ method is used to define permissions and requires two arguments. The first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
 
@@ -97,7 +97,7 @@ Use :+manage+ to represent any action and :+all+ to represent any class. Here ar
   can :read, :all        # has permission to read any model
   can :manage, :all      # has permission to do anything to any model
 
-You can pass a hash of conditions as the third argument to further restrict what the user is able to access. Here the user will only have permission to read active projects which he owns.
+You can pass a hash of conditions as the third argument to further define what the user is able to access. Here the user will only have permission to read active projects which he owns.
 
   can :read, Project, :active => true, :user_id => user.id
 
@@ -106,10 +106,10 @@ See {Defining Abilities with Hashes}[http://wiki.github.com/ryanb/cancan/definin
 Blocks can also be used if you need more control.
 
   can :update, Project do |project|
-    project && project.groups.include?(user.group)
+    project.groups.include?(user.group)
   end
 
-If the block returns true then the user has that :+update+ ability for that project, otherwise he will be denied access. See {Defining Abilities with Blocks}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-blocks] for more information.
+If the block returns true then the user has that ability for that project, otherwise he will be denied access. See {Defining Abilities with Blocks}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-blocks] for more information.
 
 
 == Aliasing Actions
@@ -120,7 +120,7 @@ You will usually be working with four actions when defining and checking permiss
   alias_action :new, :to => :create
   alias_action :edit, :to => :update
 
-Notice the +edit+ action is aliased to +update+. If the user is able to update a record he also has permission to edit it. You can define your own aliases in the +Ability+ class
+Notice the +edit+ action is aliased to +update+. This means if the user is able to update a record he also has permission to edit it. You can define your own aliases in the +Ability+ class.
 
   alias_action :update, :destroy, :to => :modify
   can :modify, Comment
@@ -131,16 +131,18 @@ The +alias_action+ method is an instance method and usually called in +initializ
 
 == Fetching Records
 
-In the controller +index+ action you may want to fetch only the records which the user has permission to read. You can do this with the +accessible_by+ scope.
+It is possible to fetch records which the user has permission to read using the +accessible_by+ scope in Active Record.
 
   @articles = Article.accessible_by(current_ability)
+
+Since version 1.4 this is done automatically when loading resources in the index action, so one rarely needs to do it manually.
 
 This will only work when abilities are defined using hash conditions, not blocks. See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for more information.
 
 
 == Additional Docs
 
-* {Upgrading to 1.3}[http://wiki.github.com/ryanb/cancan/upgrading-to-13]
+* {Upgrading to 1.4}[http://github.com/ryanb/cancan/wiki/Upgrading-to-1.4]
 * {Nested Resources}[http://wiki.github.com/ryanb/cancan/nested-resources]
 * {Testing Abilities}[http://wiki.github.com/ryanb/cancan/testing-abilities]
 * {Accessing Request Data}[http://wiki.github.com/ryanb/cancan/accessing-request-data]
@@ -150,7 +152,7 @@ This will only work when abilities are defined using hash conditions, not blocks
 
 == Questions or Problems?
 
-If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}. Or better yet, fork the project and make a pull request.
+If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[http://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
 
 To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework.
 

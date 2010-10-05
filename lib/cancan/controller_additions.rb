@@ -18,8 +18,8 @@ module CanCan
       # Sets up a before filter which loads the model resource into an instance variable.
       # For example, given an ArticlesController it will load the current article into the @article
       # instance variable. It does this by either calling Article.find(params[:id]) or
-      # Article.new(params[:article]) depending upon the action. It does nothing for the "index"
-      # action.
+      # Article.new(params[:article]) depending upon the action. The index action will
+      # automatically set @articles to Article.accessible_by(current_ability).
       #
       # If a conditions hash is used in the Ability, the +new+ and +create+ actions will set
       # the initial attributes based on these conditions. This way these actions will satisfy
@@ -226,7 +226,7 @@ module CanCan
     #   en:
     #     unauthorized:
     #       manage:
-    #         all: "Not authorized to perform that action."
+    #         all: "Not authorized to %{action} %{subject}."
     #         user: "Not allowed to manage other user accounts."
     #       update:
     #         project: "Not allowed to update this project."
