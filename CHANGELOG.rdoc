@@ -1,5 +1,9 @@
 1.4.0 (not yet released)
 
+* Adding Gemfile; to get specs running just +bundle+ and +rake+ - see issue #163
+
+* Stop at 'cannot' definition when there are no conditions - see issue #161
+
 * The :through option will now call a method with that name if instance variable doesn't exist - see issue #146
 
 * Adding :shallow option to load_resource to bring back old behavior of fetching a child without a parent

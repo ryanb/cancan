@@ -224,7 +224,7 @@ module CanCan
     def has_block?(action, subject)
       relevant_can_definitions(action, subject).any?(&:only_block?)
     end
-    
+
     def has_raw_sql?(action, subject)
       relevant_can_definitions(action, subject).any?(&:only_raw_sql?)
     end
@@ -271,7 +271,7 @@ module CanCan
         can_definition.relevant? action, subject
       end
     end
-    
+
     def relevant_can_definitions_for_match(action, subject)
       relevant_can_definitions(action, subject).each do |can_definition|
         if can_definition.only_raw_sql?

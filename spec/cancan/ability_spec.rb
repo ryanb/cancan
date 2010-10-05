@@ -324,7 +324,7 @@ describe CanCan::Ability do
     end
     @ability.should have_block(:read, :foo)
   end
-  
+
   it "should know when raw sql is used in conditions" do
     @ability.can :read, :foo
     @ability.should_not have_raw_sql(:read, :foo)

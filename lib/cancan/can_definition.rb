@@ -56,7 +56,7 @@ module CanCan
     def only_block?
       conditions_empty? && !@block.nil?
     end
-    
+
     def only_raw_sql?
       @block.nil? && !conditions_empty? && !@conditions.kind_of?(Hash)
     end
