@@ -64,6 +64,16 @@ describe CanCan::Ability do
     @block_called.should be_false
   end
 
+  it "should call block when class is passed and block has no arguments" do
+    @block_called = false
+    @ability.can :create, Integer do
+      @block_called = true
+      false
+    end
+    @ability.can?(:create, Integer).should be_false
+    @block_called.should be_true
+  end
+
   it "should pass only object for global manage actions" do
     @ability.can :manage, String do |object|
       object.should == "foo"

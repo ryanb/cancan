@@ -35,6 +35,8 @@ module CanCan
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
         matches_conditions_hash?(subject)
+      elsif @block && subject_class?(subject) && conditions_empty? && @block.arity <= 0
+        @block.call
       else
         # Don't stop at "cannot" definitions when there are conditions.
         @conditions.empty? ? true : @base_behavior
