@@ -1,12 +1,17 @@
 require 'rubygems'
-require 'bundler'
-Bundler.require(:default, :test)
+require 'bundler/setup'
+Bundler.require(:default)
+require 'supermodel' # shouldn't Bundler do this already?
 require 'active_support/all'
 require 'matchers'
 require 'cancan/matchers'
 
 RSpec.configure do |config|
   config.mock_with :rr
+  config.before(:each) do
+    Project.delete_all
+    Category.delete_all
+  end
 end
 
 class Ability
@@ -16,17 +21,12 @@ class Ability
   end
 end
 
-# Generic class to mimic a model
-class Project
-  attr_accessor :name
+class Category < SuperModel::Base
+  has_many :projects
+end
 
-  def initialize(attributes = {})
-    @name = attributes[:name]
-  end
-
-  def attributes=(attributes)
-    @name = attributes[:name] if attributes[:name]
-  end
+class Project < SuperModel::Base
+  belongs_to :category
 
   class << self
     protected

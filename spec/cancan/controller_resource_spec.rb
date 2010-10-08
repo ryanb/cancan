@@ -10,11 +10,11 @@ describe CanCan::ControllerResource do
   end
 
   it "should load the resource into an instance variable if params[:id] is specified" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should not load resource into an instance variable if already set" do
@@ -26,19 +26,19 @@ describe CanCan::ControllerResource do
   end
 
   it "should properly load resource for namespaced controller" do
-    @params.merge!(:controller => "admin/projects", :action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:controller => "admin/projects", :action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should properly load resource for namespaced controller when using '::' for namespace" do
-    @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should build a new resource with hash if params[:id] is not specified" do
@@ -157,11 +157,11 @@ describe CanCan::ControllerResource do
   end
 
   it "should load parent resource through proper id parameter" do
-    @params.merge!(:action => "index", :project_id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:action => "index", :project_id => project.id)
     resource = CanCan::ControllerResource.new(@controller, :project, :parent => true)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should load resource through the association of another parent resource using instance variable" do
@@ -185,16 +185,16 @@ describe CanCan::ControllerResource do
   end
 
   it "should not load through parent resource if instance isn't loaded when shallow" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :shallow => true)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should raise AccessDenied when attempting to load resource through nil" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     lambda {
       resource.load_resource
@@ -242,19 +242,19 @@ describe CanCan::ControllerResource do
   end
 
   it "should only authorize :read action on parent resource" do
-    @params.merge!(:action => "new", :project_id => 123)
-    stub(Project).find(123) { :some_project }
-    stub(@controller).authorize!(:read, :some_project) { raise CanCan::AccessDenied }
+    project = Project.create!
+    @params.merge!(:action => "new", :project_id => project.id)
+    stub(@controller).authorize!(:read, project) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :project, :parent => true)
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should load the model using a custom class" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller, :class => Project)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should authorize based on resource name if class is false" do
@@ -265,20 +265,20 @@ describe CanCan::ControllerResource do
   end
 
   it "should load and authorize using custom instance name" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find(123) { :some_project }
-    stub(@controller).authorize!(:show, :some_project) { raise CanCan::AccessDenied }
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    stub(@controller).authorize!(:show, project) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :instance_name => :custom_project)
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
-    @controller.instance_variable_get(:@custom_project).should == :some_project
+    @controller.instance_variable_get(:@custom_project).should == project
   end
 
   it "should load resource using custom find_by attribute" do
-    @params.merge!(:action => "show", :id => 123)
-    stub(Project).find_by_name!(123) { :some_project }
+    project = Project.create!(:name => "foo")
+    @params.merge!(:action => "show", :id => "foo")
     resource = CanCan::ControllerResource.new(@controller, :find_by => :name)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == :some_project
+    @controller.instance_variable_get(:@project).should == project
   end
 
   it "should raise ImplementationRemoved when adding :name option" do
