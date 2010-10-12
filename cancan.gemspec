@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = "cancan_with_specified_name_in_parent"
+  s.name        = "cancan"
   s.version     = "1.4.1"
   s.author      = "Ryan Bates"
   s.email       = "ryan@railscasts.com"
