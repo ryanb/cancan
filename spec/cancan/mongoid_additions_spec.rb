@@ -3,11 +3,14 @@ require 'mongoid'
 
 class MongoidCategory
   include Mongoid::Document
+  include CanCan::MongoidAdditions
+
   references_many :mongoid_projects
 end
 
 class MongoidProject
   include Mongoid::Document
+  include CanCan::MongoidAdditions
   
   referenced_in :mongoid_category
 
@@ -36,9 +39,7 @@ end
 
 describe CanCan::MongoidAdditions do
   before(:each) do
-    @model_class = Class.new(MongoidProject)
-    stub(@model_class).scoped { :scoped_stub }
-    @model_class.send(:include, CanCan::MongoidAdditions)
+    @model_class = MongoidProject
     @ability = Object.new
     @ability.extend(CanCan::Ability)
   end
@@ -51,6 +52,53 @@ describe CanCan::MongoidAdditions do
 
   it "should return [] when no ability is defined so no records are found" do
     @model_class.accessible_by(@ability, :read).should == []
+  end
+  
+  describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
+    it "should handle :field.in" do
+      obj = @model_class.create :title  => 'Sir'
+      @ability.can :read, @model_class, :title.in => ["Sir", "Madam"]
+      @ability.can?(:read, obj).should == true
+      
+      obj2 = @model_class.create :title  => 'Lord'
+      @ability.can?(:read, obj2).should == false
+    end
+    
+    it "should handle :field.nin" do
+      obj = @model_class.create :title  => 'Sir'
+      @ability.can :read, @model_class, :title.nin => ["Lord", "Madam"]
+      @ability.can?(:read, obj).should == true
+      
+      obj2 = @model_class.create :title  => 'Lord'
+      @ability.can?(:read, obj2).should == false
+    end
+    
+    it "should handle :field.size" do
+      obj = @model_class.create :titles  => ['Palatin', 'Margrave']
+      @ability.can :read, @model_class, :titles.size => 2
+      @ability.can?(:read, obj).should == true
+      
+      obj2 = @model_class.create :titles  => ['Palatin', 'Margrave', 'Marquis']
+      @ability.can?(:read, obj2).should == false
+    end    
+
+    it "should handle :field.exists" do
+      obj = @model_class.create :titles  => ['Palatin', 'Margrave']
+      @ability.can :read, @model_class, :titles.exists => true
+      @ability.can?(:read, obj).should == true
+      
+      obj2 = @model_class.create
+      @ability.can?(:read, obj2).should == false
+    end
+    
+    it "should handle :field.gt" do
+      obj = @model_class.create :age  => 50
+      @ability.can :read, @model_class, :age.gt => 45
+      @ability.can?(:read, obj).should == true
+      
+      obj2 = @model_class.create :age  => 40
+      @ability.can?(:read, obj2).should == false
+    end    
   end
 
   it "should call where with matching ability conditions" do
