@@ -86,7 +86,7 @@ module CanCan
         if query.conditions.blank?
           # this query is sure to return no results
           # we need this so there is a Mongoid::Criteria object to return, since an empty array would cause problems
-          where({:_id => {'$exists' => true, '$type' => 2}})  
+          where({:_id => {'$exists' => false, '$type' => 7}})  # type 7 is an ObjectID (default for _id)
         else   
           where(query.conditions)
         end

@@ -51,6 +51,10 @@ describe CanCan::MongoidAdditions do
   end
 
   it "should return [] when no ability is defined so no records are found" do
+    @model_class.create :title  => 'Sir'
+    @model_class.create :title  => 'Lord'
+    @model_class.create :title  => 'Dude'
+      
     @model_class.accessible_by(@ability, :read).should == []
   end
   
