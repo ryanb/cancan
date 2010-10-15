@@ -22,7 +22,7 @@ module CanCan
     end    
     
     def conditions
-      @can_definitions.first.try(:tableized_conditions)
+      @can_definitions.first.instance_variable_get(:@conditions)
     end
   end
 
@@ -82,7 +82,8 @@ module CanCan
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
-        query = ability.query(action, self)        
+        query = ability.query(action, self)     
+           
         if query.conditions.blank?
           # this query is sure to return no results
           # we need this so there is a Mongoid::Criteria object to return, since an empty array would cause problems

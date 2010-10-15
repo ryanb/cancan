@@ -58,11 +58,21 @@ describe CanCan::MongoidAdditions do
     @model_class.accessible_by(@ability, :read).should == []
   end
   
+  it "should return the correct records based on the defined ability" do
+    @ability.can :read, @model_class, :title => "Sir"
+    sir   = @model_class.create :title  => 'Sir'
+    lord  = @model_class.create :title  => 'Lord'
+    dude  = @model_class.create :title  => 'Dude'
+      
+    @model_class.accessible_by(@ability, :read).should == [sir]
+  end  
+  
   describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
     it "should handle :field.in" do
       obj = @model_class.create :title  => 'Sir'
       @ability.can :read, @model_class, :title.in => ["Sir", "Madam"]
       @ability.can?(:read, obj).should == true
+      @model_class.accessible_by(@ability, :read).should == [obj]
       
       obj2 = @model_class.create :title  => 'Lord'
       @ability.can?(:read, obj2).should == false
@@ -72,7 +82,8 @@ describe CanCan::MongoidAdditions do
       obj = @model_class.create :title  => 'Sir'
       @ability.can :read, @model_class, :title.nin => ["Lord", "Madam"]
       @ability.can?(:read, obj).should == true
-      
+      @model_class.accessible_by(@ability, :read).should == [obj]
+            
       obj2 = @model_class.create :title  => 'Lord'
       @ability.can?(:read, obj2).should == false
     end
@@ -81,7 +92,8 @@ describe CanCan::MongoidAdditions do
       obj = @model_class.create :titles  => ['Palatin', 'Margrave']
       @ability.can :read, @model_class, :titles.size => 2
       @ability.can?(:read, obj).should == true
-      
+      @model_class.accessible_by(@ability, :read).should == [obj]
+            
       obj2 = @model_class.create :titles  => ['Palatin', 'Margrave', 'Marquis']
       @ability.can?(:read, obj2).should == false
     end    
@@ -90,7 +102,8 @@ describe CanCan::MongoidAdditions do
       obj = @model_class.create :titles  => ['Palatin', 'Margrave']
       @ability.can :read, @model_class, :titles.exists => true
       @ability.can?(:read, obj).should == true
-      
+      @model_class.accessible_by(@ability, :read).should == [obj]
+            
       obj2 = @model_class.create
       @ability.can?(:read, obj2).should == false
     end
@@ -99,15 +112,17 @@ describe CanCan::MongoidAdditions do
       obj = @model_class.create :age  => 50
       @ability.can :read, @model_class, :age.gt => 45
       @ability.can?(:read, obj).should == true
-      
+      @model_class.accessible_by(@ability, :read).should == [obj]
+            
       obj2 = @model_class.create :age  => 40
       @ability.can?(:read, obj2).should == false
     end    
   end
 
   it "should call where with matching ability conditions" do
-    @ability.can :read, @model_class, :foo => {:bar => 1}
-    @model_class.accessible_by(@ability, :read).should == @model_class.where(:foos => { :bar => 1 })
+    obj = @model_class.create :foo => {:bar => 1}
+    @ability.can :read, @model_class, :foo => {:bar => 1}    
+    @model_class.accessible_by(@ability, :read).entries.first.should == obj
   end
 
   it "should not allow to fetch records when ability with just block present" do
