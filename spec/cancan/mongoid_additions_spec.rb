@@ -55,7 +55,7 @@ describe CanCan::MongoidAdditions do
     @model_class.create :title  => 'Lord'
     @model_class.create :title  => 'Dude'
       
-    @model_class.accessible_by(@ability, :read).should == []
+    @model_class.accessible_by(@ability, :read).entries.should == []
   end
   
   it "should return the correct records based on the defined ability" do
@@ -66,6 +66,16 @@ describe CanCan::MongoidAdditions do
       
     @model_class.accessible_by(@ability, :read).should == [sir]
   end  
+
+  it "should return everything when the defined ability is manage all" do
+    @ability.can :manage, :all
+    sir   = @model_class.create :title  => 'Sir'
+    lord  = @model_class.create :title  => 'Lord'
+    dude  = @model_class.create :title  => 'Dude'  
+    
+    @model_class.accessible_by(@ability, :read).entries.should == [sir, lord, dude]
+  end  
+
   
   describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
     it "should handle :field.in" do

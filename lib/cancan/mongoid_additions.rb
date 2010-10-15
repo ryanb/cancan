@@ -22,7 +22,16 @@ module CanCan
     end    
     
     def conditions
-      @can_definitions.first.instance_variable_get(:@conditions)
+      if @can_definitions.size == 0
+        false_query
+      else
+        @can_definitions.first.instance_variable_get(:@conditions)
+      end
+    end
+    
+    def false_query
+      # this query is sure to return no results
+      {:_id => {'$exists' => false, '$type' => 7}}  # type 7 is an ObjectID (default for _id)      
     end
   end
 
@@ -81,16 +90,9 @@ module CanCan
       # 
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
-      def accessible_by(ability, action = :read)
+      def accessible_by(ability, action = :read)        
         query = ability.query(action, self)     
-           
-        if query.conditions.blank?
-          # this query is sure to return no results
-          # we need this so there is a Mongoid::Criteria object to return, since an empty array would cause problems
-          where({:_id => {'$exists' => false, '$type' => 7}})  # type 7 is an ObjectID (default for _id)
-        else   
-          where(query.conditions)
-        end
+        where(query.conditions)
       end
     end
     
