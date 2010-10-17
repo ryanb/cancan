@@ -97,7 +97,7 @@ module CanCan
     end
 
     def matches_subject_class?(subject)
-      @subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
+      @subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
     end
 
     def matches_conditions_hash?(subject, conditions = @conditions)
