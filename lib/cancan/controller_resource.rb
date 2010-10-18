@@ -52,9 +52,8 @@ module CanCan
     end
 
     def load_collection?
-      resource_base.respond_to?(:accessible_by)
-       # &&
-       #      !current_ability.has_block?(authorization_action, resource_class)
+      resource_base.respond_to?(:accessible_by) &&
+      !current_ability.has_block?(authorization_action, resource_class)
     end
 
     def load_collection
