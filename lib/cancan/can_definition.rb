@@ -85,8 +85,7 @@ module CanCan
     private
 
     def subject_class?(subject)
-      klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
-      klass == Class || klass == Module
+      (subject.kind_of?(Hash) ? subject.values.first : subject).kind_of? Module
     end
 
     def matches_action?(action)
@@ -124,7 +123,7 @@ module CanCan
     end
 
     def call_block_with_all(action, subject, extra_args)
-      if subject.class == Class
+      if subject.kind_of? Module
         @block.call(action, subject, nil, *extra_args)
       else
         @block.call(action, subject.class, subject, *extra_args)

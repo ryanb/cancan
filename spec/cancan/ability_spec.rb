@@ -299,35 +299,48 @@ describe CanCan::Ability do
     @ability.can?(:read, Range).should be_false
   end
 
-  it "should allow to check ability for Module" do
-    module B; end
-    class A; include B; end
-    @ability.can :read, B
-    @ability.can?(:read, A).should be_true
-    @ability.can?(:read, A.new).should be_true
-  end
+  context "when subject is Module" do
+    before(:each) do
+      @module = _module = Module.new
+      @class = Class.new{ include _module }
+      @instance = @class.new
+    end
+    
+    it "should allow to check ability for Module" do
+      @ability.can :read, @module
+      @ability.can?(:read, @class).should be_true
+      @ability.can?(:read, @instance).should be_true
+    end
 
-  it "should not call a block for ability on Module when no instance is passed" do
-    module B; end
-    class A; include B; end
-    @ability.can :read, B do |subj|
-      @block_called = true
+    it "should not call a block for ability on Module when no instance is passed" do
+      @ability.can :read, @module do |subj|
+        @block_called = true
+      end
+      @ability.can?(:read, @module).should be_true
+      @block_called.should_not be_true
+      @ability.can?(:read, @class).should be_true
+      @block_called.should_not be_true
     end
-    @ability.can?(:read, B).should be_true
-    @block_called.should_not be_true
-    @ability.can?(:read, A).should be_true
-    @block_called.should_not be_true
-  end
   
-  it "should call a block for ability on Module when instance is passed" do
-    module B; end
-    class A; include B; end
-    @ability.can :read, B do |subj|
-      subj.class.should == A
-      @block_called = true
+    it "should call a block for ability on Module when instance is passed" do
+      @ability.can :read, @module do |subj|
+        subj.class.should == @class
+        @block_called = true
+      end
+      @ability.can?(:read, @instance).should be_true
+      @block_called.should be_true
     end
-    @ability.can?(:read, A.new).should be_true
-    @block_called.should be_true
+    
+    it "should pass nil to object when comparing module with can check" do
+      @ability.can do |action, object_class, object|
+        action.should == :foo
+        object_class.should == @module
+        object.should be_nil
+        @block_called = true
+      end
+      @ability.can?(:foo, @module)
+      @block_called.should be_true
+    end
   end
 
   it "passing a hash of subjects should check permissions through association" do
