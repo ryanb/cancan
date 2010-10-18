@@ -122,6 +122,7 @@ module CanCan
     #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
+      action, subject = nil, action if !action.nil? && subject.nil?
       can_definitions << CanDefinition.new(true, action, subject, conditions, block)
     end
 
@@ -138,6 +139,7 @@ module CanCan
     #   end
     #
     def cannot(action = nil, subject = nil, conditions = nil, &block)
+      action, subject = nil, action if !action.nil? && subject.nil?
       can_definitions << CanDefinition.new(false, action, subject, conditions, block)
     end
 

@@ -108,6 +108,40 @@ describe CanCan::Ability do
     @ability.can?(:foo, Hash)
     @block_called.should be_true
   end
+  
+  it "should always call block with arguments when passing to can with only subject argument" do
+    @ability.can Integer do |action, object_class, object|
+      action.should == :foo
+      object_class.should == 123.class
+      object.should == 123
+      @block_called = true
+    end
+    @ability.can?(:foo, 123)
+    @block_called.should be_true
+  end
+
+  it "should pass nil to object when comparing class with can check with only subject argument" do
+    @ability.can Hash do |action, object_class, object|
+      action.should == :foo
+      object_class.should == Hash
+      object.should be_nil
+      @block_called = true
+    end
+    @ability.can?(:foo, Hash)
+    @block_called.should be_true
+  end
+  
+  it "should not interference can checks with different subjects" do
+    @ability.can Integer do |action, object_class, object|
+      @integer_block_called = true
+    end
+    @ability.can Hash do |action, object_class, object|
+      @hash_block_called = true
+    end
+    @ability.can?(:foo, Integer)
+    @hash_block_called.should_not be_true
+    @integer_block_called.should be_true
+  end
 
   it "should automatically alias index and show into read calls" do
     @ability.can :read, :all

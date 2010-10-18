@@ -12,6 +12,7 @@ module CanCan
     # of conditions and the last one is the block passed to the "can" call.
     def initialize(base_behavior, action, subject, conditions, block)
       @match_all = action.nil? && subject.nil?
+      @match_subject = action.nil? && !subject.nil?
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
@@ -22,12 +23,12 @@ module CanCan
     # Matches both the subject and action, not necessarily the conditions
     def relevant?(action, subject)
       subject = subject.values.first if subject.kind_of? Hash
-      @match_all || (matches_action?(action) && matches_subject?(subject))
+      @match_all || ((@match_subject || matches_action?(action)) && matches_subject?(subject))
     end
 
     # Matches the block or conditions hash
     def matches_conditions?(action, subject, extra_args)
-      if @match_all
+      if @match_all || @match_subject
         call_block_with_all(action, subject, extra_args)
       elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
