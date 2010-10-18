@@ -282,9 +282,9 @@ module CanCan
 
     def relevant_can_definitions_for_query(action, subject)
       relevant_can_definitions(action, subject).each do |can_definition|
-        if can_definition.only_block?
-          raise Error, "The accessible_by call cannot be used with a block 'can' definition. The SQL cannot be determined for #{action.inspect} #{subject.inspect}"
-        end
+        # if can_definition.only_block?
+        #           raise Error, "The accessible_by call cannot be used with a block 'can' definition. The SQL cannot be determined for #{action.inspect} #{subject.inspect}"
+        #         end
       end
     end
 
