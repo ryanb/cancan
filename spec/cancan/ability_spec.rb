@@ -307,15 +307,27 @@ describe CanCan::Ability do
     @ability.can?(:read, A.new).should be_true
   end
 
-  it "should pass nil to a block for ability on Module when no instance is passed" do
+  it "should not call a block for ability on Module when no instance is passed" do
     module B; end
     class A; include B; end
-    @ability.can :read, B do |sym|
-      sym.should be_nil
-      true
+    @ability.can :read, B do |subj|
+      @block_called = true
     end
     @ability.can?(:read, B).should be_true
+    @block_called.should_not be_true
     @ability.can?(:read, A).should be_true
+    @block_called.should_not be_true
+  end
+  
+  it "should call a block for ability on Module when instance is passed" do
+    module B; end
+    class A; include B; end
+    @ability.can :read, B do |subj|
+      subj.class.should == A
+      @block_called = true
+    end
+    @ability.can?(:read, A.new).should be_true
+    @block_called.should be_true
   end
 
   it "passing a hash of subjects should check permissions through association" do
