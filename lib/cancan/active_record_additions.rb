@@ -21,7 +21,7 @@ module CanCan
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
         query = ability.query(action, self)
-        if respond_to? :where
+        if respond_to?(:where) && respond_to?(:joins)
           where(query.conditions).joins(query.joins)
         else
           scoped(:conditions => query.conditions, :joins => query.joins)
