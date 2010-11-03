@@ -241,6 +241,21 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
+  it "should find record through has_one association with :singleton and :shallow options" do
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true, :shallow => true)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  it "should build record through has_one association with :singleton and :shallow options" do
+    @params.merge!(:action => "create", :project => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true, :shallow => true)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
   it "should only authorize :read action on parent resource" do
     project = Project.create!
     @params.merge!(:action => "new", :project_id => project.id)
