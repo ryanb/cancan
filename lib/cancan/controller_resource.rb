@@ -62,6 +62,12 @@ module CanCan
 
     def build_resource
       resource = resource_base.send(@options[:singleton] ? "build_#{name}" : "new")
+
+      # If this resource has and belongs to many of the parent resource elements, the parent must be added to this resource's parent array
+      if (parent_resource_through && resource.respond_to?(parent_resource_through.to_s.pluralize))
+        resource.send("#{parent_resource_through.to_s.pluralize}=", [parent_resource])
+      end
+      
       initial_attributes.each do |name, value|
         resource.send("#{name}=", value)
       end
@@ -146,6 +152,11 @@ module CanCan
     # The object to load this resource through.
     def parent_resource
       @options[:through] && [@options[:through]].flatten.map { |i| fetch_parent(i) }.compact.first
+    end
+    
+    # Gets the name of the parent to load the resource through
+    def parent_resource_through
+      @options[:through] && [@options[:through]].flatten.map { |i| fetch_parent(i) ? i : nil }.compact.first
     end
 
     def fetch_parent(name)
