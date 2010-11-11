@@ -65,7 +65,8 @@ module CanCan
 
       # If this resource has and belongs to many of the parent resource elements, the parent must be added to this resource's parent array
       if (parent_resource_through && resource.respond_to?(parent_resource_through.to_s.pluralize))
-        resource.send("#{parent_resource_through.to_s.pluralize}=", [parent_resource])
+        resource.send("#{parent_resource_through.to_s.pluralize}") << parent_resource
+        resource_base.send("delete", resource)
       end
       
       initial_attributes.each do |name, value|
