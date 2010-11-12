@@ -71,6 +71,10 @@ module CanCan
       # [:+through+]
       #   Load this resource through another one. This should match the name of the parent instance variable or method.
       #
+      # [:+through_association+]
+      #   The name of the association to fetch the child records through the parent resource. This is normally not needed
+      #   because it defaults to the pluralized resource name.
+      #
       # [:+shallow+]
       #   Pass +true+ to allow this resource to be loaded directly when parent is +nil+. Defaults to +false+.
       #

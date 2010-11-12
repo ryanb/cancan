@@ -136,7 +136,7 @@ module CanCan
     def resource_base
       if @options[:through]
         if parent_resource
-          @options[:singleton] ? parent_resource : parent_resource.send(name.to_s.pluralize)
+          @options[:singleton] ? parent_resource : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
         elsif @options[:shallow]
           resource_class
         else
