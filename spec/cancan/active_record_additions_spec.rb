@@ -10,12 +10,14 @@ describe CanCan::ActiveRecordAdditions do
   end
 
   it "should call where('true=false') when no ability is defined so no records are found" do
+    stub(@model_class).joins { true } # just so it responds to .joins as well
     stub(@model_class).where('true=false').stub!.joins(nil) { :no_match }
     @model_class.accessible_by(@ability, :read).should == :no_match
   end
 
   it "should call where with matching ability conditions" do
     @ability.can :read, @model_class, :foo => {:bar => 1}
+    stub(@model_class).joins { true } # just so it responds to .joins as well
     stub(@model_class).where(:foos => { :bar => 1 }).stub!.joins([:foo]) { :found_records }
     @model_class.accessible_by(@ability, :read).should == :found_records
   end
