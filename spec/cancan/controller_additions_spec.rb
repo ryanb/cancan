@@ -54,9 +54,9 @@ describe CanCan::ControllerAdditions do
     @controller_class.load_resource :foo => :bar, :only => [:show, :index]
   end
 
-  it "skip_authorization should set up a before filter which sets @_authorized to true" do
+  it "skip_authorization_check should set up a before filter which sets @_authorized to true" do
     mock(@controller_class).before_filter(:filter_options) { |options, block| block.call(@controller) }
-    @controller_class.skip_authorization(:filter_options)
+    @controller_class.skip_authorization_check(:filter_options)
     @controller.instance_variable_get(:@_authorized).should be_true
   end
 

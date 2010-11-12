@@ -176,11 +176,11 @@ module CanCan
       #
       # Any arguments are passed to the +after_filter+ it triggers.
       #
-      # See skip_authorization to bypass this check on specific controller actions.
+      # See skip_authorization_check to bypass this check on specific controller actions.
       def check_authorization(*args)
         self.after_filter(*args) do |controller|
           unless controller.instance_variable_defined?(:@_authorized)
-            raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization to bypass this check."
+            raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization_check to bypass this check."
           end
         end
       end
@@ -188,14 +188,18 @@ module CanCan
       # Call this in the class of a controller to skip the check_authorization behavior on the actions.
       #
       #   class HomeController < ApplicationController
-      #     skip_authorization :only => :index
+      #     skip_authorization_check :only => :index
       #   end
       #
       # Any arguments are passed to the +before_filter+ it triggers.
-      def skip_authorization(*args)
+      def skip_authorization_check(*args)
         self.before_filter(*args) do |controller|
           controller.instance_variable_set(:@_authorized, true)
         end
+      end
+
+      def skip_authorization(*args)
+        raise ImplementationRemoved, "The CanCan skip_authorization method has been renamed to skip_authorization_check. Please update your code."
       end
 
       def cancan_resource_class
