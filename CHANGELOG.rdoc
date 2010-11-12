@@ -1,3 +1,16 @@
+1.4.1 (November 12, 2010)
+
+* Renaming skip_authorization to skip_authorization_check - see issue #169
+
+* Adding :through_association option to load_resource (thanks hunterae) - see issue #171
+
+* The :shallow option now works with the :singleton option (thanks nandalopes) - see issue #187
+
+* Play nicely with quick_scopes gem (thanks ramontayag) - see issue #183
+
+* Fix odd behavior when "cache_classes = false" (thanks mphalliday) - see issue #174
+
+
 1.4.0 (October 5, 2010)
 
 * Adding Gemfile; to get specs running just +bundle+ and +rake+ - see issue #163
