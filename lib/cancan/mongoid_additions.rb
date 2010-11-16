@@ -36,37 +36,28 @@ module CanCan
   end
 
   # customize to handle Mongoid queries in ability definitions conditions
+  # Mongoid Criteria are simpler to check than normal conditions hashes  
+  # When no conditions are given, true should be returned.
+  # The default CanCan behavior relies on the fact that conditions.all? will return true when conditions is empty
+  # The way ruby handles all? for empty hashes can be unexpected:
+  #   {}.all?{|a| a == 5} 
+  #   => true
+  #   {}.all?{|a| a != 5} 
+  #   => true
   class CanDefinition
-    def matches_conditions_hash?(subject, conditions = @conditions)          
-      if subject.class.include?(Mongoid::Document)        # Mongoid Criteria are simpler to check than normal conditions hashes
-        if conditions.empty?  # When no conditions are given, true should be returned.
-                              # The default CanCan behavior relies on the fact that conditions.all? will return true when conditions is empty
-                              # The way ruby handles all? for empty hashes can be unexpected:
-                              #   {}.all?{|a| a == 5} 
-                              #   => true
-                              #   {}.all?{|a| a != 5} 
-                              #   => true
+    def matches_conditions_hash_with_mongoid_subject?(subject, conditions = @conditions)          
+      if subject.class.include?(Mongoid::Document) && conditions.any?{|k,v| !k.kind_of?(Symbol)}      
+        if conditions.empty?  
           true
         else
           subject.class.where(conditions).include?(subject)  # just use Mongoid's where function
         end
       else 
-        conditions.all? do |name, value|
-          attribute = subject.send(name)
-          if value.kind_of?(Hash)
-            if attribute.kind_of? Array
-              attribute.any? { |element| matches_conditions_hash? element, value }
-            else
-              matches_conditions_hash? attribute, value
-            end
-          elsif value.kind_of?(Array) || value.kind_of?(Range)
-            value.include? attribute
-          else
-            attribute == value
-          end
-        end
+        matches_conditions_hash_without_mongoid_subject? subject, conditions
       end
     end
+    alias_method :matches_conditions_hash_without_mongoid_subject?, :matches_conditions_hash?
+    alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
 
 

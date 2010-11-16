@@ -5,9 +5,11 @@ require 'supermodel' # shouldn't Bundler do this already?
 require 'active_support/all'
 require 'matchers'
 require 'cancan/matchers'
+require 'mongoid'
+require 'active_support'
 
 RSpec.configure do |config|
-  config.mock_with :rr
+  config.mock_with :rspec
   config.before(:each) do
     Project.delete_all
     Category.delete_all

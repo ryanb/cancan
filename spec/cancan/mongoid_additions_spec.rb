@@ -49,6 +49,12 @@ describe CanCan::MongoidAdditions do
       collection.name !~ /system/
     end.each(&:drop)    
   end
+  
+  it "should compare properties on mongoid documents with the " do
+    model = @model_class.new
+    @ability.can :read, @model_class, :id => model.id
+    @ability.should be_able_to :read, model
+  end
 
   it "should return [] when no ability is defined so no records are found" do
     @model_class.create :title  => 'Sir'
@@ -86,6 +92,22 @@ describe CanCan::MongoidAdditions do
       
       obj2 = @model_class.create :title  => 'Lord'
       @ability.can?(:read, obj2).should == false
+    end
+    
+    describe "activates only when there are Criteria in the hash" do
+      it "Calls where on the model class when there are criteria" do
+        obj = @model_class.create :title  => 'Bird'
+        @conditions = {:title.nin => ["Fork", "Spoon"]}
+        @model_class.should_receive(:where).with(@conditions) {[obj]}
+        @ability.can :read, @model_class, @conditions
+        @ability.can?(:read, obj)
+      end
+      it "Calls the base version if there are no mongoid criteria" do
+        obj = @model_class.new :title  => 'Bird'
+        @conditions = {:id => obj.id}
+        @ability.can :read, @model_class, @conditions
+        @ability.should be_able_to(:read, obj)
+      end
     end
     
     it "should handle :field.nin" do
