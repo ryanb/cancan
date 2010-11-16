@@ -97,8 +97,8 @@ describe CanCan::MongoidAdditions do
     describe "activates only when there are Criteria in the hash" do
       it "Calls where on the model class when there are criteria" do
         obj = @model_class.create :title  => 'Bird'
-        @conditions = {:title.nin => ["Fork", "Spoon"]}
-        @model_class.should_receive(:where).with(@conditions) {[obj]}
+        @conditions = {:title.nin => ["Fork", "Spoon"]}      
+        mock(@model_class).where(@conditions) {[obj]}
         @ability.can :read, @model_class, @conditions
         @ability.can?(:read, obj)
       end
