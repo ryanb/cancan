@@ -1,6 +1,7 @@
 module CanCan
 
   module Ability
+    # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency
     alias_method :query_without_mongoid_support, :query
     def query(action, subject)
       if Object.const_defined?(:Mongoid) && subject <= CanCan::MongoidAdditions
@@ -56,6 +57,8 @@ module CanCan
         matches_conditions_hash_without_mongoid_subject? subject, conditions
       end
     end
+    
+    # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency    
     alias_method :matches_conditions_hash_without_mongoid_subject?, :matches_conditions_hash?
     alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
