@@ -14,6 +14,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rails', '~> 3.0.0'
   s.add_development_dependency 'rr', '~> 0.10.11' # 1.0.0 has respond_to? issues: http://github.com/btakita/rr/issues/issue/43
   s.add_development_dependency 'supermodel', '~> 0.1.4'
+  s.add_development_dependency 'with_model'
+  s.add_development_dependency 'sqlite3-ruby'
 
   s.add_development_dependency 'mongoid', '~> 2.0.0.beta.19'
   s.add_development_dependency 'bson_ext', '~> 1.1'

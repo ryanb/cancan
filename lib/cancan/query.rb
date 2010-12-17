@@ -26,10 +26,10 @@ module CanCan
     def conditions
       if @rules.size == 1 && @rules.first.base_behavior
         # Return the conditions directly if there's just one definition
-        @rules.first.tableized_conditions.dup
+        @rules.first.tableized_conditions(@sanitizer).dup
       else
         @rules.reverse.inject(false_sql) do |sql, rule|
-          merge_conditions(sql, rule.tableized_conditions.dup, rule.base_behavior)
+          merge_conditions(sql, rule.tableized_conditions(@sanitizer).dup, rule.base_behavior)
         end
       end
     end

@@ -5,6 +5,8 @@ require 'supermodel' # shouldn't Bundler do this already?
 require 'active_support/all'
 require 'matchers'
 require 'cancan/matchers'
+require 'active_record'
+require 'with_model'
 
 RSpec.configure do |config|
   config.mock_with :rr
@@ -12,7 +14,10 @@ RSpec.configure do |config|
     Project.delete_all
     Category.delete_all
   end
+  config.extend WithModel
 end
+
+ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ":memory:")
 
 class Ability
   include CanCan::Ability

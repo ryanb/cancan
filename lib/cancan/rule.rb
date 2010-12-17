@@ -41,12 +41,12 @@ module CanCan
       end
     end
 
-    def tableized_conditions(conditions = @conditions)
+    def tableized_conditions(active_record_subject, conditions = @conditions)
       return conditions unless conditions.kind_of? Hash
       conditions.inject({}) do |result_hash, (name, value)|
         if value.kind_of? Hash
-          name = name.to_s.tableize.to_sym
-          value = tableized_conditions(value)
+          name = active_record_subject.reflect_on_association(name).table_name
+          value = tableized_conditions(active_record_subject, value)
         end
         result_hash[name] = value
         result_hash
