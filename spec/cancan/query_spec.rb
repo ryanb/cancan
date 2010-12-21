@@ -104,4 +104,13 @@ describe CanCan::Query do
     @ability.can :read, Project, :project => { :foo => {:bar => true}, :bar => {:zip => :zap} }
     @ability.query(:read, Project).joins.inspect.should orderlessly_match([{:project => [:bar, :foo]}, {:company => [:bar]}].inspect)
   end
+
+  it "should not forget conditions when calling with SQL string" do
+    @ability.can :read, Project, :foo => 1
+    @ability.can :read, Project, ['bar = ?', 1]
+    query = @ability.query(:read, Project)
+    2.times do
+      query.conditions.should == "(bar = 1) OR (foo=1)"
+    end
+  end
 end
