@@ -245,7 +245,7 @@ describe CanCan::ControllerResource do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
     category = Object.new
     @controller.instance_variable_set(:@category, category)
-    stub(category).build_project { Project.new }
+    stub(category).build_project { |attributes| Project.new(attributes) }
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "foobar"

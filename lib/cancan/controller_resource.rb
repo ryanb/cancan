@@ -61,20 +61,18 @@ module CanCan
     end
 
     def build_resource
-      if @options[:singleton] && resource_base.respond_to?("build_#{name}")
-        resource = resource_base.send("build_#{name}")
-      else
-        resource = resource_base.send("new")
-      end
+      method_name = @options[:singleton] && resource_base.respond_to?("build_#{name}") ? "build_#{name}" : "new"
+      resource = resource_base.send(method_name, @params[name] || {})
       initial_attributes.each do |name, value|
         resource.send("#{name}=", value)
       end
-      resource.attributes = @params[name] if @params[name]
       resource
     end
 
     def initial_attributes
-      current_ability.attributes_for(@params[:action].to_sym, resource_class)
+      current_ability.attributes_for(@params[:action].to_sym, resource_class).delete_if do |key, value|
+        @params[name] && @params[name].include?(key)
+      end
     end
 
     def find_resource
