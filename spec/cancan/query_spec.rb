@@ -15,19 +15,19 @@ describe CanCan::Query do
     @ability.query(:read, Project).conditions.should == { :blocked => false, :user_id => 1 }
   end
 
-  it "should merge multiple can definitions into single SQL string joining with OR" do
+  it "should merge multiple rules into single SQL string joining with OR" do
     @ability.can :read, Project, :blocked => false
     @ability.can :read, Project, :admin => true
     @ability.query(:read, Project).conditions.should == "(admin=true) OR (blocked=false)"
   end
 
-  it "should merge multiple can definitions into single SQL string joining with OR and AND" do
+  it "should merge multiple rules into single SQL string joining with OR and AND" do
     @ability.can :read, Project, :blocked => false, :active => true
     @ability.can :read, Project, :admin => true
     @ability.query(:read, Project).conditions.should orderlessly_match("(blocked=false AND active=true) OR (admin=true)")
   end
 
-  it "should merge multiple can definitions into single SQL string joining with OR and AND" do
+  it "should merge multiple rules into single SQL string joining with OR and AND" do
     @ability.can :read, Project, :blocked => false, :active => true
     @ability.can :read, Project, :admin => true
     @ability.query(:read, Project).conditions.should orderlessly_match("(blocked=false AND active=true) OR (admin=true)")
@@ -77,7 +77,7 @@ describe CanCan::Query do
     @ability.query(:read, Project).conditions.should == 'true=true'
   end
 
-  it "should have nil joins if no can definitions" do
+  it "should have nil joins if no rules" do
     @ability.query(:read, Project).joins.should be_nil
   end
 

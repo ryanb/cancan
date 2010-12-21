@@ -1,5 +1,5 @@
 require 'cancan/ability'
-require 'cancan/can_definition'
+require 'cancan/rule'
 require 'cancan/controller_resource'
 require 'cancan/controller_additions'
 require 'cancan/active_record_additions'

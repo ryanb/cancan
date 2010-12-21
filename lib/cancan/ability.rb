@@ -54,8 +54,8 @@ module CanCan
     #
     # Also see the RSpec Matchers to aid in testing.
     def can?(action, subject, *extra_args)
-      match = relevant_can_definitions_for_match(action, subject).detect do |can_definition|
-        can_definition.matches_conditions?(action, subject, extra_args)
+      match = relevant_rules_for_match(action, subject).detect do |rule|
+        rule.matches_conditions?(action, subject, extra_args)
       end
       match ? match.base_behavior : false
     end
@@ -122,7 +122,7 @@ module CanCan
     #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
-      can_definitions << CanDefinition.new(true, action, subject, conditions, block)
+      rules << Rule.new(true, action, subject, conditions, block)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -138,7 +138,7 @@ module CanCan
     #   end
     #
     def cannot(action = nil, subject = nil, conditions = nil, &block)
-      can_definitions << CanDefinition.new(false, action, subject, conditions, block)
+      rules << Rule.new(false, action, subject, conditions, block)
     end
 
     # Alias one or more actions into another one.
@@ -187,10 +187,10 @@ module CanCan
     end
 
     # Returns a CanCan::Query instance to help generate database queries based on the ability.
-    # If any relevant can definitions use a block then an exception will be raised because an
+    # If any relevant rules use a block then an exception will be raised because an
     # SQL query cannot be generated from blocks of code.
     def query(action, subject)
-      Query.new(subject, relevant_can_definitions_for_query(action, subject))
+      Query.new(subject, relevant_rules_for_query(action, subject))
     end
 
     # See ControllerAdditions#authorize! for documentation.
@@ -215,18 +215,18 @@ module CanCan
 
     def attributes_for(action, subject)
       attributes = {}
-      relevant_can_definitions(action, subject).map do |can_definition|
-        attributes.merge!(can_definition.attributes_from_conditions) if can_definition.base_behavior
+      relevant_rules(action, subject).map do |rule|
+        attributes.merge!(rule.attributes_from_conditions) if rule.base_behavior
       end
       attributes
     end
 
     def has_block?(action, subject)
-      relevant_can_definitions(action, subject).any?(&:only_block?)
+      relevant_rules(action, subject).any?(&:only_block?)
     end
 
     def has_raw_sql?(action, subject)
-      relevant_can_definitions(action, subject).any?(&:only_raw_sql?)
+      relevant_rules(action, subject).any?(&:only_raw_sql?)
     end
 
     private
@@ -259,30 +259,30 @@ module CanCan
       results
     end
 
-    def can_definitions
-      @can_definitions ||= []
+    def rules
+      @rules ||= []
     end
 
-    # Returns an array of CanDefinition instances which match the action and subject
+    # Returns an array of Rule instances which match the action and subject
     # This does not take into consideration any hash conditions or block statements
-    def relevant_can_definitions(action, subject)
-      can_definitions.reverse.select do |can_definition|
-        can_definition.expanded_actions = expand_actions(can_definition.actions)
-        can_definition.relevant? action, subject
+    def relevant_rules(action, subject)
+      rules.reverse.select do |rule|
+        rule.expanded_actions = expand_actions(rule.actions)
+        rule.relevant? action, subject
       end
     end
 
-    def relevant_can_definitions_for_match(action, subject)
-      relevant_can_definitions(action, subject).each do |can_definition|
-        if can_definition.only_raw_sql?
+    def relevant_rules_for_match(action, subject)
+      relevant_rules(action, subject).each do |rule|
+        if rule.only_raw_sql?
           raise Error, "The can? and cannot? call cannot be used with a raw sql 'can' definition. The checking code cannot be determined for #{action.inspect} #{subject.inspect}"
         end
       end
     end
 
-    def relevant_can_definitions_for_query(action, subject)
-      relevant_can_definitions(action, subject).each do |can_definition|
-        if can_definition.only_block?
+    def relevant_rules_for_query(action, subject)
+      relevant_rules(action, subject).each do |rule|
+        if rule.only_block?
           raise Error, "The accessible_by call cannot be used with a block 'can' definition. The SQL cannot be determined for #{action.inspect} #{subject.inspect}"
         end
       end

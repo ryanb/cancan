@@ -3,9 +3,9 @@ module CanCan
   # Generates the sql conditions and association joins for use in ActiveRecord queries.
   # Normally you will not use this class directly, but instead through ActiveRecordAdditions#accessible_by.
   class Query
-    def initialize(sanitizer, can_definitions)
+    def initialize(sanitizer, rules)
       @sanitizer = sanitizer
-      @can_definitions = can_definitions
+      @rules = rules
     end
 
     # Returns conditions intended to be used inside a database query. Normally you will not call this
@@ -24,12 +24,12 @@ module CanCan
     #   query(:manage, User).conditions # => "not (self_managed = 't') AND ((manager_id = 1) OR (id = 1))"
     #
     def conditions
-      if @can_definitions.size == 1 && @can_definitions.first.base_behavior
+      if @rules.size == 1 && @rules.first.base_behavior
         # Return the conditions directly if there's just one definition
-        @can_definitions.first.tableized_conditions
+        @rules.first.tableized_conditions
       else
-        @can_definitions.reverse.inject(false_sql) do |sql, can_definition|
-          merge_conditions(sql, can_definition.tableized_conditions, can_definition.base_behavior)
+        @rules.reverse.inject(false_sql) do |sql, rule|
+          merge_conditions(sql, rule.tableized_conditions, rule.base_behavior)
         end
       end
     end
@@ -38,8 +38,8 @@ module CanCan
     # See ActiveRecordAdditions#accessible_by for use in Active Record.
     def joins
       joins_hash = {}
-      @can_definitions.each do |can_definition|
-        merge_joins(joins_hash, can_definition.associations_hash)
+      @rules.each do |rule|
+        merge_joins(joins_hash, rule.associations_hash)
       end
       clean_joins(joins_hash) unless joins_hash.empty?
     end

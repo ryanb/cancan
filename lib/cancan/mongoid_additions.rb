@@ -12,21 +12,21 @@ module CanCan
     end
     
     def query_with_mongoid_support(action, subject)
-      MongoidQuery.new(subject, relevant_can_definitions_for_query(action, subject))
+      MongoidQuery.new(subject, relevant_rules_for_query(action, subject))
     end
   end
   
   class MongoidQuery
-    def initialize(sanitizer, can_definitions)
+    def initialize(sanitizer, rules)
       @sanitizer = sanitizer
-      @can_definitions = can_definitions
+      @rules = rules
     end    
     
     def conditions
-      if @can_definitions.size == 0
+      if @rules.size == 0
         false_query
       else
-        @can_definitions.first.instance_variable_get(:@conditions)
+        @rules.first.instance_variable_get(:@conditions)
       end
     end
     
@@ -45,7 +45,7 @@ module CanCan
   #   => true
   #   {}.all?{|a| a != 5} 
   #   => true
-  class CanDefinition
+  class Rule
     def matches_conditions_hash_with_mongoid_subject?(subject, conditions = @conditions)          
       if subject.class.include?(Mongoid::Document) && conditions.any?{|k,v| !k.kind_of?(Symbol)}      
         if conditions.empty?  
