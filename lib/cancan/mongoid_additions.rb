@@ -1,10 +1,9 @@
 module CanCan
-
   module Ability
     # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency
     alias_method :query_without_mongoid_support, :query
     def query(action, subject)
-      if Object.const_defined?(:Mongoid) && subject <= CanCan::MongoidAdditions
+      if defined?(::Mongoid) && subject <= CanCan::MongoidAdditions
         query_with_mongoid_support(action, subject)
       else
         query_without_mongoid_support(action, subject)
@@ -47,7 +46,7 @@ module CanCan
   #   => true
   class Rule
     def matches_conditions_hash_with_mongoid_subject?(subject, conditions = @conditions)          
-      if subject.class.include?(Mongoid::Document) && conditions.any?{|k,v| !k.kind_of?(Symbol)}      
+      if defined?(::Mongoid) && subject.class.include?(::Mongoid::Document) && conditions.any?{|k,v| !k.kind_of?(Symbol)}      
         if conditions.empty?  
           true
         else
@@ -98,7 +97,7 @@ end
 
 # Info on monkeypatching Mongoid : 
 # http://log.mazniak.org/post/719062325/monkey-patching-activesupport-concern-and-you#footer
-if defined? Mongoid
+if defined?(::Mongoid)
   module Mongoid
     module Components
       old_block = @_included_block
