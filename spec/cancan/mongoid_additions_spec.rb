@@ -34,7 +34,7 @@ class MongoidProject
 end
 
 Mongoid.configure do |config|
-  config.master = Mongo::Connection.new('127.0.0.1', 27017).db("workflow_on_mongoid")
+  config.master = Mongo::Connection.new('127.0.0.1', 27017).db("cancan_mongoid_additions_spec")
 end
 
 describe CanCan::MongoidAdditions do
@@ -50,7 +50,7 @@ describe CanCan::MongoidAdditions do
     end.each(&:drop)    
   end
   
-  it "should compare properties on mongoid documents with the " do
+  it "should compare properties on mongoid documents with the conditions hash" do
     model = @model_class.new
     @ability.can :read, @model_class, :id => model.id
     @ability.should be_able_to :read, model
@@ -100,7 +100,7 @@ describe CanCan::MongoidAdditions do
         @conditions = {:title.nin => ["Fork", "Spoon"]}      
         mock(@model_class).where(@conditions) {[obj]}
         @ability.can :read, @model_class, @conditions
-        @ability.can?(:read, obj)
+        @ability.should be_able_to(:read, obj)
       end
       it "Calls the base version if there are no mongoid criteria" do
         obj = @model_class.new :title  => 'Bird'
