@@ -17,7 +17,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'mongoid', '~> 2.0.0.beta.19'
   s.add_development_dependency 'bson_ext', '~> 1.1'
-  
+  s.add_development_dependency 'dm-core', '~> 1.0.2'
+
   s.rubyforge_project = s.name
   s.required_rubygems_version = ">= 1.3.4"
 end
