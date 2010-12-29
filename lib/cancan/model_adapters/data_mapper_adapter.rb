@@ -1,5 +1,3 @@
-require 'dm-core'
-
 module CanCan
   module Ability
     # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency

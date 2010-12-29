@@ -1,5 +1,4 @@
 if ENV["MODEL_ADAPTER"] == "mongoid"
-  require 'mongoid' # require mongoid first so MongoidAdditions are loaded
   require "spec_helper"
 
   class MongoidCategory
@@ -35,7 +34,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
   end
 
   Mongoid.configure do |config|
-    config.master = Mongo::Connection.new('127.0.0.1', 27017).db("cancan_mongoid_additions_spec")
+    config.master = Mongo::Connection.new('127.0.0.1', 27017).db("cancan_mongoid_spec")
   end
 
   describe CanCan::MongoidAdditions do
@@ -50,7 +49,6 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       it "should not raise an error for ActiveRecord models" do
         @model_class = Class.new(Project)
         stub(@model_class).scoped { :scoped_stub }
-        @model_class.send(:include, CanCan::ActiveRecordAdditions)
         @ability = Object.new
         @ability.extend(CanCan::Ability)
           
@@ -60,7 +58,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         }.should_not raise_error
       end    
     end
-  
+
     context "Mongoid defined" do
       before(:each) do
         @model_class = MongoidProject

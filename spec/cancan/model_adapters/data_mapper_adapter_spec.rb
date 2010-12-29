@@ -1,6 +1,5 @@
 if ENV["MODEL_ADAPTER"] == "data_mapper"
   require "spec_helper"
-  require 'cancan/data_mapper_additions'
 
   describe CanCan::DataMapperAdditions do
     before(:each) do
