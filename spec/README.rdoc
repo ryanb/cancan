@@ -1,0 +1,24 @@
+= CanCan Specs
+
+== Running the specs
+
+To run the specs first run the +bundle+ command to install the necessary gems and the +rake+ command to run the specs.
+
+  bundle
+  rake
+
+The specs currently require Ruby 1.8.7. Ruby 1.9.2 support will be coming soon.
+
+
+== Model Adapters
+
+CanCan offers separate specs for different model adapters (such as Mongoid and Data Mapper). By default it will use Active Record but you can change this by setting the +MODEL_ADAPTER+ environment variable before running. You can run the +bundle+ command with this as well to ensure you have the installed gems.
+
+  MODEL_ADAPTER=data_mapper bundle
+  MODEL_ADAPTER=data_mapper rake
+
+The different model adapters you can specify are:
+
+* active_record (default)
+* data_mapper
+* mongoid
