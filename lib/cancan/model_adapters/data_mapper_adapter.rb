@@ -1,32 +1,26 @@
 module CanCan
-  module Ability
-    # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency
-    alias_method :query_without_data_mapper_support, :query
-    def query(action, subject)
-      if Object.const_defined?('DataMapper') && subject <= DataMapper::Resource
-        query_with_data_mapper_support(action, subject)
-      else
-        query_without_data_mapper_support(action, subject)
+  module ModelAdapters
+    class DataMapperAdapter < AbstractAdapter
+      def self.for_class?(model_class)
+        model_class <= DataMapper::Resource
+      end
+
+      def database_records
+        scope = @model_class.all(:conditions => ['true=false'])
+        conditions.each do |condition|
+          scope += @model_class.all(:conditions => condition)
+        end
+        scope
+      end
+
+      def conditions
+        @rules.map(&:conditions)
       end
     end
-
-    def query_with_data_mapper_support(action, subject)
-      DataMapperQuery.new(subject, relevant_rules_for_query(action, subject))
-    end
   end
+end
 
-  class DataMapperQuery
-    def initialize(sanitizer, rules)
-      @sanitizer = sanitizer
-      @rules = rules
-    end
-
-    def conditions
-      @rules.map {|r| r.instance_variable_get(:@conditions) }
-    end
-  end
-
-  # This module is automatically included into all Active Record models.
+module CanCan
   module DataMapperAdditions
     module ClassMethods
       # Returns a scope which fetches only the records that the passed ability
@@ -47,14 +41,7 @@ module CanCan
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
-        query = ability.query(action, self)
-
-        scope = all(:conditions => ['true=false'])
-        query.conditions.each do |condition|
-          scope += all(:conditions => condition)
-        end
-
-        return scope
+        ability.model_adapter(self, action).database_records
       end
     end
   end

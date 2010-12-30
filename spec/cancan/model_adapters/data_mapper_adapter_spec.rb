@@ -1,7 +1,7 @@
 if ENV["MODEL_ADAPTER"] == "data_mapper"
   require "spec_helper"
 
-  describe CanCan::DataMapperAdditions do
+  describe CanCan::ModelAdapters::DataMapperAdapter do
     before(:each) do
       @model_class = Class.new
       @model_class.class_eval do
@@ -11,6 +11,12 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
 
       @ability = Object.new
       @ability.extend(CanCan::Ability)
+    end
+
+    it "should be for only data mapper classes" do
+      CanCan::ModelAdapters::DataMapperAdapter.should_not be_for_class(Object)
+      CanCan::ModelAdapters::DataMapperAdapter.should be_for_class(@model_class)
+      CanCan::ModelAdapters::AbstractAdapter.adapter_class(@model_class).should == CanCan::ModelAdapters::DataMapperAdapter
     end
 
     it "should return no records when no ability is defined so no records are found" do
