@@ -4,7 +4,6 @@ require 'cancan/controller_resource'
 require 'cancan/controller_additions'
 require 'cancan/model_additions'
 require 'cancan/exceptions'
-require 'cancan/query'
 require 'cancan/inherited_resource'
 
 require 'cancan/model_adapters/abstract_adapter'
