@@ -22,3 +22,7 @@ The different model adapters you can specify are:
 * active_record (default)
 * data_mapper
 * mongoid
+
+You can also run the +spec_all+ rake task to run specs for each adapter.
+
+  rake spec_all
