@@ -1,7 +1,7 @@
 if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   require "spec_helper"
 
-  describe CanCan::ActiveRecordAdditions do
+  describe CanCan::ModelAdapters::ActiveRecordAdapter do
     before(:each) do
       @model_class = Class.new(Project)
       stub(@model_class).scoped { :scoped_stub }

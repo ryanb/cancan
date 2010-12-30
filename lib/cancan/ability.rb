@@ -186,11 +186,8 @@ module CanCan
       @aliased_actions = {}
     end
 
-    # Returns a CanCan::Query instance to help generate database queries based on the ability.
-    # If any relevant rules use a block then an exception will be raised because an
-    # SQL query cannot be generated from blocks of code.
-    def query(action, subject)
-      Query.new(subject, relevant_rules_for_query(action, subject))
+    def model_adapter(model_class, action)
+      ModelAdapters::ActiveRecordAdapter.new(model_class, relevant_rules_for_query(action, model_class))
     end
 
     # See ControllerAdditions#authorize! for documentation.
