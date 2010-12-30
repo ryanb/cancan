@@ -1,37 +1,26 @@
 module CanCan
-  module Ability
-    # could use alias_method_chain, but it's not worth adding activesupport as a gem dependency
-    alias_method :query_without_mongoid_support, :query
-    def query(action, subject)
-      if defined?(::Mongoid) && subject <= CanCan::MongoidAdditions
-        query_with_mongoid_support(action, subject)
-      else
-        query_without_mongoid_support(action, subject)
+  module ModelAdapters
+    class MongoidAdapter < AbstractAdapter
+      def self.for_class?(model_class)
+        model_class <= CanCan::MongoidAdditions # there should be a better class to detect with this
       end
-    end
 
-    def query_with_mongoid_support(action, subject)
-      MongoidQuery.new(subject, relevant_rules_for_query(action, subject))
-    end
-  end
-
-  class MongoidQuery
-    def initialize(sanitizer, rules)
-      @sanitizer = sanitizer
-      @rules = rules
-    end
-
-    def conditions
-      if @rules.size == 0
-        false_query
-      else
-        @rules.first.instance_variable_get(:@conditions)
+      def database_records
+        @model_class.where(conditions)
       end
-    end
 
-    def false_query
-      # this query is sure to return no results
-      {:_id => {'$exists' => false, '$type' => 7}}  # type 7 is an ObjectID (default for _id)
+      def conditions
+        if @rules.size == 0
+          false_query
+        else
+          @rules.first.conditions
+        end
+      end
+
+      def false_query
+        # this query is sure to return no results
+        {:_id => {'$exists' => false, '$type' => 7}}  # type 7 is an ObjectID (default for _id)
+      end
     end
   end
 
@@ -62,8 +51,6 @@ module CanCan
     alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
 
-
-
   module MongoidAdditions
     module ClassMethods
       # Returns a scope which fetches only the records that the passed ability
@@ -84,8 +71,7 @@ module CanCan
       # Here only the articles which the user can update are returned. This
       # internally uses Ability#conditions method, see that for more information.
       def accessible_by(ability, action = :read)
-        query = ability.query(action, self)
-        where(query.conditions)
+        ability.model_adapter(self, action).database_records
       end
     end
 
@@ -97,6 +83,7 @@ end
 
 # Info on monkeypatching Mongoid :
 # http://log.mazniak.org/post/719062325/monkey-patching-activesupport-concern-and-you#footer
+# This link is now broken, anyone know what it was referring to?
 if defined?(::Mongoid)
   module Mongoid
     module Components

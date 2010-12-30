@@ -37,7 +37,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
     config.master = Mongo::Connection.new('127.0.0.1', 27017).db("cancan_mongoid_spec")
   end
 
-  describe CanCan::MongoidAdditions do
+  describe CanCan::ModelAdapters::MongoidAdapter do
     context "Mongoid not defined" do
       before(:all) do
         @mongoid_class = Object.send(:remove_const, :Mongoid)
@@ -46,6 +46,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       after(:all) do
         Object.const_set(:Mongoid, @mongoid_class)
       end
+
       it "should not raise an error for ActiveRecord models" do
         @model_class = Class.new(Project)
         stub(@model_class).scoped { :scoped_stub }
@@ -70,6 +71,12 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         Mongoid.master.collections.select do |collection|
           collection.name !~ /system/
         end.each(&:drop)
+      end
+
+      it "should be for only Mongoid classes" do
+        CanCan::ModelAdapters::MongoidAdapter.should_not be_for_class(Object)
+        CanCan::ModelAdapters::MongoidAdapter.should be_for_class(@model_class)
+        CanCan::ModelAdapters::AbstractAdapter.adapter_class(@model_class).should == CanCan::ModelAdapters::MongoidAdapter
       end
 
       it "should compare properties on mongoid documents with the conditions hash" do
