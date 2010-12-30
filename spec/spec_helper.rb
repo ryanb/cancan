@@ -14,6 +14,7 @@ RSpec.configure do |config|
     Project.delete_all
     Category.delete_all
   end
+  config.extend WithModel if defined? WithModel
 end
 
 class Ability

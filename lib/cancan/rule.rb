@@ -3,7 +3,7 @@ module CanCan
   # it holds the information about a "can" call made on Ability and provides
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
-    attr_reader :base_behavior, :actions
+    attr_reader :base_behavior, :actions, :conditions
     attr_writer :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
@@ -38,18 +38,6 @@ module CanCan
       else
         # Don't stop at "cannot" definitions when there are conditions.
         @conditions.empty? ? true : @base_behavior
-      end
-    end
-
-    def tableized_conditions(conditions = @conditions)
-      return conditions unless conditions.kind_of? Hash
-      conditions.inject({}) do |result_hash, (name, value)|
-        if value.kind_of? Hash
-          name = name.to_s.tableize.to_sym
-          value = tableized_conditions(value)
-        end
-        result_hash[name] = value
-        result_hash
       end
     end
 
