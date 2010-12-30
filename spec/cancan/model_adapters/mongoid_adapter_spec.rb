@@ -11,7 +11,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
   class MongoidProject
     include Mongoid::Document
     include CanCan::MongoidAdditions
-  
+
     referenced_in :mongoid_category
 
     class << self
@@ -42,7 +42,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       before(:all) do
         @mongoid_class = Object.send(:remove_const, :Mongoid)
       end
-    
+
       after(:all) do
         Object.const_set(:Mongoid, @mongoid_class)
       end
@@ -51,12 +51,12 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         stub(@model_class).scoped { :scoped_stub }
         @ability = Object.new
         @ability.extend(CanCan::Ability)
-          
+
         @ability.can :read, @model_class
-        lambda {    
-          @ability.can? :read, @model_class.new 
+        lambda {
+          @ability.can? :read, @model_class.new
         }.should_not raise_error
-      end    
+      end
     end
 
     context "Mongoid defined" do
@@ -69,8 +69,8 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       after(:each) do
         Mongoid.master.collections.select do |collection|
           collection.name !~ /system/
-        end.each(&:drop)    
-      end    
+        end.each(&:drop)
+      end
 
       it "should compare properties on mongoid documents with the conditions hash" do
         model = @model_class.new
@@ -93,16 +93,16 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         dude  = @model_class.create :title  => 'Dude'
 
         @model_class.accessible_by(@ability, :read).should == [sir]
-      end  
+      end
 
       it "should return everything when the defined ability is manage all" do
         @ability.can :manage, :all
         sir   = @model_class.create :title  => 'Sir'
         lord  = @model_class.create :title  => 'Lord'
-        dude  = @model_class.create :title  => 'Dude'  
+        dude  = @model_class.create :title  => 'Dude'
 
         @model_class.accessible_by(@ability, :read).entries.should == [sir, lord, dude]
-      end  
+      end
 
 
       describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
@@ -119,7 +119,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         describe "activates only when there are Criteria in the hash" do
           it "Calls where on the model class when there are criteria" do
             obj = @model_class.create :title  => 'Bird'
-            @conditions = {:title.nin => ["Fork", "Spoon"]}      
+            @conditions = {:title.nin => ["Fork", "Spoon"]}
             mock(@model_class).where(@conditions) {[obj]}
             @ability.can :read, @model_class, @conditions
             @ability.should be_able_to(:read, obj)
@@ -150,7 +150,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
 
           obj2 = @model_class.create :titles  => ['Palatin', 'Margrave', 'Marquis']
           @ability.can?(:read, obj2).should == false
-        end    
+        end
 
         it "should handle :field.exists" do
           obj = @model_class.create :titles  => ['Palatin', 'Margrave']
@@ -170,12 +170,12 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
 
           obj2 = @model_class.create :age  => 40
           @ability.can?(:read, obj2).should == false
-        end    
+        end
       end
 
       it "should call where with matching ability conditions" do
         obj = @model_class.create :foo => {:bar => 1}
-        @ability.can :read, @model_class, :foo => {:bar => 1}    
+        @ability.can :read, @model_class, :foo => {:bar => 1}
         @model_class.accessible_by(@ability, :read).entries.first.should == obj
       end
 
