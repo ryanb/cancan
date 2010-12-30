@@ -51,18 +51,3 @@ module CanCan
     alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
 end
-
-# Info on monkeypatching Mongoid :
-# http://log.mazniak.org/post/719062325/monkey-patching-activesupport-concern-and-you#footer
-# This link is now broken, anyone know what it was referring to?
-if defined?(::Mongoid)
-  module Mongoid
-    module Components
-      old_block = @_included_block
-      @_included_block = Proc.new do
-        class_eval(&old_block) if old_block
-        include CanCan::ModelAdditions
-      end
-    end
-  end
-end
