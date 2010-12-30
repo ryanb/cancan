@@ -2,7 +2,7 @@ module CanCan
   module ModelAdapters
     class MongoidAdapter < AbstractAdapter
       def self.for_class?(model_class)
-        model_class <= CanCan::MongoidAdditions # there should be a better class to detect with this
+        model_class <= Mongoid::Document
       end
 
       def database_records
@@ -50,35 +50,6 @@ module CanCan
     alias_method :matches_conditions_hash_without_mongoid_subject?, :matches_conditions_hash?
     alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
-
-  module MongoidAdditions
-    module ClassMethods
-      # Returns a scope which fetches only the records that the passed ability
-      # can perform a given action on. The action defaults to :read. This
-      # is usually called from a controller and passed the +current_ability+.
-      #
-      #   @articles = Article.accessible_by(current_ability)
-      #
-      # Here only the articles which the user is able to read will be returned.
-      # If the user does not have permission to read any articles then an empty
-      # result is returned. Since this is a scope it can be combined with any
-      # other scopes or pagination.
-      #
-      # An alternative action can optionally be passed as a second argument.
-      #
-      #   @articles = Article.accessible_by(current_ability, :update)
-      #
-      # Here only the articles which the user can update are returned. This
-      # internally uses Ability#conditions method, see that for more information.
-      def accessible_by(ability, action = :read)
-        ability.model_adapter(self, action).database_records
-      end
-    end
-
-    def self.included(base)
-      base.extend ClassMethods
-    end
-  end
 end
 
 # Info on monkeypatching Mongoid :
@@ -90,7 +61,7 @@ if defined?(::Mongoid)
       old_block = @_included_block
       @_included_block = Proc.new do
         class_eval(&old_block) if old_block
-        include CanCan::MongoidAdditions
+        include CanCan::ModelAdditions
       end
     end
   end

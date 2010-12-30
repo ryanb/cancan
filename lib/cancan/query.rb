@@ -1,7 +1,7 @@
 module CanCan
 
   # Generates the sql conditions and association joins for use in ActiveRecord queries.
-  # Normally you will not use this class directly, but instead through ActiveRecordAdditions#accessible_by.
+  # Normally you will not use this class directly, but instead through ModelAdditions#accessible_by.
   class Query
     def initialize(sanitizer, rules)
       @sanitizer = sanitizer
@@ -9,7 +9,7 @@ module CanCan
     end
 
     # Returns conditions intended to be used inside a database query. Normally you will not call this
-    # method directly, but instead go through ActiveRecordAdditions#accessible_by.
+    # method directly, but instead go through ModelAdditions#accessible_by.
     #
     # If there is only one "can" definition, a hash of conditions will be returned matching the one defined.
     #

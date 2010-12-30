@@ -19,6 +19,11 @@ module CanCan
         @model_class = model_class
         @rules = rules
       end
+
+      def database_records
+        # This should be overridden in a subclass to return records which match @rules
+        raise NotImplemented, "This model adapter does not support fetching records from the database."
+      end
     end
   end
 end

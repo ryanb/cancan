@@ -3,14 +3,14 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
 
   class MongoidCategory
     include Mongoid::Document
-    include CanCan::MongoidAdditions
+    include CanCan::ModelAdditions
 
     references_many :mongoid_projects
   end
 
   class MongoidProject
     include Mongoid::Document
-    include CanCan::MongoidAdditions
+    include CanCan::ModelAdditions
 
     referenced_in :mongoid_category
 

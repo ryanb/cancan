@@ -6,7 +6,7 @@ module CanCan
       end
 
       # Returns conditions intended to be used inside a database query. Normally you will not call this
-      # method directly, but instead go through ActiveRecordAdditions#accessible_by.
+      # method directly, but instead go through ModelAdditions#accessible_by.
       #
       # If there is only one "can" definition, a hash of conditions will be returned matching the one defined.
       #
@@ -44,7 +44,7 @@ module CanCan
       end
 
       # Returns the associations used in conditions for the :joins option of a search.
-      # See ActiveRecordAdditions#accessible_by for use in Active Record.
+      # See ModelAdditions#accessible_by
       def joins
         joins_hash = {}
         @rules.each do |rule|
@@ -114,40 +114,6 @@ module CanCan
   end
 end
 
-module CanCan
-  # This module is automatically included into all Active Record models.
-  module ActiveRecordAdditions
-    module ClassMethods
-      # Returns a scope which fetches only the records that the passed ability
-      # can perform a given action on. The action defaults to :read. This
-      # is usually called from a controller and passed the +current_ability+.
-      #
-      #   @articles = Article.accessible_by(current_ability)
-      #
-      # Here only the articles which the user is able to read will be returned.
-      # If the user does not have permission to read any articles then an empty
-      # result is returned. Since this is a scope it can be combined with any
-      # other scopes or pagination.
-      #
-      # An alternative action can optionally be passed as a second argument.
-      #
-      #   @articles = Article.accessible_by(current_ability, :update)
-      #
-      # Here only the articles which the user can update are returned. This
-      # internally uses Ability#conditions method, see that for more information.
-      def accessible_by(ability, action = :read)
-        ability.model_adapter(self, action).database_records
-      end
-    end
-
-    def self.included(base)
-      base.extend ClassMethods
-    end
-  end
-end
-
-if defined? ActiveRecord
-  ActiveRecord::Base.class_eval do
-    include CanCan::ActiveRecordAdditions
-  end
+ActiveRecord::Base.class_eval do
+  include CanCan::ModelAdditions
 end
