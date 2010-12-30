@@ -1,6 +1,10 @@
 module CanCan
   module ModelAdapters
     class ActiveRecordAdapter < AbstractAdapter
+      def self.for_class?(model_class)
+        model_class <= ActiveRecord::Base
+      end
+
       # Returns conditions intended to be used inside a database query. Normally you will not call this
       # method directly, but instead go through ActiveRecordAdditions#accessible_by.
       #

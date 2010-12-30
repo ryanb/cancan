@@ -33,6 +33,12 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @comment_table = Comment.table_name
     end
 
+    it "should be for only active record classes" do
+      CanCan::ModelAdapters::ActiveRecordAdapter.should_not be_for_class(Object)
+      CanCan::ModelAdapters::ActiveRecordAdapter.should be_for_class(Article)
+      CanCan::ModelAdapters::AbstractAdapter.adapter_class(Article).should == CanCan::ModelAdapters::ActiveRecordAdapter
+    end
+
     it "should not fetch any records when no abilities are defined" do
       Article.create!
       Article.accessible_by(@ability).should be_empty

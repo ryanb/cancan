@@ -187,7 +187,8 @@ module CanCan
     end
 
     def model_adapter(model_class, action)
-      ModelAdapters::ActiveRecordAdapter.new(model_class, relevant_rules_for_query(action, model_class))
+      adapter_class = ModelAdapters::AbstractAdapter.adapter_class(model_class)
+      adapter_class.new(model_class, relevant_rules_for_query(action, model_class))
     end
 
     # See ControllerAdditions#authorize! for documentation.

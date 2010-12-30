@@ -343,6 +343,14 @@ describe CanCan::Ability do
     end
   end
 
+  it "should determine model adapter class by asking AbstractAdapter" do
+    model_class = Object.new
+    adapter_class = Object.new
+    stub(CanCan::ModelAdapters::AbstractAdapter).adapter_class(model_class) { adapter_class }
+    stub(adapter_class).new(model_class, []) { :adapter_instance }
+    @ability.model_adapter(model_class, :read).should == :adapter_instance
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil
