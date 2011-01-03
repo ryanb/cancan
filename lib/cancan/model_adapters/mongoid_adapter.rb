@@ -51,3 +51,8 @@ module CanCan
     alias_method :matches_conditions_hash?, :matches_conditions_hash_with_mongoid_subject?
   end
 end
+
+# simplest way to add `accessible_by` to all Mongoid Documents
+module Mongoid::Document::ClassMethods
+  include CanCan::ModelAdditions::ClassMethods
+end
