@@ -11,24 +11,6 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
     include Mongoid::Document
 
     referenced_in :mongoid_category
-
-    class << self
-      protected
-
-      def sanitize_sql(hash_cond)
-        hash_cond
-      end
-
-      def sanitize_hash(hash)
-        hash.map do |name, value|
-          if Hash === value
-            sanitize_hash(value).map{|cond| "#{name}.#{cond}"}
-          else
-            "#{name}=#{value}"
-          end
-        end.flatten
-      end
-    end
   end
 
   Mongoid.configure do |config|
