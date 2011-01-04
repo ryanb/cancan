@@ -88,19 +88,31 @@ module CanCan
       @subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
     end
 
+    # Checks if the given subject matches the given conditions hash.
+    # This behavior can be overriden by a model adapter by defining two class methods:
+    # override_matching_for_conditions?(subject, conditions) and
+    # matches_conditions_hash?(subject, conditions)
     def matches_conditions_hash?(subject, conditions = @conditions)
-      conditions.all? do |name, value|
-        attribute = subject.send(name)
-        if value.kind_of?(Hash)
-          if attribute.kind_of? Array
-            attribute.any? { |element| matches_conditions_hash? element, value }
-          else
-            matches_conditions_hash? attribute, value
-          end
-        elsif value.kind_of?(Array) || value.kind_of?(Range)
-          value.include? attribute
+      if conditions.empty?
+        true
+      else
+        if model_adapter(subject).override_conditions_hash_matching? subject, conditions
+          model_adapter(subject).matches_conditions_hash? subject, conditions
         else
-          attribute == value
+          conditions.all? do |name, value|
+            attribute = subject.send(name)
+            if value.kind_of?(Hash)
+              if attribute.kind_of? Array
+                attribute.any? { |element| matches_conditions_hash? element, value }
+              else
+                matches_conditions_hash? attribute, value
+              end
+            elsif value.kind_of?(Array) || value.kind_of?(Range)
+              value.include? attribute
+            else
+              attribute == value
+            end
+          end
         end
       end
     end
@@ -116,6 +128,10 @@ module CanCan
       else
         @block.call(action, subject.class, subject, *extra_args)
       end
+    end
+
+    def model_adapter(subject)
+      ModelAdapters::AbstractAdapter.adapter_class(subject_class?(subject) ? subject : subject.class)
     end
   end
 end
