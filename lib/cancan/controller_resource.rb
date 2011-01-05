@@ -26,7 +26,7 @@ module CanCan
     end
 
     def load_resource
-      if parent? || member_action?
+      if load_instance?
         self.resource_instance ||= load_resource_instance
       elsif load_collection?
         self.collection_instance ||= load_collection
@@ -51,9 +51,12 @@ module CanCan
       end
     end
 
+    def load_instance?
+      parent? || member_action?
+    end
+
     def load_collection?
-      resource_base.respond_to?(:accessible_by) &&
-      !current_ability.has_block?(authorization_action, resource_class)
+      resource_base.respond_to?(:accessible_by) && !current_ability.has_block?(authorization_action, resource_class)
     end
 
     def load_collection
@@ -116,7 +119,7 @@ module CanCan
     end
 
     def resource_instance
-      @controller.instance_variable_get("@#{instance_name}")
+      @controller.instance_variable_get("@#{instance_name}") if load_instance?
     end
 
     def collection_instance=(instance)

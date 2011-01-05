@@ -91,6 +91,22 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_defined?(:@projects).should be_false
   end
 
+  it "should not authorize single resource in collection action" do
+    @params[:action] = "index"
+    @controller.instance_variable_set(:@project, :some_project)
+    stub(@controller).authorize!(:index, Project) { raise CanCan::AccessDenied }
+    resource = CanCan::ControllerResource.new(@controller)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+  end
+
+  it "should authorize parent resource in collection action" do
+    @params[:action] = "index"
+    @controller.instance_variable_set(:@category, :some_category)
+    stub(@controller).authorize!(:read, :some_category) { raise CanCan::AccessDenied }
+    resource = CanCan::ControllerResource.new(@controller, :category, :parent => true)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+  end
+
   it "should perform authorization using controller action and loaded model" do
     @params[:action] = "show"
     @controller.instance_variable_set(:@project, :some_project)
