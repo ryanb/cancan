@@ -10,7 +10,7 @@ module CanCan
       end
 
       def self.matches_conditions_hash?(subject, conditions)
-        subject.class.where(conditions).include?(subject)  # just use Mongoid's where function
+        subject.class.where(conditions).include?(subject) # TODO don't use a database query here for performance and other instances
       end
 
       def database_records

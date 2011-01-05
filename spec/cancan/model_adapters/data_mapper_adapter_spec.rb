@@ -1,66 +1,115 @@
 if ENV["MODEL_ADAPTER"] == "data_mapper"
   require "spec_helper"
 
+  DataMapper.setup(:default, 'sqlite::memory:')
+
+  class Article
+    include DataMapper::Resource
+    property :id, Serial
+    property :published, Boolean, :default => false
+    property :secret, Boolean, :default => false
+    property :priority, Integer
+    has n, :comments
+  end
+
+  class Comment
+    include DataMapper::Resource
+    property :id, Serial
+    property :spam, Boolean, :default => false
+    belongs_to :article
+  end
+
+  DataMapper.finalize
+  DataMapper.auto_migrate!
+
   describe CanCan::ModelAdapters::DataMapperAdapter do
     before(:each) do
-      @model_class = Class.new
-      @model_class.class_eval do
-        include DataMapper::Resource
-      end
-      stub(@model_class).all(:conditions => ['true=false']) { 'no-match:' }
-
+      Article.destroy
+      Comment.destroy
       @ability = Object.new
       @ability.extend(CanCan::Ability)
     end
 
     it "should be for only data mapper classes" do
       CanCan::ModelAdapters::DataMapperAdapter.should_not be_for_class(Object)
-      CanCan::ModelAdapters::DataMapperAdapter.should be_for_class(@model_class)
-      CanCan::ModelAdapters::AbstractAdapter.adapter_class(@model_class).should == CanCan::ModelAdapters::DataMapperAdapter
+      CanCan::ModelAdapters::DataMapperAdapter.should be_for_class(Article)
+      CanCan::ModelAdapters::AbstractAdapter.adapter_class(Article).should == CanCan::ModelAdapters::DataMapperAdapter
     end
 
-    it "should return no records when no ability is defined so no records are found" do
-      @model_class.accessible_by(@ability, :read).should == 'no-match:'
+    it "should not fetch any records when no abilities are defined" do
+      Article.create
+      Article.accessible_by(@ability).should be_empty
     end
 
-    it "should call all with matching ability conditions" do
-      @ability.can :read, @model_class, :foo => {:bar => 1}
-      stub(@model_class).all(:conditions => {:foo => {:bar => 1}}) { 'found-records:' }
-      @model_class.accessible_by(@ability, :read).should == 'no-match:found-records:'
+    it "should fetch all articles when one can read all" do
+      @ability.can :read, Article
+      article = Article.create
+      Article.accessible_by(@ability).should == [article]
     end
 
-    it "should merge association joins and sanitize conditions" do
-      @ability.can :read, @model_class, :foo => {:bar => 1}
-      @ability.can :read, @model_class, :too => {:car => 1, :far => {:bar => 1}}
-
-      stub(@model_class).all(:conditions => {:foo => {:bar => 1}}) { 'foo:' }
-      stub(@model_class).all(:conditions => {:too => {:car => 1, :far => {:bar => 1}}}) { 'too:' }
-
-      @model_class.accessible_by(@ability).should == 'no-match:too:foo:'
+    it "should fetch only the articles that are published" do
+      @ability.can :read, Article, :published => true
+      article1 = Article.create(:published => true)
+      article2 = Article.create(:published => false)
+      Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should allow to define sql conditions by not hash" do
-      @ability.can :read, @model_class, :foo => 1
-      @ability.can :read, @model_class, ['bar = ?', 1]
-
-      stub(@model_class).all(:conditions => {:foo => 1}) { 'foo:' }
-      stub(@model_class).all(:conditions => ['bar = ?', 1]) { 'bar:' }
-
-      @model_class.accessible_by(@ability).should == 'no-match:bar:foo:'
+    it "should fetch any articles which are published or secret" do
+      @ability.can :read, Article, :published => true
+      @ability.can :read, Article, :secret => true
+      article1 = Article.create(:published => true, :secret => false)
+      article2 = Article.create(:published => true, :secret => true)
+      article3 = Article.create(:published => false, :secret => true)
+      article4 = Article.create(:published => false, :secret => false)
+      Article.accessible_by(@ability).should == [article1, article2, article3]
     end
 
-    it "should not allow to fetch records when ability with just block present" do
-      @ability.can :read, @model_class do false end
-      lambda {
-        @model_class.accessible_by(@ability)
-      }.should raise_error(CanCan::Error)
+    it "should fetch only the articles that are published and not secret" do
+      pending "the `cannot` may require some custom SQL, maybe abstract out from Active Record adapter"
+      @ability.can :read, Article, :published => true
+      @ability.cannot :read, Article, :secret => true
+      article1 = Article.create(:published => true, :secret => false)
+      article2 = Article.create(:published => true, :secret => true)
+      article3 = Article.create(:published => false, :secret => true)
+      article4 = Article.create(:published => false, :secret => false)
+      Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should not allow to check ability on object when nonhash sql ability definition without block present" do
-      @ability.can :read, @model_class, ['bar = ?', 1]
-      lambda {
-        @ability.can? :read, @model_class.new
-      }.should raise_error(CanCan::Error)
+    it "should only read comments for articles which are published" do
+      @ability.can :read, Comment, :article => { :published => true }
+      comment1 = Comment.create(:article => Article.create!(:published => true))
+      comment2 = Comment.create(:article => Article.create!(:published => false))
+      Comment.accessible_by(@ability).should == [comment1]
     end
+
+    it "should allow conditions in SQL and merge with hash conditions" do
+      @ability.can :read, Article, :published => true
+      @ability.can :read, Article, ["secret=?", true]
+      article1 = Article.create(:published => true, :secret => false)
+      article4 = Article.create(:published => false, :secret => false)
+      Article.accessible_by(@ability).should == [article1]
+    end
+
+    it "should match gt comparison" do
+      @ability.can :read, Article, :priority.gt => 3
+      article1 = Article.create(:priority => 4)
+      article2 = Article.create(:priority => 3)
+      Article.accessible_by(@ability).should == [article1]
+      @ability.should be_able_to(:read, article1)
+      @ability.should_not be_able_to(:read, article2)
+    end
+
+    it "should match gte comparison" do
+      @ability.can :read, Article, :priority.gte => 3
+      article1 = Article.create(:priority => 4)
+      article2 = Article.create(:priority => 3)
+      article3 = Article.create(:priority => 2)
+      Article.accessible_by(@ability).should == [article1, article2]
+      @ability.should be_able_to(:read, article1)
+      @ability.should be_able_to(:read, article2)
+      @ability.should_not be_able_to(:read, article3)
+    end
+
+    # TODO: add more comparison specs
   end
 end
