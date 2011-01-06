@@ -84,7 +84,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           it "Calls where on the model class when there are criteria" do
             obj = MongoidProject.create(:title => 'Bird')
             @conditions = {:title.nin => ["Fork", "Spoon"]}
-            mock(MongoidProject).where(@conditions) {[obj]}
+
             @ability.can :read, MongoidProject, @conditions
             @ability.should be_able_to(:read, obj)
           end
