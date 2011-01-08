@@ -3,10 +3,12 @@ require "spec_helper"
 describe CanCan::InheritedResource do
   before(:each) do
     @params = HashWithIndifferentAccess.new(:controller => "projects")
-    @controller = Object.new # simple stub for now
+    @controller_class = Class.new
+    @controller = @controller_class.new
     @ability = Ability.new(nil)
     stub(@controller).params { @params }
     stub(@controller).current_ability { @ability }
+    stub(@controller_class).cancan_skipper { {:authorize => {}, :load => {}} }
   end
 
   it "show should load resource through @controller.resource" do

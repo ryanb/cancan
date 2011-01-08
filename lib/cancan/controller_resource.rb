@@ -26,19 +26,36 @@ module CanCan
     end
 
     def load_resource
-      if load_instance?
-        self.resource_instance ||= load_resource_instance
-      elsif load_collection?
-        self.collection_instance ||= load_collection
+      unless skip?(:load)
+        if load_instance?
+          self.resource_instance ||= load_resource_instance
+        elsif load_collection?
+          self.collection_instance ||= load_collection
+        end
       end
     end
 
     def authorize_resource
-      @controller.authorize!(authorization_action, resource_instance || resource_class_with_parent)
+      unless skip?(:authorize)
+        @controller.authorize!(authorization_action, resource_instance || resource_class_with_parent)
+      end
     end
 
     def parent?
       @options.has_key?(:parent) ? @options[:parent] : @name && @name != name_from_controller.to_sym
+    end
+
+    def skip?(behavior) # This could probably use some refactoring
+      options = @controller.class.cancan_skipper[behavior][@name]
+      if options.nil?
+        false
+      elsif options == {}
+        true
+      elsif options[:except] && ![options[:except]].flatten.include?(@params[:action].to_sym)
+        true
+      elsif [options[:only]].flatten.include?(@params[:action].to_sym)
+        true
+      end
     end
 
     protected

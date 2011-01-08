@@ -3,10 +3,12 @@ require "spec_helper"
 describe CanCan::ControllerResource do
   before(:each) do
     @params = HashWithIndifferentAccess.new(:controller => "projects")
-    @controller = Object.new # simple stub for now
+    @controller_class = Class.new
+    @controller = @controller_class.new
     @ability = Ability.new(nil)
     stub(@controller).params { @params }
     stub(@controller).current_ability { @ability }
+    stub(@controller_class).cancan_skipper { {:authorize => {}, :load => {}} }
   end
 
   it "should load the resource into an instance variable if params[:id] is specified" do
@@ -338,5 +340,53 @@ describe CanCan::ControllerResource do
     lambda {
       CanCan::ControllerResource.new(@controller, :nested => :project)
     }.should raise_error(CanCan::ImplementationRemoved)
+  end
+
+  it "should skip resource behavior for :only actions in array" do
+    stub(@controller_class).cancan_skipper { {:load => {nil => {:only => [:index, :show]}}} }
+    @params.merge!(:action => "index")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_true
+    CanCan::ControllerResource.new(@controller, :some_resource).skip?(:load).should be_false
+    @params.merge!(:action => "show")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_true
+    @params.merge!(:action => "other_action")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_false
+  end
+
+  it "should skip resource behavior for :only one action on resource" do
+    stub(@controller_class).cancan_skipper { {:authorize => {:project => {:only => :index}}} }
+    @params.merge!(:action => "index")
+    CanCan::ControllerResource.new(@controller).skip?(:authorize).should be_false
+    CanCan::ControllerResource.new(@controller, :project).skip?(:authorize).should be_true
+    @params.merge!(:action => "other_action")
+    CanCan::ControllerResource.new(@controller, :project).skip?(:authorize).should be_false
+  end
+
+  it "should skip resource behavior :except actions in array" do
+    stub(@controller_class).cancan_skipper { {:load => {nil => {:except => [:index, :show]}}} }
+    @params.merge!(:action => "index")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_false
+    @params.merge!(:action => "show")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_false
+    @params.merge!(:action => "other_action")
+    CanCan::ControllerResource.new(@controller).skip?(:load).should be_true
+    CanCan::ControllerResource.new(@controller, :some_resource).skip?(:load).should be_false
+  end
+
+  it "should skip resource behavior :except one action on resource" do
+    stub(@controller_class).cancan_skipper { {:authorize => {:project => {:except => :index}}} }
+    @params.merge!(:action => "index")
+    CanCan::ControllerResource.new(@controller, :project).skip?(:authorize).should be_false
+    @params.merge!(:action => "other_action")
+    CanCan::ControllerResource.new(@controller).skip?(:authorize).should be_false
+    CanCan::ControllerResource.new(@controller, :project).skip?(:authorize).should be_true
+  end
+
+  it "should skip loading and authorization" do
+    stub(@controller_class).cancan_skipper { {:authorize => {nil => {}}, :load => {nil => {}}} }
+    @params.merge!(:action => "new")
+    resource = CanCan::ControllerResource.new(@controller)
+    lambda { resource.load_and_authorize_resource }.should_not raise_error
+    @controller.instance_variable_get(:@project).should be_nil
   end
 end

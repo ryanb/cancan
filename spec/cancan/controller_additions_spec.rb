@@ -83,4 +83,34 @@ describe CanCan::ControllerAdditions do
     stub(@controller.class).ancestors { ["InheritedResources::Actions"] }
     @controller.class.cancan_resource_class.should == CanCan::InheritedResource
   end
+
+  it "cancan_skipper should be an empty hash with :authorize and :load options and remember changes" do
+    @controller_class.cancan_skipper.should == {:authorize => {}, :load => {}}
+    @controller_class.cancan_skipper[:load] = true
+    @controller_class.cancan_skipper[:load].should == true
+  end
+
+  it "skip_authorize_resource should add itself to the cancan skipper with given model name and options" do
+    @controller_class.skip_authorize_resource(:project, :only => [:index, :show])
+    @controller_class.cancan_skipper[:authorize][:project].should == {:only => [:index, :show]}
+    @controller_class.skip_authorize_resource(:only => [:index, :show])
+    @controller_class.cancan_skipper[:authorize][nil].should == {:only => [:index, :show]}
+    @controller_class.skip_authorize_resource(:article)
+    @controller_class.cancan_skipper[:authorize][:article].should == {}
+  end
+
+  it "skip_load_resource should add itself to the cancan skipper with given model name and options" do
+    @controller_class.skip_load_resource(:project, :only => [:index, :show])
+    @controller_class.cancan_skipper[:load][:project].should == {:only => [:index, :show]}
+    @controller_class.skip_load_resource(:only => [:index, :show])
+    @controller_class.cancan_skipper[:load][nil].should == {:only => [:index, :show]}
+    @controller_class.skip_load_resource(:article)
+    @controller_class.cancan_skipper[:load][:article].should == {}
+  end
+
+  it "skip_load_and_authore_resource should add itself to the cancan skipper with given model name and options" do
+    @controller_class.skip_load_and_authorize_resource(:project, :only => [:index, :show])
+    @controller_class.cancan_skipper[:load][:project].should == {:only => [:index, :show]}
+    @controller_class.cancan_skipper[:authorize][:project].should == {:only => [:index, :show]}
+  end
 end
