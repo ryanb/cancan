@@ -38,9 +38,9 @@ Next create a class called +Ability+ in "models/ability.rb" or anywhere else in 
     end
   end
 
-The +current_user+ is passed in to this method which is where the abilities are defined. See the "Defining Abilities" section below for more information.
+The +current_user+ is passed in to this method which is where the abilities are defined. See {Defining Abilities}[http://wiki.github.com/ryanb/cancan/checking-abilities] for what can go here.
 
-The current user's permissions can be accessed using the "can?" and "cannot?" methods in the view and controller.
+The current user's permissions can then be accessed using the "can?" and "cannot?" methods in the view and controller.
 
   <% if can? :update, @article %>
     <%= link_to "Edit", edit_article_path(@article) %>
@@ -79,67 +79,6 @@ If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will 
 See {Exception Handling}[http://wiki.github.com/ryanb/cancan/exception-handling] for more information.
 
 
-== Defining Abilities
-
-As shown above, the +Ability+ class is where all user permissions are defined. The current user model is passed into the initialize method so the permissions can be modified based on any user attributes. CanCan makes no assumption about how roles are handled in your application. See {Role Based Authorization}[http://wiki.github.com/ryanb/cancan/role-based-authorization] for an example.
-
-The +can+ method is used to define permissions and requires two arguments. The first one is the action you're setting the permission for, the second one is the class of object you're setting it on.
-
-  can :update, Article
-
-You can pass an array for either of these parameters to match any one. In this case the user will have the ability to update or destroy both articles and comments.
-
-  can [:update, :destroy], [Article, Comment]
-
-Use :+manage+ to represent any action and :+all+ to represent any class. Here are some examples.
-
-  can :manage, Article   # has permissions to do anything to articles
-  can :read, :all        # has permission to read any model
-  can :manage, :all      # has permission to do anything to any model
-
-You can pass a hash of conditions as the third argument to further define what the user is able to access. Here the user will only have permission to read active projects which he owns.
-
-  can :read, Project, :active => true, :user_id => user.id
-
-See {Defining Abilities with Hashes}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-hashes] for more information.
-
-Blocks can also be used if you need more control.
-
-  can :update, Project do |project|
-    project.groups.include?(user.group)
-  end
-
-If the block returns true then the user has that ability for that project, otherwise he will be denied access. See {Defining Abilities with Blocks}[http://wiki.github.com/ryanb/cancan/defining-abilities-with-blocks] for more information.
-
-
-== Aliasing Actions
-
-You will usually be working with four actions when defining and checking permissions: :+read+, :+create+, :+update+, :+destroy+. These aren't the same as the 7 RESTful actions in Rails. CanCan automatically adds some default aliases for mapping those actions.
-
-  alias_action :index, :show, :to => :read
-  alias_action :new, :to => :create
-  alias_action :edit, :to => :update
-
-Notice the +edit+ action is aliased to +update+. This means if the user is able to update a record he also has permission to edit it. You can define your own aliases in the +Ability+ class.
-
-  alias_action :update, :destroy, :to => :modify
-  can :modify, Comment
-  can? :update, Comment # => true
-
-The +alias_action+ method is an instance method and usually called in +initialize+. See {Custom Actions}[http://wiki.github.com/ryanb/cancan/custom-actions] for information on adding other actions.
-
-
-== Fetching Records
-
-It is possible to fetch records which the user has permission to read using the +accessible_by+ scope in Active Record.
-
-  @articles = Article.accessible_by(current_ability)
-
-Since version 1.4 this is done automatically when loading resources in the index action, so one rarely needs to do it manually.
-
-This will only work when abilities are defined using hash conditions, not blocks. See {Fetching Records}[http://wiki.github.com/ryanb/cancan/fetching-records] for more information.
-
-
 == Additional Docs
 
 * {Upgrading to 1.4}[http://github.com/ryanb/cancan/wiki/Upgrading-to-1.4]
@@ -154,7 +93,7 @@ This will only work when abilities are defined using hash conditions, not blocks
 
 If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[http://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
 
-To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework.
+To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
 
 
 == Special Thanks
