@@ -1,6 +1,6 @@
 = CanCan
 
-Wiki[http://wiki.github.com/ryanb/cancan] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
+Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
 CanCan is an authorization library for Ruby on Rails which restricts what resources a given user is allowed to access. All permissions are defined in a single location (the +Ability+ class) and not duplicated across controllers, views, and database queries.
 
@@ -22,7 +22,7 @@ Alternatively, you can install it as a plugin.
 
 == Getting Started
 
-CanCan expects a +current_user+ method to exist. If you have not already, set up some authentication (such as Authlogic[http://github.com/binarylogic/authlogic] or Devise[http://github.com/plataformatec/devise]). See {Changing Defaults}[http://wiki.github.com/ryanb/cancan/changing-defaults] if you need different behavior.
+CanCan expects a +current_user+ method to exist in controllers. If you have not already, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need different behavior.
 
 Next create a class called +Ability+ in "models/ability.rb" or anywhere else in the load path. It should look similar to this.
 
@@ -38,7 +38,7 @@ Next create a class called +Ability+ in "models/ability.rb" or anywhere else in 
     end
   end
 
-The +current_user+ is passed in to this method which is where the abilities are defined. See {Defining Abilities}[http://wiki.github.com/ryanb/cancan/checking-abilities] for what can go here.
+The +current_user+ is passed in to this method which is where the abilities are defined. See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for what can go here.
 
 The current user's permissions can then be accessed using the "can?" and "cannot?" methods in the view and controller.
 
@@ -46,7 +46,7 @@ The current user's permissions can then be accessed using the "can?" and "cannot
     <%= link_to "Edit", edit_article_path(@article) %>
   <% end %>
 
-See {Checking Abilities}[http://wiki.github.com/ryanb/cancan/checking-abilities] for more information
+See {Checking Abilities}[https://github.com/ryanb/cancan/wiki/checking-abilities] for more information
 
 The "authorize!" method in the controller will raise an exception if the user is not able to perform the given action.
 
@@ -65,7 +65,7 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
     end
   end
 
-See {Authorizing Controller Actions}[http://wiki.github.com/ryanb/cancan/authorizing-controller-actions] for more information
+See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information
 
 If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
@@ -76,26 +76,26 @@ If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will 
     end
   end
 
-See {Exception Handling}[http://wiki.github.com/ryanb/cancan/exception-handling] for more information.
+See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling] for more information.
 
 
 == Additional Docs
 
-* {Upgrading to 1.4}[http://github.com/ryanb/cancan/wiki/Upgrading-to-1.4]
-* {Nested Resources}[http://wiki.github.com/ryanb/cancan/nested-resources]
-* {Testing Abilities}[http://wiki.github.com/ryanb/cancan/testing-abilities]
-* {Accessing Request Data}[http://wiki.github.com/ryanb/cancan/accessing-request-data]
-* {Admin Namespace}[http://wiki.github.com/ryanb/cancan/admin-namespace]
-* {See more}[http://wiki.github.com/ryanb/cancan/]
+* {Upgrading to 1.4}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.4]
+* {Nested Resources}[https://github.com/ryanb/cancan/wiki/nested-resources]
+* {Testing Abilities}[https://github.com/ryanb/cancan/wiki/testing-abilities]
+* {Accessing Request Data}[https://github.com/ryanb/cancan/wiki/accessing-request-data]
+* {Admin Namespace}[https://github.com/ryanb/cancan/wiki/admin-namespace]
+* {See more}[https://github.com/ryanb/cancan/wiki]
 
 
 == Questions or Problems?
 
-If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[http://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
+If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
 
-To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
+To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[httpss://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
 
 
 == Special Thanks
 
-CanCan was inspired by declarative_authorization[http://github.com/stffn/declarative_authorization/] and aegis[http://github.com/makandra/aegis]. Also many thanks to the CanCan contributors[http://github.com/ryanb/cancan/contributors]. See the CHANGELOG[http://github.com/ryanb/cancan/blob/master/CHANGELOG.rdoc] for the full list.
+CanCan was inspired by declarative_authorization[https://github.com/stffn/declarative_authorization/] and aegis[https://github.com/makandra/aegis]. Also many thanks to the CanCan contributors[https://github.com/ryanb/cancan/contributors]. See the CHANGELOG[https://github.com/ryanb/cancan/blob/master/CHANGELOG.rdoc] for the full list.
