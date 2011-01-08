@@ -135,18 +135,18 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           obj2 = MongoidProject.create(:age => 40)
           @ability.can?(:read, obj2).should == false
         end
-        
+
         it "should handle instance not saved to database" do
           obj = MongoidProject.new(:title => 'Sir')
           @ability.can :read, MongoidProject, :title.in => ["Sir", "Madam"]
           @ability.can?(:read, obj).should == true
-          
+
           # accessible_by only returns saved records
           MongoidProject.accessible_by(@ability, :read).entries.should == []
-          
+
           obj2 = MongoidProject.new(:title => 'Lord')
           @ability.can?(:read, obj2).should == false
-        end          
+        end
       end
 
       it "should call where with matching ability conditions" do

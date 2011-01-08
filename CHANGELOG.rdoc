@@ -1,3 +1,24 @@
+1.5.0 (not yet released)
+
+* Added an Ability generator - see issue #170
+
+* Added DataMapper support (thanks natemueller)
+
+* Added Mongoid support (thanks bowsersenior)
+
+* Added skip_load_and_authorize_resource methods to controller class - see issue #164
+
+* Added support for uncountable resources in index action - see issue #193
+
+* Cleaned up README and added spec/README
+
+* Internal: renamed CanDefinition to Rule
+
+* Internal: added a model adapter layer for easily supporting more ORMs
+
+* Internal: added .rvmrc to auto-switch to 1.8.7 with gemset - see issue #231
+
+
 1.4.1 (November 12, 2010)
 
 * Renaming skip_authorization to skip_authorization_check - see issue #169
