@@ -93,7 +93,7 @@ See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling
 
 If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
 
-To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[httpss://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
+To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
 
 
 == Special Thanks
