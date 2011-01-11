@@ -22,25 +22,15 @@ Alternatively, you can install it as a plugin.
 
 == Getting Started
 
-CanCan expects a +current_user+ method to exist in controllers. If you have not already, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need different behavior.
+CanCan expects a +current_user+ method to exist in controllers. First, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need to customize this behavior.
 
-Next create a class called +Ability+ in "models/ability.rb" or anywhere else in the load path. It should look similar to this.
+Next, make an +Ability+ class. CanCan 1.5 includes a generator for this.
 
-  class Ability
-    include CanCan::Ability
+  rails g cancan:ability
 
-    def initialize(user)
-      if user.admin?
-        can :manage, :all
-      else
-        can :read, :all
-      end
-    end
-  end
+This is where the user permission will be defined. See the comments in models/ability.rb and {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
 
-The +current_user+ is passed in to this method which is where the abilities are defined. See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for what can go here.
-
-The current user's permissions can then be accessed using the "can?" and "cannot?" methods in the view and controller.
+The current user's permissions can then be checked using the <tt>can?</tt> and <tt>cannot?</tt> methods in the view and controller.
 
   <% if can? :update, @article %>
     <%= link_to "Edit", edit_article_path(@article) %>
@@ -65,7 +55,7 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
     end
   end
 
-See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information
+See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information.
 
 If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
@@ -79,13 +69,14 @@ If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will 
 See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling] for more information.
 
 
-== Additional Docs
+== Wiki Docs
 
-* {Upgrading to 1.4}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.4]
-* {Nested Resources}[https://github.com/ryanb/cancan/wiki/nested-resources]
-* {Testing Abilities}[https://github.com/ryanb/cancan/wiki/testing-abilities]
-* {Accessing Request Data}[https://github.com/ryanb/cancan/wiki/accessing-request-data]
-* {Admin Namespace}[https://github.com/ryanb/cancan/wiki/admin-namespace]
+* {Upgrading to 1.5}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.5]
+* {Defining Abilities}[https://github.com/ryanb/cancan/wiki/Defining-Abilities]
+* {Checking Abilities}[https://github.com/ryanb/cancan/wiki/Checking-Abilities]
+* {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/Authorizing-Controller-Actions]
+* {Exception Handling}[https://github.com/ryanb/cancan/wiki/Exception-Handling]
+* {Changing Defaults}[https://github.com/ryanb/cancan/wiki/Changing-Defaults]
 * {See more}[https://github.com/ryanb/cancan/wiki]
 
 
