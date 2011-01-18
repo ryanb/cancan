@@ -7,7 +7,7 @@ CanCan is an authorization library for Ruby on Rails which restricts what resour
 
 == Installation
 
-In <b>Rails 3</b>, add this to your Gemfile.
+In <b>Rails 3</b>, add this to your Gemfile and run the +bundle+ command.
 
   gem "cancan"
 
@@ -22,13 +22,19 @@ Alternatively, you can install it as a plugin.
 
 == Getting Started
 
-CanCan expects a +current_user+ method to exist in controllers. First, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need to customize this behavior.
+CanCan expects a +current_user+ method to exist in the controller. First, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need different behavior.
 
-Next, make an +Ability+ class. CanCan 1.5 includes a generator for this.
+
+=== 1. Define Abilities
+
+User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 3 generator for creating this class.
 
   rails g cancan:ability
 
-This is where the user permission will be defined. See the comments in models/ability.rb and {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
+See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
+
+
+=== 2. Check Abilities & Authorization
 
 The current user's permissions can then be checked using the <tt>can?</tt> and <tt>cannot?</tt> methods in the view and controller.
 
@@ -38,14 +44,14 @@ The current user's permissions can then be checked using the <tt>can?</tt> and <
 
 See {Checking Abilities}[https://github.com/ryanb/cancan/wiki/checking-abilities] for more information
 
-The "authorize!" method in the controller will raise an exception if the user is not able to perform the given action.
+The <tt>authorize!</tt> method in the controller will raise an exception if the user is not able to perform the given action.
 
   def show
     @article = Article.find(params[:id])
     authorize! :read, @article
   end
 
-Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will use a before filter to load the resource into an instance variable and authorize it for each action.
+Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will use a before filter to load the resource into an instance variable and authorize it for every action.
 
   class ArticlesController < ApplicationController
     load_and_authorize_resource
@@ -56,6 +62,9 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
   end
 
 See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information.
+
+
+=== 3. Handle Unauthorized Access
 
 If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
@@ -82,9 +91,9 @@ See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling
 
 == Questions or Problems?
 
-If you have any issues with CanCan which you cannot find the solution to in the documentation, please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
+If you have any issues with CanCan which you cannot find the solution to in the documentation[https://github.com/ryanb/cancan/wiki], please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
 
-To get the specs running you should call +bundle+ and then +rake+. Specs currently do not work in Ruby 1.9 due to the RR mocking framework. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
+To get the specs running you should call +bundle+ and then +rake+. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
 
 
 == Special Thanks
