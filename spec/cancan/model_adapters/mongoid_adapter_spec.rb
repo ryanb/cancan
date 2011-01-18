@@ -56,7 +56,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         lord  = MongoidProject.create(:title => 'Lord')
         dude  = MongoidProject.create(:title => 'Dude')
 
-        MongoidProject.accessible_by(@ability, :read).should == [sir]
+        MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
       end
 
       it "should return everything when the defined ability is manage all" do
@@ -154,7 +154,24 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, MongoidProject, :foo => {:bar => 1}
         MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
       end
+      
+      it "should exclude from the result if set to cannot" do
+        obj = MongoidProject.create(:bar => 1)
+        obj2 = MongoidProject.create(:bar => 2)
+        @ability.can :read, MongoidProject
+        @ability.cannot :read, MongoidProject, :bar => 2
+        MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
+      end
 
+      it "should combine the rules" do
+        obj = MongoidProject.create(:bar => 1)
+        obj2 = MongoidProject.create(:bar => 2)
+        obj3 = MongoidProject.create(:bar => 3)
+        @ability.can :read, MongoidProject, :bar => 1
+        @ability.can :read, MongoidProject, :bar => 2
+        MongoidProject.accessible_by(@ability, :read).entries.should =~ [obj, obj2]
+      end
+      
       it "should not allow to fetch records when ability with just block present" do
         @ability.can :read, MongoidProject do
           false
