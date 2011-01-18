@@ -160,7 +160,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         obj2 = MongoidProject.create(:bar => 2)
         @ability.can :read, MongoidProject
         @ability.cannot :read, MongoidProject, :bar => 2
-        MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
+        MongoidProject.accessible_by(@ability, :read).entries.should == [obj]
       end
 
       it "should combine the rules" do
