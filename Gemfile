@@ -11,7 +11,7 @@ when "data_mapper"
   gem "dm-migrations", "~> 1.0.2"
 when "mongoid"
   gem "bson_ext", "~> 1.1"
-  gem "mongoid", "~> 2.0.0.beta.19"
+  gem "mongoid", "~> 2.0.0.beta.20"
 else
   raise "Unknown model adapter: #{ENV["MODEL_ADAPTER"]}"
 end

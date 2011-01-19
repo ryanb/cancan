@@ -16,14 +16,22 @@ module CanCan
       end
 
       def database_records
-        @model_class.where(conditions)
-      end
-
-      def conditions
-        if @rules.size == 0
-          false_query
+        if @rules.size == 0  
+          @model_class.where(false_query)
         else
-          @rules.first.conditions
+          criteria = @model_class.all
+          @rules.each do |rule|
+            criteria = chain_criteria(rule, criteria)
+          end
+          criteria
+        end
+      end
+      
+      def chain_criteria rule, criteria
+        if rule.base_behavior
+          criteria.or(rule.conditions)
+        else
+          criteria.excludes(rule.conditions)
         end
       end
 
