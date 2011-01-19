@@ -17,27 +17,16 @@ module CanCan
 
       def database_records
         if @rules.size == 0  
-          @model_class.where(false_query)
+          @model_class.where(:_id => {'$exists' => false, '$type' => 7}) # return no records in Mongoid
         else
-          criteria = @model_class.all
-          @rules.each do |rule|
-            criteria = chain_criteria(rule, criteria)
+          @rules.inject(@model_class.all) do |records, rule|
+            if rule.base_behavior
+              records.or(rule.conditions)
+            else
+              records.excludes(rule.conditions)
+            end
           end
-          criteria
         end
-      end
-      
-      def chain_criteria rule, criteria
-        if rule.base_behavior
-          criteria.or(rule.conditions)
-        else
-          criteria.excludes(rule.conditions)
-        end
-      end
-
-      def false_query
-        # this query is sure to return no results
-        {:_id => {'$exists' => false, '$type' => 7}}  # type 7 is an ObjectID (default for _id)
       end
     end
   end
