@@ -8,12 +8,23 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
+    with_model :category do
+      table do |t|
+        t.boolean "visible"
+      end
+      model do
+        has_many :articles
+      end
+    end
+
     with_model :article do
       table do |t|
         t.boolean "published"
         t.boolean "secret"
+        t.integer "category_id"
       end
       model do
+        belongs_to :category
         has_many :comments
       end
     end
@@ -85,6 +96,13 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.can :read, Comment, :article => { :published => true }
       comment1 = Comment.create!(:article => Article.create!(:published => true))
       comment2 = Comment.create!(:article => Article.create!(:published => false))
+      Comment.accessible_by(@ability).should == [comment1]
+    end
+
+    it "should only read comments for visible categories through articles" do
+      @ability.can :read, Comment, :article => { :category => { :visible => true } }
+      comment1 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => true)))
+      comment2 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => false)))
       Comment.accessible_by(@ability).should == [comment1]
     end
 

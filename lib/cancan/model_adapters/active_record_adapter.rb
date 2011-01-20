@@ -31,12 +31,13 @@ module CanCan
         end
       end
 
-      def tableized_conditions(conditions)
+      def tableized_conditions(conditions, model_class = @model_class)
         return conditions unless conditions.kind_of? Hash
         conditions.inject({}) do |result_hash, (name, value)|
           if value.kind_of? Hash
-            name = @model_class.reflect_on_association(name).table_name
-            value = tableized_conditions(value)
+            association_class = model_class.reflect_on_association(name).class_name.constantize
+            name = model_class.reflect_on_association(name).table_name
+            value = tableized_conditions(value, association_class)
           end
           result_hash[name] = value
           result_hash
