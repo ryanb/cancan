@@ -1,3 +1,10 @@
+1.5.1 (January 20, 2011)
+
+* Fixing deeply nested conditions in Active Record adapter - see issue #246
+
+* Improving Mongoid support for multiple can and cannot definitions (thanks stellard) - see issue #239
+
+
 1.5.0 (January 11, 2011)
 
 * Added an Ability generator - see issue #170
