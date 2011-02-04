@@ -290,6 +290,12 @@ describe CanCan::Ability do
     @ability.can?(:read, "foobar" => Range).should be_false
     @ability.can?(:read, 123 => Range).should be_true
   end
+  
+  it "should allow to check ability on Hash-like object" do
+    class Container < Hash; end
+    @ability.can :read, Container
+    @ability.can?(:read, Container.new).should be_true
+  end
 
   it "should have initial attributes based on hash conditions of 'new' action" do
     @ability.can :manage, Range, :foo => "foo", :hash => {:skip => "hashes"}

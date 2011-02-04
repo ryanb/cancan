@@ -21,7 +21,7 @@ module CanCan
 
     # Matches both the subject and action, not necessarily the conditions
     def relevant?(action, subject)
-      subject = subject.values.first if subject.kind_of? Hash
+      subject = subject.values.first if subject.class == Hash
       @match_all || (matches_action?(action) && matches_subject?(subject))
     end
 
@@ -31,7 +31,7 @@ module CanCan
         call_block_with_all(action, subject, extra_args)
       elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
-      elsif @conditions.kind_of?(Hash) && subject.kind_of?(Hash)
+      elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
         matches_conditions_hash?(subject)
