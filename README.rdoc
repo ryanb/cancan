@@ -77,6 +77,17 @@ If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will 
 See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling] for more information.
 
 
+=== 4. Lock It Down
+
+If you want to ensure authorization happens on every action in your application, add +check_authorization+ to your ApplicationController.
+
+  class ApplicationController < ActionController::Base
+    check_authorization
+  end
+
+This will raise an exception if authorization is not performed in an action. If you want to skip this add +skip_authorization_check+ to a controller subclass. See {Ensure Authorization}[https://github.com/ryanb/cancan/wiki/Ensure-Authorization] for more information.
+
+
 == Wiki Docs
 
 * {Upgrading to 1.5}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.5]
