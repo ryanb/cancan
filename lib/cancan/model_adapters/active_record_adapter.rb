@@ -55,8 +55,8 @@ module CanCan
       end
 
       def database_records
-        if @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
-          @model_class.where(conditions).joins(joins)
+        if @model_class.respond_to?(:all) and conditions.empty? and joins.nil?
+          @model_class.all
         else
           @model_class.scoped(:conditions => conditions, :joins => joins)
         end
