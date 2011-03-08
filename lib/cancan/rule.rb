@@ -100,17 +100,21 @@ module CanCan
           model_adapter(subject).matches_conditions_hash? subject, conditions
         else
           conditions.all? do |name, value|
-            attribute = subject.send(name)
-            if value.kind_of?(Hash)
-              if attribute.kind_of? Array
-                attribute.any? { |element| matches_conditions_hash? element, value }
-              else
-                matches_conditions_hash? attribute, value
-              end
-            elsif value.kind_of?(Array) || value.kind_of?(Range)
-              value.include? attribute
+            if model_adapter(subject).override_condition_matching? subject, name, value
+              model_adapter(subject).matches_condition? subject, name, value
             else
-              attribute == value
+              attribute = subject.send(name)
+              if value.kind_of?(Hash)
+                if attribute.kind_of? Array
+                  attribute.any? { |element| matches_conditions_hash? element, value }
+                else
+                  matches_conditions_hash? attribute, value
+                end
+              elsif value.kind_of?(Array) || value.kind_of?(Range)
+                value.include? attribute
+              else
+                attribute == value
+              end
             end
           end
         end

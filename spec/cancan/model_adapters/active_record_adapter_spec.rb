@@ -21,6 +21,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       table do |t|
         t.boolean "published"
         t.boolean "secret"
+        t.integer "priority"
         t.integer "category_id"
       end
       model do
@@ -198,6 +199,17 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.can :read, Article, :project => { :blocked => false }
       @ability.can :read, Article, :project => { :admin => true }
       @ability.model_adapter(Article, :read).joins.should == [:project]
+    end
+
+    describe "with MetaWhere" do
+      it "should read articles where priority is less than 2" do
+        @ability.can :read, Article, :priority.lt => 2
+        article1 = Article.create!(:priority => 1)
+        article2 = Article.create!(:priority => 3)
+        Article.accessible_by(@ability).should == [article1]
+        @ability.should be_able_to(:read, article1)
+        @ability.should_not be_able_to(:read, article2)
+      end
     end
   end
 end

@@ -5,6 +5,16 @@ module CanCan
         model_class <= ActiveRecord::Base
       end
 
+      def self.override_condition_matching?(subject, name, value)
+        name.kind_of?(MetaWhere::Column) if defined? MetaWhere
+      end
+
+      def self.matches_condition?(subject, name, value)
+        case name.method
+        when "lt" then subject.send(name.column) < value
+        end
+      end
+
       # Returns conditions intended to be used inside a database query. Normally you will not call this
       # method directly, but instead go through ModelAdditions#accessible_by.
       #

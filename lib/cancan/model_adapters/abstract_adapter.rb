@@ -26,6 +26,17 @@ module CanCan
         raise NotImplemented, "This model adapter does not support matching on a conditions hash."
       end
 
+      # Used to determine if this model adapter will override the matching behavior for a specific condition.
+      # If this returns true then matches_condition? will be called. See Rule#matches_conditions_hash
+      def self.override_condition_matching?(subject, name, value)
+        false
+      end
+
+      # Override if override_condition_matching? returns true
+      def self.matches_condition?(subject, name, value)
+        raise NotImplemented, "This model adapter does not support matching on a specific condition."
+      end
+
       def initialize(model_class, rules)
         @model_class = model_class
         @rules = rules
