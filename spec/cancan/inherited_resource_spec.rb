@@ -25,9 +25,9 @@ describe CanCan::InheritedResource do
     @controller.instance_variable_get(:@project).should == :project_resource
   end
 
-  it "index should load through @controller.parent when parent" do
+  it "index should load through @controller.association_chain when parent" do
     @params[:action] = "index"
-    stub(@controller).parent { :project_resource }
+    stub(@controller).association_chain { @controller.instance_variable_set(:@project, :project_resource) }
     CanCan::InheritedResource.new(@controller, :parent => true).load_resource
     @controller.instance_variable_get(:@project).should == :project_resource
   end
