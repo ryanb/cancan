@@ -42,6 +42,11 @@ describe CanCan::ControllerAdditions do
     @controller_class.load_and_authorize_resource :project, :foo => :bar
   end
 
+  it "load_and_authorize_resource with :prepend should prepend the before filter" do
+    mock(@controller_class).prepend_before_filter({})
+    @controller_class.load_and_authorize_resource :foo => :bar, :prepend => true
+  end
+
   it "authorize_resource should setup a before filter which passes call to ControllerResource" do
     stub(CanCan::ControllerResource).new(@controller, nil, :foo => :bar).mock!.authorize_resource
     mock(@controller_class).before_filter(:except => :show) { |options, block| block.call(@controller) }

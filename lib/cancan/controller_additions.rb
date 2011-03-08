@@ -109,6 +109,9 @@ module CanCan
       #
       #     load_resource :new => :build
       #
+      # [:+prepend+]
+      #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
+      #
       def load_resource(*args)
         cancan_resource_class.add_before_filter(self, :load_resource, *args)
       end
@@ -161,6 +164,9 @@ module CanCan
       #
       # [:+through+]
       #   Authorize conditions on this parent resource when instance isn't available.
+      #
+      # [:+prepend+]
+      #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
       def authorize_resource(*args)
         cancan_resource_class.add_before_filter(self, :authorize_resource, *args)
