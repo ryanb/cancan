@@ -36,7 +36,7 @@ module CanCan
         conditions.inject({}) do |result_hash, (name, value)|
           if value.kind_of? Hash
             association_class = model_class.reflect_on_association(name).class_name.constantize
-            name = model_class.reflect_on_association(name).table_name
+            name = model_class.reflect_on_association(name).table_name.to_sym
             value = tableized_conditions(value, association_class)
           end
           result_hash[name] = value
