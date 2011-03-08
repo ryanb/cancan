@@ -14,6 +14,7 @@ module CanCan
         case name.method
         when "lt" then subject_value < value
         when "gt" then subject_value > value
+        else raise NotImplemented, "The #{name.method} MetaWhere condition is not supported."
         end
       end
 
