@@ -3,7 +3,8 @@ module CanCan
   class InheritedResource < ControllerResource # :nodoc:
     def load_resource_instance
       if parent?
-        @controller.send :parent
+        @controller.send :association_chain
+        @controller.instance_variable_get("@#{instance_name}")
       elsif new_actions.include? @params[:action].to_sym
         @controller.send :build_resource
       else
