@@ -201,15 +201,22 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.model_adapter(Article, :read).joins.should == [:project]
     end
 
-    describe "with MetaWhere" do
-      it "should read articles where priority is less than 2" do
-        @ability.can :read, Article, :priority.lt => 2
-        article1 = Article.create!(:priority => 1)
-        article2 = Article.create!(:priority => 3)
-        Article.accessible_by(@ability).should == [article1]
-        @ability.should be_able_to(:read, article1)
-        @ability.should_not be_able_to(:read, article2)
-      end
+    it "should restrict articles given a MetaWhere condition" do
+      @ability.can :read, Article, :priority.lt => 2
+      article1 = Article.create!(:priority => 1)
+      article2 = Article.create!(:priority => 3)
+      Article.accessible_by(@ability).should == [article1]
+      @ability.should be_able_to(:read, article1)
+      @ability.should_not be_able_to(:read, article2)
+    end
+
+    it "should match any MetaWhere condition" do
+      adapter = CanCan::ModelAdapters::ActiveRecordAdapter
+      article1 = Article.new(:priority => 1)
+      adapter.matches_condition?(article1, :priority.lt, 2).should be_true
+      adapter.matches_condition?(article1, :priority.lt, 1).should be_false
+      adapter.matches_condition?(article1, :priority.gt, 0).should be_true
+      adapter.matches_condition?(article1, :priority.gt, 1).should be_false
     end
   end
 end

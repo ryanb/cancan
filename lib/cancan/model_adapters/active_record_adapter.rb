@@ -10,8 +10,10 @@ module CanCan
       end
 
       def self.matches_condition?(subject, name, value)
+        subject_value = subject.send(name.column)
         case name.method
-        when "lt" then subject.send(name.column) < value
+        when "lt" then subject_value < value
+        when "gt" then subject_value > value
         end
       end
 
