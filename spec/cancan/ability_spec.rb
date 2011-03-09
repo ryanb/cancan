@@ -357,6 +357,14 @@ describe CanCan::Ability do
     @ability.model_adapter(model_class, :read).should == :adapter_instance
   end
 
+  it "should raise an error when attempting to use a block with a hash condition since it's not likely what they want" do
+    lambda {
+      @ability.can :read, Array, :published => true do
+        false
+      end
+    }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil
