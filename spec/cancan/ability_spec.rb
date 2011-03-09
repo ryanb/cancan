@@ -357,6 +357,14 @@ describe CanCan::Ability do
     @ability.model_adapter(model_class, :read).should == :adapter_instance
   end
 
+  it "should raise an error when attempting to use a block with a hash condition since it's not likely what they want" do
+    lambda {
+      @ability.can :read, Array, :published => true do
+        false
+      end
+    }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil
@@ -395,6 +403,7 @@ describe CanCan::Ability do
     it "should have variables for action and subject" do
       I18n.backend.store_translations :en, :unauthorized => {:manage => {:all => "%{action} %{subject}"}} # old syntax for now in case testing with old I18n
       @ability.unauthorized_message(:update, Array).should == "update array"
+      @ability.unauthorized_message(:update, ArgumentError).should == "update argument error"
       @ability.unauthorized_message(:edit, 1..3).should == "edit range"
     end
   end

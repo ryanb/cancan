@@ -109,6 +109,9 @@ module CanCan
       #
       #     load_resource :new => :build
       #
+      # [:+prepend+]
+      #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
+      #
       def load_resource(*args)
         cancan_resource_class.add_before_filter(self, :load_resource, *args)
       end
@@ -161,6 +164,9 @@ module CanCan
       #
       # [:+through+]
       #   Authorize conditions on this parent resource when instance isn't available.
+      #
+      # [:+prepend+]
+      #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
       def authorize_resource(*args)
         cancan_resource_class.add_before_filter(self, :authorize_resource, *args)
@@ -220,14 +226,31 @@ module CanCan
       #     check_authorization
       #   end
       #
-      # Any arguments are passed to the +after_filter+ it triggers.
-      #
       # See skip_authorization_check to bypass this check on specific controller actions.
-      def check_authorization(*args)
-        self.after_filter(*args) do |controller|
-          unless controller.instance_variable_defined?(:@_authorized)
-            raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization_check to bypass this check."
-          end
+      #
+      # Options:
+      # [:+only+]
+      #   Only applies to given actions.
+      #
+      # [:+except+]
+      #   Does not apply to given actions.
+      #
+      # [:+if+]
+      #   Supply the name of a controller method to be called. The authorization check only takes place if this returns true.
+      #
+      #     check_authorization :if => :admin_controller?
+      #
+      # [:+unless+]
+      #   Supply the name of a controller method to be called. The authorization check only takes place if this returns false.
+      #
+      #     check_authorization :unless => :devise_controller?
+      #
+      def check_authorization(options = {})
+        self.after_filter(options.slice(:only, :except)) do |controller|
+          return if controller.instance_variable_defined?(:@_authorized)
+          return if options[:if] && !controller.send(options[:if])
+          return if options[:unless] && controller.send(options[:unless])
+          raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization_check to bypass this check."
         end
       end
 

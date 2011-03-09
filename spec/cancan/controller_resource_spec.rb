@@ -110,7 +110,7 @@ describe CanCan::ControllerResource do
   end
 
   it "should perform authorization using controller action and loaded model" do
-    @params[:action] = "show"
+    @params.merge!(:action => "show", :id => 123)
     @controller.instance_variable_set(:@project, :some_project)
     stub(@controller).authorize!(:show, :some_project) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller)
@@ -118,25 +118,34 @@ describe CanCan::ControllerResource do
   end
 
   it "should perform authorization using controller action and non loaded model" do
-    @params[:action] = "show"
+    @params.merge!(:action => "show", :id => 123)
     stub(@controller).authorize!(:show, Project) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
 
   it "should call load_resource and authorize_resource for load_and_authorize_resource" do
-    @params[:action] = "show"
+    @params.merge!(:action => "show", :id => 123)
     resource = CanCan::ControllerResource.new(@controller)
     mock(resource).load_resource
     mock(resource).authorize_resource
     resource.load_and_authorize_resource
   end
 
-  it "should not build a resource when on custom collection action" do
-    @params[:action] = "sort"
+  it "should not build a single resource when on custom collection action even with id" do
+    @params.merge!(:action => "sort", :id => 123)
     resource = CanCan::ControllerResource.new(@controller, :collection => [:sort, :list])
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
+  end
+
+  it "should load a collection resource when on custom action with no id param" do
+    stub(Project).accessible_by(@ability, :sort) { :found_projects }
+    @params[:action] = "sort"
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should be_nil
+    @controller.instance_variable_get(:@projects).should == :found_projects
   end
 
   it "should build a resource when on custom new action even when params[:id] exists" do
@@ -250,7 +259,7 @@ describe CanCan::ControllerResource do
   end
 
   it "should find record through has_one association with :singleton option" do
-    @params.merge!(:action => "show")
+    @params.merge!(:action => "show", :id => 123)
     category = Object.new
     @controller.instance_variable_set(:@category, category)
     stub(category).project { :some_project }

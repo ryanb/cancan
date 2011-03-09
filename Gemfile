@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
 case ENV["MODEL_ADAPTER"]
 when nil, "active_record"
-  gem "sqlite3-ruby", :require => "sqlite3"
+  gem "sqlite3"
   gem "activerecord", :require => "active_record"
   gem "with_model"
   gem "meta_where"

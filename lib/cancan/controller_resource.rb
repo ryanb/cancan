@@ -5,7 +5,8 @@ module CanCan
     def self.add_before_filter(controller_class, method, *args)
       options = args.extract_options!
       resource_name = args.first
-      controller_class.before_filter(options.slice(:only, :except)) do |controller|
+      before_filter_method = options.delete(:prepend) ? :prepend_before_filter : :before_filter
+      controller_class.send(before_filter_method, options.slice(:only, :except)) do |controller|
         controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).send(method)
       end
     end
@@ -112,7 +113,7 @@ module CanCan
     end
 
     def member_action?
-      !collection_actions.include? @params[:action].to_sym
+      new_actions.include?(@params[:action].to_sym) || (@params[:id] && !collection_actions.include?(@params[:action].to_sym))
     end
 
     # Returns the class used for this resource. This can be overriden by the :class option.
