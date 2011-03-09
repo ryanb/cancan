@@ -19,6 +19,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
 
     with_model :article do
       table do |t|
+        t.string  "name"
         t.boolean "published"
         t.boolean "secret"
         t.integer "priority"
@@ -227,11 +228,27 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
 
     it "should match any MetaWhere condition" do
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter
-      article1 = Article.new(:priority => 1)
+      article1 = Article.new(:priority => 1, :name => "Hello World")
+      adapter.matches_condition?(article1, :priority.eq, 1).should be_true
+      adapter.matches_condition?(article1, :priority.eq, 2).should be_false
+      adapter.matches_condition?(article1, :priority.ne, 2).should be_true
+      adapter.matches_condition?(article1, :priority.ne, 1).should be_false
+      adapter.matches_condition?(article1, :priority.in, [1, 2]).should be_true
+      adapter.matches_condition?(article1, :priority.in, [2, 3]).should be_false
+      adapter.matches_condition?(article1, :priority.nin, [2, 3]).should be_true
+      adapter.matches_condition?(article1, :priority.nin, [1, 2]).should be_false
       adapter.matches_condition?(article1, :priority.lt, 2).should be_true
       adapter.matches_condition?(article1, :priority.lt, 1).should be_false
+      adapter.matches_condition?(article1, :priority.lteq, 1).should be_true
+      adapter.matches_condition?(article1, :priority.lteq, 0).should be_false
       adapter.matches_condition?(article1, :priority.gt, 0).should be_true
       adapter.matches_condition?(article1, :priority.gt, 1).should be_false
+      adapter.matches_condition?(article1, :priority.gteq, 1).should be_true
+      adapter.matches_condition?(article1, :priority.gteq, 2).should be_false
+      adapter.matches_condition?(article1, :name.like, "ello worl").should be_true
+      adapter.matches_condition?(article1, :name.like, "helo").should be_false
+      adapter.matches_condition?(article1, :name.nlike, "helo").should be_true
+      adapter.matches_condition?(article1, :name.nlike, "ello worl").should be_false
     end
   end
 end

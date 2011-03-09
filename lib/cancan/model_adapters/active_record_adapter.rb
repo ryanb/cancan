@@ -11,9 +11,17 @@ module CanCan
 
       def self.matches_condition?(subject, name, value)
         subject_value = subject.send(name.column)
-        case name.method
-        when "lt" then subject_value < value
-        when "gt" then subject_value > value
+        case name.method.to_sym
+        when :eq      then subject_value == value
+        when :not_eq  then subject_value != value
+        when :in      then value.include?(subject_value)
+        when :not_in  then !value.include?(subject_value)
+        when :lt      then subject_value < value
+        when :lteq    then subject_value <= value
+        when :gt      then subject_value > value
+        when :gteq    then subject_value >= value
+        when :matches then subject_value.downcase.include?(value.downcase)
+        when :does_not_match then !subject_value.downcase.include?(value.downcase)
         else raise NotImplemented, "The #{name.method} MetaWhere condition is not supported."
         end
       end
