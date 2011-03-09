@@ -11,7 +11,17 @@ module CanCan
 
       def self.matches_condition?(subject, name, value)
         subject_value = subject.send(name.column)
-        case name.method.to_sym
+        if name.method.to_s.ends_with? "_any"
+          value.any? { |v| meta_where_match? subject_value, name.method.to_s.sub("_any", ""), v }
+        elsif name.method.to_s.ends_with? "_all"
+          value.all? { |v| meta_where_match? subject_value, name.method.to_s.sub("_all", ""), v }
+        else
+          meta_where_match? subject_value, name.method, value
+        end
+      end
+
+      def self.meta_where_match?(subject_value, method, value)
+        case method.to_sym
         when :eq      then subject_value == value
         when :not_eq  then subject_value != value
         when :in      then value.include?(subject_value)
@@ -20,9 +30,9 @@ module CanCan
         when :lteq    then subject_value <= value
         when :gt      then subject_value > value
         when :gteq    then subject_value >= value
-        when :matches then subject_value.downcase.include?(value.downcase)
-        when :does_not_match then !subject_value.downcase.include?(value.downcase)
-        else raise NotImplemented, "The #{name.method} MetaWhere condition is not supported."
+        when :matches then subject_value =~ Regexp.new("^" + Regexp.escape(value).gsub("%", ".*") + "$", true)
+        when :does_not_match then !meta_where_match?(subject_value, :matches, value)
+        else raise NotImplemented, "The #{method} MetaWhere condition is not supported."
         end
       end
 

@@ -231,6 +231,10 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       article1 = Article.new(:priority => 1, :name => "Hello World")
       adapter.matches_condition?(article1, :priority.eq, 1).should be_true
       adapter.matches_condition?(article1, :priority.eq, 2).should be_false
+      adapter.matches_condition?(article1, :priority.eq_any, [1, 2]).should be_true
+      adapter.matches_condition?(article1, :priority.eq_any, [2, 3]).should be_false
+      adapter.matches_condition?(article1, :priority.eq_all, [1, 1]).should be_true
+      adapter.matches_condition?(article1, :priority.eq_all, [1, 2]).should be_false
       adapter.matches_condition?(article1, :priority.ne, 2).should be_true
       adapter.matches_condition?(article1, :priority.ne, 1).should be_false
       adapter.matches_condition?(article1, :priority.in, [1, 2]).should be_true
@@ -245,10 +249,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       adapter.matches_condition?(article1, :priority.gt, 1).should be_false
       adapter.matches_condition?(article1, :priority.gteq, 1).should be_true
       adapter.matches_condition?(article1, :priority.gteq, 2).should be_false
-      adapter.matches_condition?(article1, :name.like, "ello worl").should be_true
-      adapter.matches_condition?(article1, :name.like, "helo").should be_false
-      adapter.matches_condition?(article1, :name.nlike, "helo").should be_true
-      adapter.matches_condition?(article1, :name.nlike, "ello worl").should be_false
+      adapter.matches_condition?(article1, :name.like, "%ello worl%").should be_true
+      adapter.matches_condition?(article1, :name.like, "hello world").should be_true
+      adapter.matches_condition?(article1, :name.like, "hello%").should be_true
+      adapter.matches_condition?(article1, :name.like, "h%d").should be_true
+      adapter.matches_condition?(article1, :name.like, "%helo%").should be_false
+      adapter.matches_condition?(article1, :name.like, "hello").should be_false
+      adapter.matches_condition?(article1, :name.like, "hello.world").should be_false
+      adapter.matches_condition?(article1, :name.nlike, "%helo%").should be_true
+      adapter.matches_condition?(article1, :name.nlike, "%ello worl%").should be_false
     end
   end
 end
