@@ -12,7 +12,7 @@ describe CanCan::InheritedResource do
   end
 
   it "show should load resource through @controller.resource" do
-    @params[:action] = "show"
+    @params.merge!(:action => "show", :id => 123)
     stub(@controller).resource { :project_resource }
     CanCan::InheritedResource.new(@controller).load_resource
     @controller.instance_variable_get(:@project).should == :project_resource
