@@ -110,8 +110,23 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.can :read, Article, :published => true
       @ability.can :read, Article, ["secret=?", true]
       article1 = Article.create!(:published => true, :secret => false)
+      article2 = Article.create!(:published => true, :secret => true)
+      article3 = Article.create!(:published => false, :secret => true)
       article4 = Article.create!(:published => false, :secret => false)
+      Article.accessible_by(@ability).should == [article1, article2, article3]
+    end
+
+    it "should allow a scope for conditions" do
+      @ability.can :read, Article, Article.where(:secret => true)
+      article1 = Article.create!(:secret => true)
+      article2 = Article.create!(:secret => false)
       Article.accessible_by(@ability).should == [article1]
+    end
+
+    it "should raise an exception when trying to merge scope with other conditions" do
+      @ability.can :read, Article, :published => true
+      @ability.can :read, Article, Article.where(:secret => true)
+      lambda { Article.accessible_by(@ability) }.should raise_error(CanCan::Error, "Unable to merge an Active Record scope with other conditions. Instead use a hash or SQL for read Article ability.")
     end
 
     it "should not allow to fetch records when ability with just block present" do

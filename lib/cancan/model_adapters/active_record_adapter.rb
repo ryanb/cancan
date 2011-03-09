@@ -55,7 +55,9 @@ module CanCan
       end
 
       def database_records
-        if @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
+        if override_scope
+          override_scope
+        elsif @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
           @model_class.where(conditions).joins(joins)
         else
           @model_class.scoped(:conditions => conditions, :joins => joins)
@@ -63,6 +65,18 @@ module CanCan
       end
 
       private
+
+      def override_scope
+        conditions = @rules.map(&:conditions).compact
+        if conditions.any? { |c| c.kind_of?(ActiveRecord::Relation) }
+          if conditions.size == 1
+            conditions.first
+          else
+            rule = @rules.detect { |rule| rule.conditions.kind_of?(ActiveRecord::Relation) }
+            raise Error, "Unable to merge an Active Record scope with other conditions. Instead use a hash or SQL for #{rule.actions.first} #{rule.subjects.first} ability."
+          end
+        end
+      end
 
       def merge_conditions(sql, conditions_hash, behavior)
         if conditions_hash.blank?
