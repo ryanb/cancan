@@ -90,7 +90,7 @@ This will raise an exception if authorization is not performed in an action. If 
 
 == Wiki Docs
 
-* {Upgrading to 1.5}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.5]
+* {Upgrading to 1.6}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.6]
 * {Defining Abilities}[https://github.com/ryanb/cancan/wiki/Defining-Abilities]
 * {Checking Abilities}[https://github.com/ryanb/cancan/wiki/Checking-Abilities]
 * {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/Authorizing-Controller-Actions]

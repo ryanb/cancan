@@ -1,3 +1,24 @@
+1.6.0 (March 11, 2011)
+
+* Added MetaWhere support - see issue #194 and #261
+
+* Allow Active Record scopes in Ability conditions - see issue #257
+
+* Added :if and :unless options to check_authorization - see issue #284
+
+* Several Inherited Resources fixes (thanks aq1018, tanordheim and stefanoverna)
+
+* Pass action name to accessible_by call when loading a collection (thanks amw)
+
+* Added :prepend option to load_and_authorize_resource to load before other filters - see issue #290
+
+* Fixed spacing issue in I18n message for multi-word model names - see issue #292
+
+* Load resource collection for any action which doesn't have an "id" parameter - see issue #296
+
+* Raise an exception when trying to make a Ability condition with both a hash of conditions and a block - see issue #269
+
+
 1.5.1 (January 20, 2011)
 
 * Fixing deeply nested conditions in Active Record adapter - see issue #246
