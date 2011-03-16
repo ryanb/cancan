@@ -82,10 +82,10 @@ module CanCan
     end
 
     def build_resource
-      method_name = @options[:singleton] && resource_base.respond_to?("build_#{name}") ? "build_#{name}" : "new"
-      resource = resource_base.send(method_name, @params[name] || {})
-      initial_attributes.each do |name, value|
-        resource.send("#{name}=", value)
+      resource = resource_base.new(@params[name] || {})
+      resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
+      initial_attributes.each do |attr_name, value|
+        resource.send("#{attr_name}=", value)
       end
       resource
     end
@@ -97,8 +97,8 @@ module CanCan
     end
 
     def find_resource
-      if @options[:singleton] && resource_base.respond_to?(name)
-        resource_base.send(name)
+      if @options[:singleton] && parent_resource.respond_to?(name)
+        parent_resource.send(name)
       else
         @options[:find_by] ? resource_base.send("find_by_#{@options[:find_by]}!", id_param) : resource_base.find(id_param)
       end
@@ -155,7 +155,7 @@ module CanCan
     def resource_base
       if @options[:through]
         if parent_resource
-          @options[:singleton] ? parent_resource : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
+          @options[:singleton] ? resource_class : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
         elsif @options[:shallow]
           resource_class
         else
@@ -166,9 +166,13 @@ module CanCan
       end
     end
 
+    def parent_name
+      @options[:through] && [@options[:through]].flatten.detect { |i| fetch_parent(i) }
+    end
+
     # The object to load this resource through.
     def parent_resource
-      @options[:through] && [@options[:through]].flatten.map { |i| fetch_parent(i) }.compact.first
+      parent_name && fetch_parent(parent_name)
     end
 
     def fetch_parent(name)

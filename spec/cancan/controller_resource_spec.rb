@@ -268,14 +268,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == :some_project
   end
 
-  it "should build record through has_one association with :singleton option" do
+  it "should not build record through has_one association with :singleton option because it can cause it to delete it in the database" do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
-    category = Object.new
+    category = Category.new
     @controller.instance_variable_set(:@category, category)
-    stub(category).build_project { |attributes| Project.new(attributes) }
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "foobar"
+    @controller.instance_variable_get(:@project).category.should == category
   end
 
   it "should find record through has_one association with :singleton and :shallow options" do

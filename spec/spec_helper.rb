@@ -29,4 +29,5 @@ end
 
 class Project < SuperModel::Base
   belongs_to :category
+  attr_accessor :category # why doesn't SuperModel do this automatically?
 end
