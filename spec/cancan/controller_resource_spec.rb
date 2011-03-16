@@ -104,7 +104,7 @@ describe CanCan::ControllerResource do
   it "should authorize parent resource in collection action" do
     @params[:action] = "index"
     @controller.instance_variable_set(:@category, :some_category)
-    stub(@controller).authorize!(:read, :some_category) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :some_category) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :category, :parent => true)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
@@ -293,10 +293,10 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
-  it "should only authorize :read action on parent resource" do
+  it "should only authorize :show action on parent resource" do
     project = Project.create!
     @params.merge!(:action => "new", :project_id => project.id)
-    stub(@controller).authorize!(:read, project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, project) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :project, :parent => true)
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
   end

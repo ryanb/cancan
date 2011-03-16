@@ -4,7 +4,7 @@ module CanCan
   module ModelAdditions
     module ClassMethods
       # Returns a scope which fetches only the records that the passed ability
-      # can perform a given action on. The action defaults to :read. This
+      # can perform a given action on. The action defaults to :index. This
       # is usually called from a controller and passed the +current_ability+.
       #
       #   @articles = Article.accessible_by(current_ability)
@@ -19,7 +19,7 @@ module CanCan
       #   @articles = Article.accessible_by(current_ability, :update)
       #
       # Here only the articles which the user can update are returned.
-      def accessible_by(ability, action = :read)
+      def accessible_by(ability, action = :index)
         ability.model_adapter(self, action).database_records
       end
     end
