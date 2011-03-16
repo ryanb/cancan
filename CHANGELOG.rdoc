@@ -1,3 +1,12 @@
+1.6.1 (March 15, 2011)
+
+* Use Item.new instead of build_item for singleton resource so it doesn't effect database - see issue #304
+
+* Made accessible_by action default to :index and parent action default to :show instead of :read - see issue #302
+
+* Reverted Inherited Resources "collection" override since it doesn't seem to be working - see issue #305
+
+
 1.6.0 (March 11, 2011)
 
 * Added MetaWhere support - see issue #194 and #261
