@@ -13,7 +13,7 @@ module CanCan
     end
 
     def resource_base
-      @controller.send :collection
+      @controller.send :end_of_association_chain
     end
   end
 end
