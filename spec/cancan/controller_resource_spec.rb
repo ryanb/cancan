@@ -258,8 +258,8 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == :some_project
   end
 
-  it "should find record through has_one association with :singleton option" do
-    @params.merge!(:action => "show", :id => 123)
+  it "should find record through has_one association with :singleton option without id param" do
+    @params.merge!(:action => "show", :id => nil)
     category = Object.new
     @controller.instance_variable_set(:@category, category)
     stub(category).project { :some_project }
