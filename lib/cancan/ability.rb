@@ -8,7 +8,7 @@ module CanCan
   #
   #     def initialize(user)
   #       if user.admin?
-  #         can :manage, :all
+  #         can :access, :all
   #       else
   #         can :read, :all
   #       end
@@ -78,11 +78,11 @@ module CanCan
     #
     #   can [:update, :destroy], [Article, Comment]
     #
-    # You can pass :all to match any object and :manage to match any action. Here are some examples.
+    # You can pass :all to match any object and :access to match any action. Here are some examples.
     #
-    #   can :manage, :all
+    #   can :access, :all
     #   can :update, :all
-    #   can :manage, Project
+    #   can :access, Project
     #
     # You can pass a hash of conditions as the third argument. Here the user can only see active projects which he owns.
     #
@@ -158,11 +158,6 @@ module CanCan
     #   can :update, Comment
     #   can? :modify, Comment # => false
     #
-    # Unless that exact alias is used.
-    #
-    #   can :modify, Comment
-    #   can? :modify, Comment # => true
-    #
     # The following aliases are added by default for conveniently mapping common controller actions.
     #
     #   alias_action :index, :show, :to => :read
@@ -172,18 +167,42 @@ module CanCan
     # This way one can use params[:action] in the controller to determine the permission.
     def alias_action(*args)
       target = args.pop[:to]
-      aliased_actions[target] ||= []
-      aliased_actions[target] += args
+      aliases[:actions][target] ||= []
+      aliases[:actions][target] += args
     end
 
-    # Returns a hash of aliased actions. The key is the target and the value is an array of actions aliasing the key.
-    def aliased_actions
-      @aliased_actions ||= default_alias_actions
+    # Alias one or more subjects into another one.
+    #
+    #   alias_subject :admins, :moderators, :to => :users
+    #   can :update, :users
+    #
+    # Then :modify permission will apply to both :update and :destroy requests.
+    #
+    #   can? :update, :admins # => true
+    #   can? :update, :moderators # => true
+    #
+    # This only works in one direction. Passing the aliased subject into the "can?" call
+    # will not work because aliases are meant to generate more generic subjects.
+    #
+    #   alias_subject :admins, :moderators, :to => :users
+    #   can :update, :admins
+    #   can? :update, :users # => false
+    #
+    def alias_subject(*args)
+      target = args.pop[:to]
+      aliases[:subjects][target] ||= []
+      aliases[:subjects][target] += args
     end
 
-    # Removes previously aliased actions including the defaults.
-    def clear_aliased_actions
-      @aliased_actions = {}
+    # Returns a hash of action and subject aliases.
+    def aliases
+      @aliases ||= default_aliases
+    end
+
+    # Removes previously aliased actions or subjects including the defaults.
+    def clear_aliases
+      aliases[:actions] = {}
+      aliases[:subjects] = {}
     end
 
     def model_adapter(model_class, action)
@@ -206,7 +225,7 @@ module CanCan
     def unauthorized_message(action, subject)
       keys = unauthorized_message_keys(action, subject)
       variables = {:action => action.to_s}
-      variables[:subject] = (subject.class == Class ? subject : subject.class).to_s.underscore.humanize.downcase
+      variables[:subject] = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.humanize.downcase.pluralize)
       message = I18n.translate(nil, variables.merge(:scope => :unauthorized, :default => keys + [""]))
       message.blank? ? nil : message
     end
@@ -230,9 +249,9 @@ module CanCan
     private
 
     def unauthorized_message_keys(action, subject)
-      subject = (subject.class == Class ? subject : subject.class).name.underscore unless subject.kind_of? Symbol
-      [subject, :all].map do |try_subject|
-        [aliases_for_action(action), :manage].flatten.map do |try_action|
+      subject = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.humanize.downcase.pluralize)
+      [aliases_for(:subjects, subject.to_sym), :all].flatten.map do |try_subject|
+        [aliases_for(:actions, action.to_sym), :access].flatten.map do |try_action|
           :"#{try_action}.#{try_subject}"
         end
       end.flatten
@@ -241,18 +260,18 @@ module CanCan
     # Accepts an array of actions and returns an array of actions which match.
     # This should be called before "matches?" and other checking methods since they
     # rely on the actions to be expanded.
-    def expand_actions(actions)
-      actions.map do |action|
-        aliased_actions[action] ? [action, *expand_actions(aliased_actions[action])] : action
+    def expand_aliases(type, items)
+      items.map do |item|
+        aliases[type][item] ? [item, *expand_aliases(type, aliases[type][item])] : item
       end.flatten
     end
 
     # Given an action, it will try to find all of the actions which are aliased to it.
-    # This does the opposite kind of lookup as expand_actions.
-    def aliases_for_action(action)
+    # This does the opposite kind of lookup as expand_aliases.
+    def aliases_for(type, action)
       results = [action]
-      aliased_actions.each do |aliased_action, actions|
-        results += aliases_for_action(aliased_action) if actions.include? action
+      aliases[type].each do |aliased_action, actions|
+        results += aliases_for(type, aliased_action) if actions.include? action
       end
       results
     end
@@ -265,7 +284,8 @@ module CanCan
     # This does not take into consideration any hash conditions or block statements
     def relevant_rules(action, subject)
       rules.reverse.select do |rule|
-        rule.expanded_actions = expand_actions(rule.actions)
+        rule.expanded_actions = expand_aliases(:actions, rule.actions)
+        rule.expanded_subjects = expand_aliases(:subjects, rule.subjects)
         rule.relevant? action, subject
       end
     end
@@ -286,11 +306,15 @@ module CanCan
       end
     end
 
-    def default_alias_actions
+    def default_aliases
       {
-        :read => [:index, :show],
-        :create => [:new],
-        :update => [:edit],
+        :subjects => {},
+        :actions => {
+          :read => [:index, :show],
+          :create => [:new],
+          :update => [:edit],
+          :destroy => [:delete],
+        }
       }
     end
   end

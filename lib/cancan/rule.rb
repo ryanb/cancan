@@ -4,7 +4,7 @@ module CanCan
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
     attr_reader :base_behavior, :subjects, :actions, :conditions
-    attr_writer :expanded_actions
+    attr_writer :expanded_actions, :expanded_subjects
 
     # The first argument when initializing is the base_behavior which is a true/false
     # value. True for "can" and false for "cannot". The next two arguments are the action
@@ -30,11 +30,11 @@ module CanCan
     def matches_conditions?(action, subject, extra_args)
       if @match_all
         call_block_with_all(action, subject, extra_args)
-      elsif @block && !subject_class?(subject)
+      elsif @block && subject_object?(subject)
         @block.call(subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
-      elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
+      elsif @conditions.kind_of?(Hash) && subject_object?(subject)
         matches_conditions_hash?(subject)
       else
         # Don't stop at "cannot" definitions when there are conditions.
@@ -72,21 +72,24 @@ module CanCan
 
     private
 
-    def subject_class?(subject)
-      klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
-      klass == Class || klass == Module
+    def subject_object?(subject)
+      # klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
+      # klass == Class || klass == Module
+      !subject.kind_of?(Symbol)
     end
 
     def matches_action?(action)
-      @expanded_actions.include?(:manage) || @expanded_actions.include?(action)
+      @expanded_actions.include?(:access) || @expanded_actions.include?(action)
     end
 
     def matches_subject?(subject)
-      @subjects.include?(:all) || @subjects.include?(subject) || matches_subject_class?(subject)
+      subject = subject_name(subject) if subject_object? subject
+      @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject) # || matches_subject_class?(subject)
     end
 
+    # TODO deperecate this
     def matches_subject_class?(subject)
-      @subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
+      @expanded_subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
     end
 
     # Checks if the given subject matches the given conditions hash.
@@ -128,15 +131,19 @@ module CanCan
     end
 
     def call_block_with_all(action, subject, extra_args)
-      if subject.class == Class
-        @block.call(action, subject, nil, *extra_args)
+      if subject_object? subject
+        @block.call(action, subject_name(subject), subject, *extra_args)
       else
-        @block.call(action, subject.class, subject, *extra_args)
+        @block.call(action, subject, nil, *extra_args)
       end
     end
 
+    def subject_name(subject)
+      subject.class.to_s.underscore.humanize.downcase.pluralize.to_sym
+    end
+
     def model_adapter(subject)
-      ModelAdapters::AbstractAdapter.adapter_class(subject_class?(subject) ? subject : subject.class)
+      ModelAdapters::AbstractAdapter.adapter_class(subject_object?(subject) ? subject.class : subject)
     end
   end
 end
