@@ -113,6 +113,7 @@ module CanCan
       #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
       def load_resource(*args)
+        raise ImplementationRemoved, "The load_resource method has been removed, use load_and_authorize_resource instead."
         cancan_resource_class.add_before_filter(self, :load_resource, *args)
       end
 
@@ -169,6 +170,7 @@ module CanCan
       #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
       def authorize_resource(*args)
+        raise ImplementationRemoved, "The authorize_resource method has been removed, use load_and_authorize_resource instead."
         cancan_resource_class.add_before_filter(self, :authorize_resource, *args)
       end
 
@@ -197,6 +199,7 @@ module CanCan
       #
       # You can also pass the resource name as the first argument to skip that resource.
       def skip_load_resource(*args)
+        raise ImplementationRemoved, "The skip_load_resource method has been removed, use skip_load_and_authorize_resource instead."
         options = args.extract_options!
         name = args.first
         cancan_skipper[:load][name] = options
@@ -213,20 +216,23 @@ module CanCan
       #
       # You can also pass the resource name as the first argument to skip that resource.
       def skip_authorize_resource(*args)
+        raise ImplementationRemoved, "The skip_authorize_resource method has been removed, use skip_load_and_authorize_resource instead."
         options = args.extract_options!
         name = args.first
         cancan_skipper[:authorize][name] = options
       end
 
-      # Add this to a controller to ensure it performs authorization through +authorized+! or +authorize_resource+ call.
-      # If neither of these authorization methods are called, a CanCan::AuthorizationNotPerformed exception will be raised.
-      # This is normally added to the ApplicationController to ensure all controller actions do authorization.
+      # Add this to a controller to automatically perform authorization on every action.
       #
       #   class ApplicationController < ActionController::Base
-      #     check_authorization
+      #     enable_authorization
       #   end
       #
-      # See skip_authorization_check to bypass this check on specific controller actions.
+      # Internally it does this in a before_filter for every action.
+      #
+      #   authorize! params[:action], params[:controller]
+      #
+      # If you need to "skip" authorization in a given controller, it is best to enable :+access+ to it in the +Ability+.
       #
       # Options:
       # [:+only+]
@@ -236,39 +242,21 @@ module CanCan
       #   Does not apply to given actions.
       #
       # [:+if+]
-      #   Supply the name of a controller method to be called. The authorization check only takes place if this returns true.
+      #   Supply the name of a controller method to be called. The authorization only takes place if this returns true.
       #
-      #     check_authorization :if => :admin_controller?
+      #     enable_authorization :if => :admin_controller?
       #
       # [:+unless+]
-      #   Supply the name of a controller method to be called. The authorization check only takes place if this returns false.
+      #   Supply the name of a controller method to be called. The authorization only takes place if this returns false.
       #
-      #     check_authorization :unless => :devise_controller?
+      #     enable_authorization :unless => :devise_controller?
       #
-      def check_authorization(options = {})
-        self.after_filter(options.slice(:only, :except)) do |controller|
-          return if controller.instance_variable_defined?(:@_authorized)
+      def enable_authorization(options = {})
+        self.before_filter(options.slice(:only, :except)) do |controller|
           return if options[:if] && !controller.send(options[:if])
           return if options[:unless] && controller.send(options[:unless])
-          raise AuthorizationNotPerformed, "This action failed the check_authorization because it does not authorize_resource. Add skip_authorization_check to bypass this check."
+          authorize! controller.params[:action], controller.params[:controller]
         end
-      end
-
-      # Call this in the class of a controller to skip the check_authorization behavior on the actions.
-      #
-      #   class HomeController < ApplicationController
-      #     skip_authorization_check :only => :index
-      #   end
-      #
-      # Any arguments are passed to the +before_filter+ it triggers.
-      def skip_authorization_check(*args)
-        self.before_filter(*args) do |controller|
-          controller.instance_variable_set(:@_authorized, true)
-        end
-      end
-
-      def skip_authorization(*args)
-        raise ImplementationRemoved, "The CanCan skip_authorization method has been renamed to skip_authorization_check. Please update your code."
       end
 
       def cancan_resource_class
@@ -279,8 +267,16 @@ module CanCan
         end
       end
 
+      def check_authorization(options = {})
+        raise ImplementationRemoved, "The check_authorization method has been removed, use enable_authorization instead."
+      end
+
+      def skip_authorization_check(*args)
+        raise ImplementationRemoved, "The skip_authorization_check method has been removed, instead authorize access to controller in Ability to 'skip'."
+      end
+
       def cancan_skipper
-        @_cancan_skipper ||= {:authorize => {}, :load => {}}
+        raise ImplementationRemoved, "The skip_authorization_check method has been removed, instead authorize access to controller in Ability to 'skip'."
       end
     end
 
@@ -328,10 +324,6 @@ module CanCan
     def authorize!(*args)
       @_authorized = true
       current_ability.authorize!(*args)
-    end
-
-    def unauthorized!(message = nil)
-      raise ImplementationRemoved, "The unauthorized! method has been removed from CanCan, use authorize! instead."
     end
 
     # Creates and returns the current user's ability and caches it. If you
