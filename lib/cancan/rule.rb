@@ -14,8 +14,8 @@ module CanCan
       raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block.nil?
       @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
-      @actions = [action].flatten
-      @subjects = [subject].flatten
+      @actions = [action].flatten.compact.map(&:to_sym)
+      @subjects = [subject].flatten.compact.map(&:to_sym)
       @conditions = conditions || {}
       @block = block
     end
@@ -75,16 +75,16 @@ module CanCan
     def subject_object?(subject)
       # klass = (subject.kind_of?(Hash) ? subject.values.first : subject).class
       # klass == Class || klass == Module
-      !subject.kind_of?(Symbol)
+      !subject.kind_of?(Symbol) && !subject.kind_of?(String)
     end
 
     def matches_action?(action)
-      @expanded_actions.include?(:access) || @expanded_actions.include?(action)
+      @expanded_actions.include?(:access) || @expanded_actions.include?(action.to_sym)
     end
 
     def matches_subject?(subject)
       subject = subject_name(subject) if subject_object? subject
-      @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject) # || matches_subject_class?(subject)
+      @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject.to_sym) # || matches_subject_class?(subject)
     end
 
     # TODO deperecate this

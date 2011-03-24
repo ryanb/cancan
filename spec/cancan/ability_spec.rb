@@ -35,6 +35,13 @@ describe CanCan::Ability do
     @ability.can?(:paint, :cars).should be_false
   end
 
+  it "allows strings instead of symbols" do
+    @ability.can "paint", "fences"
+    @ability.can?("paint", "fences").should be_true
+    @ability.can "access", "all"
+    @ability.can?("wax", "cars").should be_true
+  end
+
 
   # Aliases
 
