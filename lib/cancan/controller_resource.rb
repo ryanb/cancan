@@ -38,7 +38,7 @@ module CanCan
 
     def authorize_resource
       unless skip?(:authorize)
-        @controller.authorize!(authorization_action, resource_instance || resource_class_with_parent)
+        @controller.authorize!(authorization_action, resource_instance || subject_name_with_parent)
       end
     end
 
@@ -74,7 +74,7 @@ module CanCan
     end
 
     def load_collection?
-      resource_base.respond_to?(:accessible_by) && !current_ability.has_block?(authorization_action, resource_class)
+      resource_base.respond_to?(:accessible_by) && !current_ability.has_block?(authorization_action, subject_name)
     end
 
     def load_collection
@@ -91,7 +91,7 @@ module CanCan
     end
 
     def initial_attributes
-      current_ability.attributes_for(@params[:action].to_sym, resource_class).delete_if do |key, value|
+      current_ability.attributes_for(@params[:action].to_sym, subject_name).delete_if do |key, value|
         @params[name] && @params[name].include?(key)
       end
     end
@@ -128,8 +128,12 @@ module CanCan
       end
     end
 
-    def resource_class_with_parent
-      parent_resource ? {parent_resource => resource_class} : resource_class
+    def subject_name
+      resource_class.to_s.underscore.pluralize.to_sym
+    end
+
+    def subject_name_with_parent
+      parent_resource ? {parent_resource => subject_name} : subject_name
     end
 
     def resource_instance=(instance)

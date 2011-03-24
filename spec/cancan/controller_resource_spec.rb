@@ -52,7 +52,7 @@ describe CanCan::ControllerResource do
 
   it "should build a new resource with attributes from current ability" do
     @params.merge!(:action => "new")
-    @ability.can(:create, Project, :name => "from conditions")
+    @ability.can(:create, :projects, :name => "from conditions")
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "from conditions"
@@ -60,7 +60,7 @@ describe CanCan::ControllerResource do
 
   it "should override initial attributes with params" do
     @params.merge!(:action => "new", :project => {:name => "from params"})
-    @ability.can(:create, Project, :name => "from conditions")
+    @ability.can(:create, :projects, :name => "from conditions")
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).name.should == "from params"
@@ -86,7 +86,7 @@ describe CanCan::ControllerResource do
   it "should not use accessible_by when defining abilities through a block" do
     stub(Project).accessible_by(@ability) { :found_projects }
     @params[:action] = "index"
-    @ability.can(:read, Project) { |p| false }
+    @ability.can(:read, :projects) { |p| false }
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
@@ -96,7 +96,7 @@ describe CanCan::ControllerResource do
   it "should not authorize single resource in collection action" do
     @params[:action] = "index"
     @controller.instance_variable_set(:@project, :some_project)
-    stub(@controller).authorize!(:index, Project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:index, :projects) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
@@ -119,7 +119,7 @@ describe CanCan::ControllerResource do
 
   it "should perform authorization using controller action and non loaded model" do
     @params.merge!(:action => "show", :id => 123)
-    stub(@controller).authorize!(:show, Project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :projects) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
@@ -243,7 +243,7 @@ describe CanCan::ControllerResource do
     @params.merge!(:action => "index")
     category = Object.new
     @controller.instance_variable_set(:@category, category)
-    stub(@controller).authorize!(:index, category => Project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:index, category => :projects) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end
@@ -311,7 +311,7 @@ describe CanCan::ControllerResource do
 
   it "should authorize based on resource name if class is false" do
     @params.merge!(:action => "show", :id => 123)
-    stub(@controller).authorize!(:show, :project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :projects) { raise CanCan::AccessDenied }
     resource = CanCan::ControllerResource.new(@controller, :class => false)
     lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
   end

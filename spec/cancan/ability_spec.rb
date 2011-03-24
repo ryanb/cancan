@@ -269,7 +269,7 @@ describe CanCan::Ability do
   end
 
 
-  # Determining Conditions
+  # Determining Kind of Conditions
 
   it "knows when a block is used for conditions" do
     @ability.can :read, :books
@@ -288,7 +288,6 @@ describe CanCan::Ability do
   end
 
   it "determines model adapter class by asking AbstractAdapter" do
-    pending
     model_class = Object.new
     adapter_class = Object.new
     stub(CanCan::ModelAdapters::AbstractAdapter).adapter_class(model_class) { adapter_class }

@@ -20,7 +20,9 @@ module CanCan
           @model_class.where(:_id => {'$exists' => false, '$type' => 7}) # return no records in Mongoid
         else
           @rules.inject(@model_class.all) do |records, rule|
-            if rule.base_behavior
+            if rule.conditions.empty?
+              records
+            elsif rule.base_behavior
               records.or(rule.conditions)
             else
               records.excludes(rule.conditions)

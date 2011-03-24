@@ -207,7 +207,7 @@ module CanCan
 
     def model_adapter(model_class, action)
       adapter_class = ModelAdapters::AbstractAdapter.adapter_class(model_class)
-      adapter_class.new(model_class, relevant_rules_for_query(action, model_class))
+      adapter_class.new(model_class, relevant_rules_for_query(action, model_class.to_s.underscore.pluralize.to_sym))
     end
 
     # See ControllerAdditions#authorize! for documentation.
@@ -249,7 +249,7 @@ module CanCan
     private
 
     def unauthorized_message_keys(action, subject)
-      subject = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.humanize.downcase.pluralize)
+      subject = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.pluralize)
       [aliases_for(:subjects, subject.to_sym), :all].flatten.map do |try_subject|
         [aliases_for(:actions, action.to_sym), :access].flatten.map do |try_action|
           :"#{try_action}.#{try_subject}"

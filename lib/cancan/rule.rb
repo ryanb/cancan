@@ -139,7 +139,7 @@ module CanCan
     end
 
     def subject_name(subject)
-      subject.class.to_s.underscore.humanize.downcase.pluralize.to_sym
+      subject.class.to_s.underscore.pluralize.to_sym
     end
 
     def model_adapter(subject)

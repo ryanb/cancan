@@ -42,21 +42,21 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
     end
 
     it "should fetch all articles when one can read all" do
-      @ability.can :read, Article
+      @ability.can :read, :articles
       article = Article.create
       Article.accessible_by(@ability).should == [article]
     end
 
     it "should fetch only the articles that are published" do
-      @ability.can :read, Article, :published => true
+      @ability.can :read, :articles, :published => true
       article1 = Article.create(:published => true)
       article2 = Article.create(:published => false)
       Article.accessible_by(@ability).should == [article1]
     end
 
     it "should fetch any articles which are published or secret" do
-      @ability.can :read, Article, :published => true
-      @ability.can :read, Article, :secret => true
+      @ability.can :read, :articles, :published => true
+      @ability.can :read, :articles, :secret => true
       article1 = Article.create(:published => true, :secret => false)
       article2 = Article.create(:published => true, :secret => true)
       article3 = Article.create(:published => false, :secret => true)
@@ -66,8 +66,8 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
 
     it "should fetch only the articles that are published and not secret" do
       pending "the `cannot` may require some custom SQL, maybe abstract out from Active Record adapter"
-      @ability.can :read, Article, :published => true
-      @ability.cannot :read, Article, :secret => true
+      @ability.can :read, :articles, :published => true
+      @ability.cannot :read, :articles, :secret => true
       article1 = Article.create(:published => true, :secret => false)
       article2 = Article.create(:published => true, :secret => true)
       article3 = Article.create(:published => false, :secret => true)
@@ -76,22 +76,22 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
     end
 
     it "should only read comments for articles which are published" do
-      @ability.can :read, Comment, :article => { :published => true }
+      @ability.can :read, :comments, :article => { :published => true }
       comment1 = Comment.create(:article => Article.create!(:published => true))
       comment2 = Comment.create(:article => Article.create!(:published => false))
       Comment.accessible_by(@ability).should == [comment1]
     end
 
     it "should allow conditions in SQL and merge with hash conditions" do
-      @ability.can :read, Article, :published => true
-      @ability.can :read, Article, ["secret=?", true]
+      @ability.can :read, :articles, :published => true
+      @ability.can :read, :articles, ["secret=?", true]
       article1 = Article.create(:published => true, :secret => false)
       article4 = Article.create(:published => false, :secret => false)
       Article.accessible_by(@ability).should == [article1]
     end
 
     it "should match gt comparison" do
-      @ability.can :read, Article, :priority.gt => 3
+      @ability.can :read, :articles, :priority.gt => 3
       article1 = Article.create(:priority => 4)
       article2 = Article.create(:priority => 3)
       Article.accessible_by(@ability).should == [article1]
@@ -100,7 +100,7 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
     end
 
     it "should match gte comparison" do
-      @ability.can :read, Article, :priority.gte => 3
+      @ability.can :read, :articles, :priority.gte => 3
       article1 = Article.create(:priority => 4)
       article2 = Article.create(:priority => 3)
       article3 = Article.create(:priority => 2)
