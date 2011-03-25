@@ -95,12 +95,12 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_defined?(:@projects).should be_false
   end
 
-  it "should not authorize single resource in collection action" do
+  it "should not authorize resource in collection action" do
     @params[:action] = "index"
     @controller.instance_variable_set(:@project, :some_project)
     stub(@controller).authorize!(:index, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
+    lambda { resource.authorize_resource }.should_not raise_error(CanCan::Unauthorized)
   end
 
   it "should authorize parent resource in collection action" do
@@ -119,11 +119,11 @@ describe CanCan::ControllerResource do
     lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
-  it "should perform authorization using controller action and non loaded model" do
+  it "should not perform authorization using controller action when no loaded model" do
     @params.merge!(:action => "show", :id => 123)
     stub(@controller).authorize!(:show, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
+    lambda { resource.authorize_resource }.should_not raise_error(CanCan::Unauthorized)
   end
 
   it "should call load_resource and authorize_resource for load_and_authorize_resource" do
@@ -242,6 +242,7 @@ describe CanCan::ControllerResource do
   end
 
   it "should authorize nested resource through parent association on index action" do
+    pending
     @params.merge!(:action => "index")
     category = Object.new
     @controller.instance_variable_set(:@category, category)
@@ -311,11 +312,11 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
-  it "should authorize based on resource name if class is false" do
+  it "should not authorize based on resource name if class is false because we don't do class level authorization anymore" do
     @params.merge!(:action => "show", :id => 123)
     stub(@controller).authorize!(:show, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :class => false)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
+    lambda { resource.authorize_resource }.should_not raise_error(CanCan::Unauthorized)
   end
 
   it "should load and authorize using custom instance name" do

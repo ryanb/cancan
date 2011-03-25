@@ -33,7 +33,7 @@ module CanCan
     end
 
     def authorize_resource
-      @controller.authorize!(authorization_action, resource_instance || subject_name_with_parent)
+      @controller.authorize!(authorization_action, resource_instance) if resource_instance
     end
 
     def parent?
