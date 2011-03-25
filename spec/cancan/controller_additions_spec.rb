@@ -95,4 +95,13 @@ describe CanCan::ControllerAdditions do
     @controller_class.enable_authorization(:unless => :engine_controller?)
     @authorize_called.should be_false
   end
+
+  it "enable_authorization should pass block to rescue_from CanCan::Unauthorized call" do
+    @block_called = false
+    mock(@controller_class).before_filter({})
+    mock(@controller_class).after_filter({})
+    mock(@controller_class).rescue_from(CanCan::Unauthorized) { |options, block| block.call(:exception) }
+    @controller_class.enable_authorization { |e| @block_called = (e == :exception) }
+    @block_called.should be_true
+  end
 end

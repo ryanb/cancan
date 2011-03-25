@@ -251,19 +251,20 @@ module CanCan
       #
       #     enable_authorization :unless => :devise_controller?
       #
-      def enable_authorization(options = {})
-        self.before_filter(options.slice(:only, :except)) do |controller|
+      def enable_authorization(options = {}, &block)
+        before_filter(options.slice(:only, :except)) do |controller|
           break if options[:if] && !controller.send(options[:if])
           break if options[:unless] && controller.send(options[:unless])
           controller.authorize! controller.params[:action], controller.params[:controller]
         end
-        self.after_filter(options.slice(:only, :except)) do |controller|
+        after_filter(options.slice(:only, :except)) do |controller|
           break if options[:if] && !controller.send(options[:if])
           break if options[:unless] && controller.send(options[:unless])
           unless controller.current_ability.fully_authorized? controller.params[:action], controller.params[:controller]
             raise CanCan::InsufficientAuthorizationCheck, "Authorization check is not sufficient for this action. This is probably because you have a conditions or attributes defined in Ability and are not checking for them in the action."
           end
         end
+        rescue_from(CanCan::Unauthorized, &block) if block
       end
 
       def cancan_resource_class
