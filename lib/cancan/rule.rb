@@ -51,6 +51,10 @@ module CanCan
       @block.nil? && !conditions_empty? && !@conditions.kind_of?(Hash)
     end
 
+    def attributes?
+      @attributes.present?
+    end
+
     def instance_conditions?
       @block || !conditions_empty?
     end

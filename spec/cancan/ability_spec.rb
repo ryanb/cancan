@@ -235,7 +235,7 @@ describe CanCan::Ability do
   end
 
 
-  # Sufficient Check
+  # Checking if Fully Authorized
 
   it "is not fully authorized when no authorize! call is made" do
     @ability.can :update, :ranges, :begin => 1
@@ -269,11 +269,23 @@ describe CanCan::Ability do
     @ability.should_not be_fully_authorized(:update, :ranges)
   end
 
-  it "is not fully authorized when attributes are required but not checked on in update/destroy actions" do
-    pending
-    @ability.can :update, :users, :name
+  it "is not fully authorized when attributes are required but not checked in update/create actions" do
+    @ability.can :access, :users, :name
     @ability.authorize! :update, :users
     @ability.should_not be_fully_authorized(:update, :users)
+    @ability.authorize! :create, :users
+    @ability.should_not be_fully_authorized(:create, :users)
+    @ability.authorize! :destroy, :users
+    @ability.should be_fully_authorized(:destroy, :users)
+  end
+
+  it "marks as fully authorized when authorizing with strings instead of symbols" do
+    @ability.fully_authorized! "update", "ranges"
+    @ability.should be_fully_authorized(:update, :ranges)
+    @ability.should be_fully_authorized("update", "ranges")
+    @ability.can :update, :users
+    @ability.authorize! "update", "users"
+    @ability.should be_fully_authorized(:update, :users)
   end
 
 

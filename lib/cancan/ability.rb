@@ -213,14 +213,18 @@ module CanCan
     # See ControllerAdditions#authorize! for documentation.
     def authorize!(action, subject, *args)
       message = nil
-      if args.last.kind_of?(Hash) && args.last.has_key?(:message)
+      if args.last.kind_of?(Hash)
         message = args.pop[:message]
       end
+      attribute = args.first
       if cannot?(action, subject, *args)
         message ||= unauthorized_message(action, subject)
         raise AccessDenied.new(message, action, subject)
       else
-        fully_authorized!(action, subject) unless subject.kind_of?(Symbol) && has_instance_conditions?(action, subject)
+        not_fully_authorized = false
+        not_fully_authorized = true if %w[create update].include?(action.to_s) && attribute.nil? && has_attributes?(action, subject)
+        not_fully_authorized = true if subject.kind_of?(Symbol) && has_instance_conditions?(action, subject)
+        fully_authorized!(action, subject) unless not_fully_authorized
       end
     end
 
@@ -252,14 +256,18 @@ module CanCan
       relevant_rules(action, subject).any?(&:instance_conditions?)
     end
 
+    def has_attributes?(action, subject)
+      relevant_rules(action, subject).any?(&:attributes?)
+    end
+
     def fully_authorized?(action, subject)
       @fully_authorized ||= []
-      @fully_authorized.include? [action, subject]
+      @fully_authorized.include? [action.to_sym, subject.to_sym]
     end
 
     def fully_authorized!(action, subject)
       @fully_authorized ||= []
-      @fully_authorized << [action, subject]
+      @fully_authorized << [action.to_sym, subject.to_sym]
     end
 
     private
