@@ -4,7 +4,7 @@ require "spec_helper"
 describe CanCan::Rule do
   before(:each) do
     @conditions = {}
-    @rule = CanCan::Rule.new(true, :read, :integers, @conditions, nil)
+    @rule = CanCan::Rule.new(true, :read, :integers, @conditions)
   end
 
   it "should return no association joins if none exist" do
@@ -33,7 +33,7 @@ describe CanCan::Rule do
   end
 
   it "should return no association joins if conditions is nil" do
-    rule = CanCan::Rule.new(true, :read, :integers, nil, nil)
+    rule = CanCan::Rule.new(true, :read, :integers)
     rule.associations_hash.should == {}
   end
 end

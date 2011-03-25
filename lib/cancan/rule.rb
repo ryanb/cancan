@@ -10,28 +10,29 @@ module CanCan
     # value. True for "can" and false for "cannot". The next two arguments are the action
     # and subject respectively (such as :read, @project). The third argument is a hash
     # of conditions and the last one is the block passed to the "can" call.
-    def initialize(base_behavior, action, subject, conditions, block)
-      raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block.nil?
+    def initialize(base_behavior, action = nil, subject = nil, *extra_args, &block)
       @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
-      @actions = [action].flatten.compact.map(&:to_sym)
-      @subjects = [subject].flatten.compact.map(&:to_sym)
-      @conditions = conditions || {}
+      @actions = [action].flatten
+      @subjects = [subject].flatten
+      @attributes = [extra_args.shift].flatten if extra_args.first.kind_of?(Symbol) || extra_args.first.kind_of?(Array) && extra_args.first.first.kind_of?(Symbol)
+      raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if extra_args.first && !block.nil?
+      @conditions = extra_args.first || {}
       @block = block
     end
 
-    # Matches both the subject and action, not necessarily the conditions
-    def relevant?(action, subject)
+    # Matches the subject, action, and given attribute. Conditions are not checked here.
+    def relevant?(action, subject, attribute)
       subject = subject.values.first if subject.class == Hash
-      @match_all || (matches_action?(action) && matches_subject?(subject))
+      @match_all || (matches_action?(action) && matches_subject?(subject) && matches_attribute?(attribute))
     end
 
     # Matches the block or conditions hash
-    def matches_conditions?(action, subject, extra_args)
+    def matches_conditions?(action, subject, attribute)
       if @match_all
-        call_block_with_all(action, subject, extra_args)
+        call_block_with_all(action, subject, attribute)
       elsif @block && subject_object?(subject)
-        @block.call(subject, *extra_args)
+        @block.arity == 1 ? @block.call(subject) : @block.call(subject, attribute)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && subject_object?(subject)
@@ -87,6 +88,10 @@ module CanCan
       @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject.to_sym) # || matches_subject_class?(subject)
     end
 
+    def matches_attribute?(attribute)
+      @attributes.nil? || attribute.nil? || @attributes.include?(attribute.to_sym)
+    end
+
     # TODO deperecate this
     def matches_subject_class?(subject)
       @expanded_subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
@@ -130,11 +135,11 @@ module CanCan
       matches_conditions_hash?(parent, @conditions[parent.class.name.downcase.to_sym] || {})
     end
 
-    def call_block_with_all(action, subject, extra_args)
+    def call_block_with_all(action, subject, attribute)
       if subject_object? subject
-        @block.call(action, subject_name(subject), subject, *extra_args)
+        @block.call(action, subject_name(subject), subject, attribute)
       else
-        @block.call(action, subject, nil, *extra_args)
+        @block.call(action, subject, nil, attribute)
       end
     end
 

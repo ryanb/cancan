@@ -35,11 +35,9 @@ describe CanCan::Ability do
     @ability.can?(:paint, :cars).should be_false
   end
 
-  it "allows strings instead of symbols" do
-    @ability.can "paint", "fences"
+  it "allows strings instead of symbols in ability check" do
+    @ability.can :paint, :fences
     @ability.can?("paint", "fences").should be_true
-    @ability.can "access", "all"
-    @ability.can?("wax", "cars").should be_true
   end
 
 
@@ -182,12 +180,58 @@ describe CanCan::Ability do
     @block_called.should be_true
   end
 
-  it "should raise an error when attempting to use a block with a hash condition since it's not likely what they want" do
+  it "raises an error when attempting to use a block with a hash condition since it's not likely what they want" do
     lambda {
       @ability.can :read, :ranges, :published => true do
         false
       end
     }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read ranges ability. Use either one.")
+  end
+
+
+  # Attributes
+
+  it "allows permission on attributes" do
+    @ability.can :update, :users, :name
+    @ability.can :update, :users, [:email, :age]
+    @ability.can?(:update, :users, :name).should be_true
+    @ability.can?(:update, :users, :email).should be_true
+    @ability.can?(:update, :users, :password).should be_false
+  end
+
+  it "allows permission on all attributes when none are given" do
+    @ability.can :update, :users
+    @ability.can?(:update, :users, :password).should be_true
+  end
+
+  it "allows strings when chekcing attributes" do
+    @ability.can :update, :users, :name
+    @ability.can?(:update, :users, "name").should be_true
+  end
+
+  it "combines attribute check with conditions hash" do
+    @ability.can :update, :ranges, :begin => 1
+    @ability.can :update, :ranges, :name, :begin => 2
+    @ability.can?(:update, 1..3, :foobar).should be_true
+    @ability.can?(:update, 2..4, :foobar).should be_false
+    @ability.can?(:update, 2..4, :name).should be_true
+    @ability.can?(:update, 3..5, :name).should be_false
+  end
+
+  it "passes attribute to block and nil if no attribute checked" do
+    @ability.can :update, :ranges do |range, attribute|
+      attribute == :name
+    end
+    @ability.can?(:update, 1..3, :name).should be_true
+    @ability.can?(:update, 2..4).should be_false
+  end
+
+  it "passes attribute to block for global can definition" do
+    @ability.can do |action, subject, object, attribute|
+      attribute == :name
+    end
+    @ability.can?(:update, 1..3, :name).should be_true
+    @ability.can?(:update, 2..4).should be_false
   end
 
 
@@ -259,7 +303,7 @@ describe CanCan::Ability do
     end
   end
 
-  it "should raise access denied exception with default message if not specified" do
+  it "raises access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :books
     rescue CanCan::AccessDenied => e

@@ -53,9 +53,9 @@ module CanCan
     #   end
     #
     # Also see the RSpec Matchers to aid in testing.
-    def can?(action, subject, *extra_args)
-      match = relevant_rules_for_match(action, subject).detect do |rule|
-        rule.matches_conditions?(action, subject, extra_args)
+    def can?(action, subject, attribute = nil)
+      match = relevant_rules_for_match(action, subject, attribute).detect do |rule|
+        rule.matches_conditions?(action, subject, attribute)
       end
       match ? match.base_behavior : false
     end
@@ -121,8 +121,8 @@ module CanCan
     #     # check the database and return true/false
     #   end
     #
-    def can(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(true, action, subject, conditions, block)
+    def can(*args, &block)
+      rules << Rule.new(true, *args, &block)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -137,8 +137,8 @@ module CanCan
     #     product.invisible?
     #   end
     #
-    def cannot(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(false, action, subject, conditions, block)
+    def cannot(*args, &block)
+      rules << Rule.new(false, *args, &block)
     end
 
     # Alias one or more actions into another one.
@@ -282,16 +282,16 @@ module CanCan
 
     # Returns an array of Rule instances which match the action and subject
     # This does not take into consideration any hash conditions or block statements
-    def relevant_rules(action, subject)
+    def relevant_rules(action, subject, attribute = nil)
       rules.reverse.select do |rule|
         rule.expanded_actions = expand_aliases(:actions, rule.actions)
         rule.expanded_subjects = expand_aliases(:subjects, rule.subjects)
-        rule.relevant? action, subject
+        rule.relevant? action, subject, attribute
       end
     end
 
-    def relevant_rules_for_match(action, subject)
-      relevant_rules(action, subject).each do |rule|
+    def relevant_rules_for_match(action, subject, attribute)
+      relevant_rules(action, subject, attribute).each do |rule|
         if rule.only_raw_sql?
           raise Error, "The can? and cannot? call cannot be used with a raw sql 'can' definition. The checking code cannot be determined for #{action.inspect} #{subject.inspect}"
         end
@@ -299,7 +299,7 @@ module CanCan
     end
 
     def relevant_rules_for_query(action, subject)
-      relevant_rules(action, subject).each do |rule|
+      relevant_rules(action, subject, nil).each do |rule|
         if rule.only_block?
           raise Error, "The accessible_by call cannot be used with a block 'can' definition. The SQL cannot be determined for #{action.inspect} #{subject.inspect}"
         end
