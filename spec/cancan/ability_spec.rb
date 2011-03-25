@@ -235,6 +235,48 @@ describe CanCan::Ability do
   end
 
 
+  # Sufficient Check
+
+  it "is not fully authorized when no authorize! call is made" do
+    @ability.can :update, :ranges, :begin => 1
+    @ability.can?(:update, :ranges).should be_true
+    @ability.should_not be_fully_authorized(:update, :ranges)
+  end
+
+  it "is fully authorized when calling authorize! with a matching action and subject" do
+    @ability.can :update, :ranges
+    @ability.authorize! :update, :ranges
+    @ability.should be_fully_authorized(:update, :ranges)
+    @ability.should_not be_fully_authorized(:create, :ranges)
+  end
+
+  it "is fully authorized when marking action and subject as such" do
+    @ability.fully_authorized! :update, :ranges
+    @ability.should be_fully_authorized(:update, :ranges)
+  end
+
+  it "is not fully authorized when a conditions hash exists but no instance is used" do
+    @ability.can :update, :ranges, :begin => 1
+    @ability.authorize! :update, :ranges
+    @ability.should_not be_fully_authorized(:update, :ranges)
+  end
+
+  it "is not fully authorized when a block exists but no instance is used" do
+    @ability.can :update, :ranges do |range|
+      range.begin == 1
+    end
+    @ability.authorize! :update, :ranges
+    @ability.should_not be_fully_authorized(:update, :ranges)
+  end
+
+  it "is not fully authorized when attributes are required but not checked on in update/destroy actions" do
+    pending
+    @ability.can :update, :users, :name
+    @ability.authorize! :update, :users
+    @ability.should_not be_fully_authorized(:update, :users)
+  end
+
+
   # Cannot
 
   it "offers cannot? method which inverts can?" do

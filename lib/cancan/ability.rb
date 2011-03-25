@@ -219,6 +219,8 @@ module CanCan
       if cannot?(action, subject, *args)
         message ||= unauthorized_message(action, subject)
         raise AccessDenied.new(message, action, subject)
+      else
+        fully_authorized!(action, subject) unless subject.kind_of?(Symbol) && has_instance_conditions?(action, subject)
       end
     end
 
@@ -244,6 +246,20 @@ module CanCan
 
     def has_raw_sql?(action, subject)
       relevant_rules(action, subject).any?(&:only_raw_sql?)
+    end
+
+    def has_instance_conditions?(action, subject)
+      relevant_rules(action, subject).any?(&:instance_conditions?)
+    end
+
+    def fully_authorized?(action, subject)
+      @fully_authorized ||= []
+      @fully_authorized.include? [action, subject]
+    end
+
+    def fully_authorized!(action, subject)
+      @fully_authorized ||= []
+      @fully_authorized << [action, subject]
     end
 
     private
