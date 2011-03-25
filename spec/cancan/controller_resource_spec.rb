@@ -66,21 +66,23 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "from params"
   end
 
-  it "should build a collection when on index action when class responds to accessible_by" do
+  it "should build a collection when on index action when class responds to accessible_by and mark ability as fully authorized" do
     stub(Project).accessible_by(@ability, :index) { :found_projects }
     @params[:action] = "index"
     resource = CanCan::ControllerResource.new(@controller, :project)
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
     @controller.instance_variable_get(:@projects).should == :found_projects
+    @ability.should be_fully_authorized(:index, :projects)
   end
 
-  it "should not build a collection when on index action when class does not respond to accessible_by" do
+  it "should not build a collection when on index action when class does not respond to accessible_by and not mark ability as fully authorized" do
     @params[:action] = "index"
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
     @controller.instance_variable_get(:@project).should be_nil
     @controller.instance_variable_defined?(:@projects).should be_false
+    @ability.should_not be_fully_authorized(:index, :projects)
   end
 
   it "should not use accessible_by when defining abilities through a block" do

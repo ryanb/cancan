@@ -28,6 +28,7 @@ module CanCan
         self.resource_instance ||= load_resource_instance
       elsif load_collection?
         self.collection_instance ||= load_collection
+        current_ability.fully_authorized! @params[:action], @params[:controller]
       end
     end
 
