@@ -220,12 +220,17 @@ module CanCan
       if cannot?(action, subject, *args)
         message ||= unauthorized_message(action, subject)
         raise AccessDenied.new(message, action, subject)
-      else
-        not_fully_authorized = false
-        not_fully_authorized = true if %w[create update].include?(action.to_s) && attribute.nil? && has_attributes?(action, subject)
-        not_fully_authorized = true if subject.kind_of?(Symbol) && has_instance_conditions?(action, subject)
-        fully_authorized!(action, subject) unless not_fully_authorized
+      elsif sufficient_attribute_check?(action, subject, attribute) && sufficient_condition_check?(action, subject)
+        fully_authorized!(action, subject)
       end
+    end
+
+    def sufficient_attribute_check?(action, subject, attribute)
+      !(%w[create update].include?(action.to_s) && attribute.nil? && has_attributes?(action, subject))
+    end
+
+    def sufficient_condition_check?(action, subject)
+      !((subject.kind_of?(Symbol) || subject.kind_of?(String)) && has_instance_conditions?(action, subject))
     end
 
     def unauthorized_message(action, subject)
