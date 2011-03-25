@@ -317,9 +317,11 @@ describe CanCan::Ability do
     end
   end
 
-  it "should not raise access denied exception if ability is authorized to perform an action" do
+  it "should not raise access denied exception if ability is authorized to perform an action and return subject" do
     @ability.can :read, :foo
-    lambda { @ability.authorize!(:read, :foo) }.should_not raise_error
+    lambda {
+      @ability.authorize!(:read, :foo).should == :foo
+    }.should_not raise_error
   end
 
   it "should know when block is used in conditions" do

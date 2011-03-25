@@ -201,6 +201,7 @@ module CanCan
         message ||= unauthorized_message(action, subject)
         raise AccessDenied.new(message, action, subject)
       end
+      subject
     end
 
     def unauthorized_message(action, subject)
