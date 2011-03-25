@@ -60,25 +60,38 @@ describe CanCan::ControllerAdditions do
 
   it "enable_authorization should call authorize! with controller and action name" do
     @params.merge!(:controller => "projects", :action => "create")
-    mock(@controller_class).authorize!("create", "projects")
+    mock(@controller).authorize!("create", "projects")
     stub(@controller_class).before_filter(:only => :foo, :except => :bar) { |options, block| block.call(@controller) }
+    stub(@controller_class).after_filter(:only => :foo, :except => :bar)
     @controller_class.enable_authorization(:only => :foo, :except => :bar)
   end
 
-  it "enable_authorization should not not call authorize! when :if is false" do
+  it "enable_authorization should raise InsufficientAuthorizationCheck when not fully authoried" do
+    @params.merge!(:controller => "projects", :action => "create")
+    stub(@ability).fully_authorized? { false }
+    stub(@controller_class).before_filter(:only => :foo, :except => :bar)
+    stub(@controller_class).after_filter(:only => :foo, :except => :bar) { |options, block| block.call(@controller) }
+    lambda {
+      @controller_class.enable_authorization(:only => :foo, :except => :bar)
+    }.should raise_error(CanCan::InsufficientAuthorizationCheck)
+  end
+
+  it "enable_authorization should not call authorize! when :if is false" do
     @authorize_called = false
     stub(@controller).authorize? { false }
-    stub(@controller_class).authorize! { @authorize_called = true }
+    stub(@controller).authorize! { @authorize_called = true }
     mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
+    mock(@controller_class).after_filter({}) { |options, block| block.call(@controller) }
     @controller_class.enable_authorization(:if => :authorize?)
     @authorize_called.should be_false
   end
 
-  it "enable_authorization should not trigger AuthorizationNotPerformed when :unless is true" do
+  it "enable_authorization should not call authorize! when :unless is true" do
     @authorize_called = false
     stub(@controller).engine_controller? { true }
-    stub(@controller_class).authorize! { @authorize_called = true }
+    stub(@controller).authorize! { @authorize_called = true }
     mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
+    mock(@controller_class).after_filter({}) { |options, block| block.call(@controller) }
     @controller_class.enable_authorization(:unless => :engine_controller?)
     @authorize_called.should be_false
   end

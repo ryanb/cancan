@@ -225,14 +225,6 @@ module CanCan
       end
     end
 
-    def sufficient_attribute_check?(action, subject, attribute)
-      !(%w[create update].include?(action.to_s) && attribute.nil? && has_attributes?(action, subject))
-    end
-
-    def sufficient_condition_check?(action, subject)
-      !((subject.kind_of?(Symbol) || subject.kind_of?(String)) && has_instance_conditions?(action, subject))
-    end
-
     def unauthorized_message(action, subject)
       keys = unauthorized_message_keys(action, subject)
       variables = {:action => action.to_s}
@@ -284,6 +276,14 @@ module CanCan
           :"#{try_action}.#{try_subject}"
         end
       end.flatten
+    end
+
+    def sufficient_attribute_check?(action, subject, attribute)
+      !(%w[create update].include?(action.to_s) && attribute.nil? && has_attributes?(action, subject))
+    end
+
+    def sufficient_condition_check?(action, subject)
+      !((subject.kind_of?(Symbol) || subject.kind_of?(String)) && has_instance_conditions?(action, subject))
     end
 
     # Accepts an array of actions and returns an array of actions which match.
