@@ -223,6 +223,7 @@ module CanCan
       elsif sufficient_attribute_check?(action, subject, attribute) && sufficient_condition_check?(action, subject)
         fully_authorized!(action, subject)
       end
+      subject
     end
 
     def unauthorized_message(action, subject)

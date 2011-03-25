@@ -359,7 +359,30 @@ describe CanCan::Ability do
     end
   end
 
-  it "raises access denied exception with default message if not specified" do
+  it "should not raise access denied exception if ability is authorized to perform an action and return subject" do
+    @ability.can :read, :foo
+    lambda {
+      @ability.authorize!(:read, :foo).should == :foo
+    }.should_not raise_error
+  end
+
+  it "should know when block is used in conditions" do
+    @ability.can :read, :foo
+    @ability.should_not have_block(:read, :foo)
+    @ability.can :read, :foo do |foo|
+      false
+    end
+    @ability.should have_block(:read, :foo)
+  end
+
+  it "should know when raw sql is used in conditions" do
+    @ability.can :read, :foo
+    @ability.should_not have_raw_sql(:read, :foo)
+    @ability.can :read, :foo, 'false'
+    @ability.should have_raw_sql(:read, :foo)
+  end
+
+  it "should raise access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :books
     rescue CanCan::AccessDenied => e
@@ -370,9 +393,11 @@ describe CanCan::Ability do
     end
   end
 
-  it "does not raise access denied exception if ability is authorized to perform an action" do
+  it "does not raise access denied exception if ability is authorized to perform an action and return subject" do
     @ability.can :read, :books
-    lambda { @ability.authorize!(:read, :books) }.should_not raise_error
+    lambda {
+      @ability.authorize!(:read, :books).should == :books
+    }.should_not raise_error
   end
 
 
