@@ -18,7 +18,7 @@ module CanCan
   # This usually happens within a call to ControllerAdditions#authorize! but can be
   # raised manually.
   #
-  #   raise CanCan::AccessDenied.new("Not authorized!", :read, Article)
+  #   raise CanCan::Unauthorized.new("Not authorized!", :read, Article)
   #
   # The passed message, action, and subject are optional and can later be retrieved when
   # rescuing from the exception.
@@ -33,9 +33,9 @@ module CanCan
   #   exception.default_message = "Default error message"
   #   exception.message # => "Default error message"
   #
-  # See ControllerAdditions#authorized! for more information on rescuing from this exception
+  # See ControllerAdditions#authorize! for more information on rescuing from this exception
   # and customizing the message using I18n.
-  class AccessDenied < Error
+  class Unauthorized < Error
     attr_reader :action, :subject
     attr_writer :default_message
 

@@ -1,9 +1,9 @@
 require "spec_helper"
 
-describe CanCan::AccessDenied do
+describe CanCan::Unauthorized do
   describe "with action and subject" do
     before(:each) do
-      @exception = CanCan::AccessDenied.new(nil, :some_action, :some_subject)
+      @exception = CanCan::Unauthorized.new(nil, :some_action, :some_subject)
     end
 
     it "should have action and subject accessors" do
@@ -20,7 +20,7 @@ describe CanCan::AccessDenied do
 
   describe "with only a message" do
     before(:each) do
-      @exception = CanCan::AccessDenied.new("Access denied!")
+      @exception = CanCan::Unauthorized.new("Access denied!")
     end
 
     it "should have nil action and subject" do

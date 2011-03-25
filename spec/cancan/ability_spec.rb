@@ -277,6 +277,8 @@ describe CanCan::Ability do
     @ability.should_not be_fully_authorized(:update, :users)
     @ability.authorize! :create, :users
     @ability.should_not be_fully_authorized(:create, :users)
+    @ability.authorize! :create, :users, :name
+    @ability.should be_fully_authorized(:create, :users)
     @ability.authorize! :destroy, :users
     @ability.should be_fully_authorized(:destroy, :users)
   end
@@ -347,15 +349,15 @@ describe CanCan::Ability do
 
   # Unauthorized Exception
 
-  it "raises CanCan::AccessDenied when calling authorize! on unauthorized action" do
+  it "raises CanCan::Unauthorized when calling authorize! on unauthorized action" do
     begin
       @ability.authorize! :read, :books, :message => "Access denied!"
-    rescue CanCan::AccessDenied => e
+    rescue CanCan::Unauthorized => e
       e.message.should == "Access denied!"
       e.action.should == :read
       e.subject.should == :books
     else
-      fail "Expected CanCan::AccessDenied exception to be raised"
+      fail "Expected CanCan::Unauthorized exception to be raised"
     end
   end
 
@@ -385,11 +387,11 @@ describe CanCan::Ability do
   it "should raise access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :books
-    rescue CanCan::AccessDenied => e
+    rescue CanCan::Unauthorized => e
       e.default_message = "Access denied!"
       e.message.should == "Access denied!"
     else
-      fail "Expected CanCan::AccessDenied exception to be raised"
+      fail "Expected CanCan::Unauthorized exception to be raised"
     end
   end
 

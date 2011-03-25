@@ -292,7 +292,7 @@ module CanCan
       base.helper_method :can?, :cannot?
     end
 
-    # Raises a CanCan::AccessDenied exception if the current_ability cannot
+    # Raises a CanCan::Unauthorized exception if the current_ability cannot
     # perform the given action. This is usually called in a controller action or
     # before filter to perform the authorization.
     #
@@ -319,12 +319,12 @@ module CanCan
     # access is displayed to the user.
     #
     #   class ApplicationController < ActionController::Base
-    #     rescue_from CanCan::AccessDenied do |exception|
+    #     rescue_from CanCan::Unauthorized do |exception|
     #       redirect_to root_url, :alert => exception.message
     #     end
     #   end
     #
-    # See the CanCan::AccessDenied exception for more details on working with the exception.
+    # See the CanCan::Unauthorized exception for more details on working with the exception.
     #
     # See the load_and_authorize_resource method to automatically add the authorize! behavior
     # to the default RESTful actions.

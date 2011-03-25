@@ -163,7 +163,7 @@ module CanCan
         elsif @options[:shallow]
           resource_class
         else
-          raise AccessDenied # maybe this should be a record not found error instead?
+          raise Unauthorized # maybe this should be a record not found error instead?
         end
       else
         resource_class

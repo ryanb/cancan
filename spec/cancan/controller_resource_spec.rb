@@ -96,32 +96,32 @@ describe CanCan::ControllerResource do
   it "should not authorize single resource in collection action" do
     @params[:action] = "index"
     @controller.instance_variable_set(:@project, :some_project)
-    stub(@controller).authorize!(:index, :projects) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:index, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should authorize parent resource in collection action" do
     @params[:action] = "index"
     @controller.instance_variable_set(:@category, :some_category)
-    stub(@controller).authorize!(:show, :some_category) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :some_category) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :category, :parent => true)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should perform authorization using controller action and loaded model" do
     @params.merge!(:action => "show", :id => 123)
     @controller.instance_variable_set(:@project, :some_project)
-    stub(@controller).authorize!(:show, :some_project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :some_project) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should perform authorization using controller action and non loaded model" do
     @params.merge!(:action => "show", :id => 123)
-    stub(@controller).authorize!(:show, :projects) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should call load_resource and authorize_resource for load_and_authorize_resource" do
@@ -229,13 +229,13 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
-  it "should raise AccessDenied when attempting to load resource through nil" do
+  it "should raise Unauthorized when attempting to load resource through nil" do
     project = Project.create!
     @params.merge!(:action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     lambda {
       resource.load_resource
-    }.should raise_error(CanCan::AccessDenied)
+    }.should raise_error(CanCan::Unauthorized)
     @controller.instance_variable_get(:@project).should be_nil
   end
 
@@ -243,9 +243,9 @@ describe CanCan::ControllerResource do
     @params.merge!(:action => "index")
     category = Object.new
     @controller.instance_variable_set(:@category, category)
-    stub(@controller).authorize!(:index, category => :projects) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:index, category => :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should load through first matching if multiple are given" do
@@ -296,9 +296,9 @@ describe CanCan::ControllerResource do
   it "should only authorize :show action on parent resource" do
     project = Project.create!
     @params.merge!(:action => "new", :project_id => project.id)
-    stub(@controller).authorize!(:show, project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, project) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :project, :parent => true)
-    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should load the model using a custom class" do
@@ -311,17 +311,17 @@ describe CanCan::ControllerResource do
 
   it "should authorize based on resource name if class is false" do
     @params.merge!(:action => "show", :id => 123)
-    stub(@controller).authorize!(:show, :projects) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, :projects) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :class => false)
-    lambda { resource.authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.authorize_resource }.should raise_error(CanCan::Unauthorized)
   end
 
   it "should load and authorize using custom instance name" do
     project = Project.create!
     @params.merge!(:action => "show", :id => project.id)
-    stub(@controller).authorize!(:show, project) { raise CanCan::AccessDenied }
+    stub(@controller).authorize!(:show, project) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :instance_name => :custom_project)
-    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
+    lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::Unauthorized)
     @controller.instance_variable_get(:@custom_project).should == project
   end
 

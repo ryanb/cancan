@@ -66,10 +66,10 @@ See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/author
 
 === 3. Handle Unauthorized Access
 
-If the user authorization fails, a <tt>CanCan::AccessDenied</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
+If the user authorization fails, a <tt>CanCan::Unauthorized</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
 
   class ApplicationController < ActionController::Base
-    rescue_from CanCan::AccessDenied do |exception|
+    rescue_from CanCan::Unauthorized do |exception|
       redirect_to root_url, :alert => exception.message
     end
   end
