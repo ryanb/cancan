@@ -264,6 +264,7 @@ module CanCan
     end
 
     def fully_authorized!(action, subject)
+      subject = subject.class.to_s.underscore.pluralize.to_sym unless subject.kind_of?(Symbol) || subject.kind_of?(String)
       @fully_authorized ||= []
       @fully_authorized << [action.to_sym, subject.to_sym]
     end

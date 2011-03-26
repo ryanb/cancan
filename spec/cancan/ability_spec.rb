@@ -261,6 +261,8 @@ describe CanCan::Ability do
     @ability.should_not be_fully_authorized(:update, :ranges)
     @ability.authorize! "update", "ranges"
     @ability.should_not be_fully_authorized(:update, :ranges)
+    @ability.authorize! :update, 1..3
+    @ability.should be_fully_authorized(:update, :ranges)
   end
 
   it "is not fully authorized when a block exists but no instance is used" do
@@ -269,6 +271,8 @@ describe CanCan::Ability do
     end
     @ability.authorize! :update, :ranges
     @ability.should_not be_fully_authorized(:update, :ranges)
+    @ability.authorize! :update, 1..3
+    @ability.should be_fully_authorized(:update, :ranges)
   end
 
   it "is not fully authorized when attributes are required but not checked in update/create actions" do
