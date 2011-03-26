@@ -43,7 +43,7 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
-  it "should build a new resource with hash if params[:id] is not specified" do
+  it "should build a new resource with hash if params[:id] is not specified and authorize on each attribute" do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
@@ -334,6 +334,22 @@ describe CanCan::ControllerResource do
     resource = CanCan::ControllerResource.new(@controller, :find_by => :name)
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
+  end
+
+  it "should authorize each new attribute in the create action" do
+    @params.merge!(:action => "create", :project => {:name => "foo"})
+    @controller.instance_variable_set(:@project, :some_project)
+    mock(@controller).authorize!(:create, :some_project, :name)
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.authorize_resource
+  end
+
+  it "should authorize each new attribute in the update action" do
+    @params.merge!(:action => "update", :id => 123, :project => {:name => "foo"})
+    @controller.instance_variable_set(:@project, :some_project)
+    mock(@controller).authorize!(:update, :some_project, :name)
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.authorize_resource
   end
 
   # it "should raise ImplementationRemoved when adding :name option" do

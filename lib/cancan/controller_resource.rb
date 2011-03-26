@@ -33,7 +33,15 @@ module CanCan
     end
 
     def authorize_resource
-      @controller.authorize!(authorization_action, resource_instance) if resource_instance
+      if resource_instance
+        if @params[name] && (authorization_action == :create || authorization_action == :update)
+          @params[name].each do |key, value|
+            @controller.authorize!(authorization_action, resource_instance, key.to_sym)
+          end
+        else
+          @controller.authorize!(authorization_action, resource_instance)
+        end
+      end
     end
 
     def parent?
