@@ -1,111 +1,108 @@
 = CanCan
 
-Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
+This is the branch for CanCan 2.0 which is in very early development. For a stable release please check out the {master branch}[https://github.com/ryanb/cancan]
 
-CanCan is an authorization library for Ruby on Rails which restricts what resources a given user is allowed to access. All permissions are defined in a single location (the +Ability+ class) and not duplicated across controllers, views, and database queries.
-
-
-== Installation
-
-In <b>Rails 3</b>, add this to your Gemfile and run the +bundle+ command.
-
-  gem "cancan"
-
-In <b>Rails 2</b>, add this to your environment.rb file.
-
-  config.gem "cancan"
-
-Alternatively, you can install it as a plugin.
-
-  rails plugin install git://github.com/ryanb/cancan.git
+Here are some instructions for setting up CanCan 2.0. Try this out and provide feedback in the {issue tracker}[https://github.com/ryanb/cancan/issues].
 
 
-== Getting Started
+== Setup
 
-CanCan expects a +current_user+ method to exist in the controller. First, set up some authentication (such as Authlogic[https://github.com/binarylogic/authlogic] or Devise[https://github.com/plataformatec/devise]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/changing-defaults] if you need different behavior.
+CanCan expects your controllers to have a +current_user+ method. Add some authentication for this (such as Devise[https://github.com/plataformatec/devise], Authlogic[https://github.com/binarylogic/authlogic] or {nifty:authentication}[https://github.com/ryanb/nifty-generators]). See {Changing Defaults}[https://github.com/ryanb/cancan/wiki/Changing-Defaults] to customize this behavior.
 
+To install CanCan, add it to your Gemfile and run the `bundle` command.
 
-=== 1. Define Abilities
+  gem "cancan", :git => "git://github.com/ryanb/cancan.git", :branch => "2.0"
 
-User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 3 generator for creating this class.
+Next generate an Ability class, this is where your permissions will be defined.
 
   rails g cancan:ability
 
-See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
+Add authorization by calling {enable_authorization}[https://github.com/ryanb/cancan/wiki/enable_authorization] in your ApplicationController.
+
+  class ApplicationController < ActionController::Base
+    enable_authorization
+  end
+
+This will add an authorization check locking down every controller action. If you try visiting a page, a <tt>CanCan::Unauthorized</tt> exception will be raised since you have not granted the user ability to access it.
 
 
-=== 2. Check Abilities & Authorization
+== Defining Abilities
 
-The current user's permissions can then be checked using the <tt>can?</tt> and <tt>cannot?</tt> methods in the view and controller.
+You grant access to controller actions through the +Ability+ class which was generated above. The +current_user+ is passed in allowing you to define permissions based on user attributes. For example:
 
-  <% if can? :update, @article %>
-    <%= link_to "Edit", edit_article_path(@article) %>
+  if user
+    can :access, :all
+  else
+    can :access, :home
+    can :create, [:users, :sessions]
+  end
+
+Here if there is a user he will be able to perform any action on any controller. If someone is not logged in he can only access the home, users, and sessions controllers.
+
+The first argument to +can+ is the action the user can perform. The second argument is the controller name they can perform that action on. You can pass <tt>:access</tt> and <tt>:all</tt> to represent any action and controller respectively.
+
+As shown above, pass an array to either of these will grant permission on each item in the array. It isn't necessary to pass the +new+ action here because CanCan includes some default aliases. See the {Aliases}[https://github.com/ryanb/cancan/wiki/Aliases] page for details.
+
+You can check permissions in any controller or view using the <tt>can?</tt> method.
+
+  <% if can? :create, :comments %>
+    <%= link_to "New Comment", new_comment_path %>
   <% end %>
 
-See {Checking Abilities}[https://github.com/ryanb/cancan/wiki/checking-abilities] for more information
+Here the link will only show up the user can create comments.
 
-The <tt>authorize!</tt> method in the controller will raise an exception if the user is not able to perform the given action.
 
-  def show
-    @article = Article.find(params[:id])
-    authorize! :read, @article
+== Resource Conditions
+
+What if you need to change authorization based on a model's attributes? You can do so by passing a hash of conditions as the last argument to +can+. For example, if you want to only allow one to access projects which he owns you can set the <tt>:user_id</tt>.
+
+  can :access, :projects, :user_id => user.id
+
+A block can also be used for complex condition checks just like in CanCan 1, but here it is not necessary.
+
+If you try visiting any of the project pages at this point you will see a <tt>CanCan::InsufficientAuthorizationCheck</tt> exception is raised. This is because the default authorization has no way to check permissions on the <tt>@project</tt> instance. You can check permissions on an object manually using the <tt>authorize!</tt> method.
+
+  def edit
+    @project = Project.find(params[:id])
+    authorize! :edit, @project
   end
 
-Setting this for every action can be tedious, therefore the +load_and_authorize_resource+ method is provided to automatically authorize all actions in a RESTful style resource controller. It will use a before filter to load the resource into an instance variable and authorize it for every action.
+However this can get tedious. Instead CanCan provides a +load_and_authorize_resource+ method to load the <tt>@project</tt> instance in every controller action and authorize it.
 
-  class ArticlesController < ApplicationController
+  class ProjectsController < ApplicationController
     load_and_authorize_resource
-
-    def show
-      # @article is already loaded and authorized
+    def edit
+      # @project already loaded here and authorized
     end
   end
 
-See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information.
+The +index+ (and other collection actions) will load the <tt>@projects</tt> instance which automatically limits the projects the user is allowed to access. This is a scope so you can make further calls to +where+ to limit what is returned from the database.
 
-
-=== 3. Handle Unauthorized Access
-
-If the user authorization fails, a <tt>CanCan::Unauthorized</tt> exception will be raised. You can catch this and modify its behavior in the +ApplicationController+.
-
-  class ApplicationController < ActionController::Base
-    rescue_from CanCan::Unauthorized do |exception|
-      redirect_to root_url, :alert => exception.message
-    end
+  def index
+    @projects = @projects.where(:hidden => false)
   end
 
-See {Exception Handling}[https://github.com/ryanb/cancan/wiki/exception-handling] for more information.
+You can check permissions on instances using the <tt>can?</tt> method.
+
+  <%= link_to "Edit Project", edit_project_path if can? :update, @project %>
+
+Here it will only show the edit link if the +user_id+ matches.
 
 
-=== 4. Lock It Down
+== Resource Attributes
 
-If you want to ensure authorization happens on every action in your application, add +check_authorization+ to your ApplicationController.
+In CanCan 2.0 it is possible to define permissions on specific resource attributes. For example, if you want to allow a user to only update the name and priority of a project, pass that as the third argument to +can+.
 
-  class ApplicationController < ActionController::Base
-    check_authorization
-  end
+  can :update, :projects, [:name, :priority]
 
-This will raise an exception if authorization is not performed in an action. If you want to skip this add +skip_authorization_check+ to a controller subclass. See {Ensure Authorization}[https://github.com/ryanb/cancan/wiki/Ensure-Authorization] for more information.
+If you use this in combination with +load_and_authorize_resource+ it will ensure that only those two attributes exist in <tt>params[:project]</tt> when updating the project. If you do this everywhere it will not be necessary to use +attr_accessible+ in your models.
 
+You can combine this with a hash of conditions. For example, here the user can update all attributes except the price when the product is discontinued.
 
-== Wiki Docs
+  can :update, :products
+  cannot :update, :products, :price, :discontinued => true
 
-* {Upgrading to 1.6}[https://github.com/ryanb/cancan/wiki/Upgrading-to-1.6]
-* {Defining Abilities}[https://github.com/ryanb/cancan/wiki/Defining-Abilities]
-* {Checking Abilities}[https://github.com/ryanb/cancan/wiki/Checking-Abilities]
-* {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/Authorizing-Controller-Actions]
-* {Exception Handling}[https://github.com/ryanb/cancan/wiki/Exception-Handling]
-* {Changing Defaults}[https://github.com/ryanb/cancan/wiki/Changing-Defaults]
-* {See more}[https://github.com/ryanb/cancan/wiki]
+You can check permissions on specific attributes to determine what to show in the form.
 
+  <%= f.text_field :name if can? :update, @project, :name %>
 
-== Questions or Problems?
-
-If you have any issues with CanCan which you cannot find the solution to in the documentation[https://github.com/ryanb/cancan/wiki], please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
-
-To get the specs running you should call +bundle+ and then +rake+. See the {spec/README}[https://github.com/ryanb/cancan/blob/master/spec/README.rdoc] for more information.
-
-
-== Special Thanks
-
-CanCan was inspired by declarative_authorization[https://github.com/stffn/declarative_authorization/] and aegis[https://github.com/makandra/aegis]. Also many thanks to the CanCan contributors[https://github.com/ryanb/cancan/contributors]. See the CHANGELOG[https://github.com/ryanb/cancan/blob/master/CHANGELOG.rdoc] for the full list.

@@ -22,21 +22,12 @@ module CanCan
     #
     # You can also pass the class instead of an instance (if you don't have one handy).
     #
-    #   can? :create, Project
+    #   can? :create, :projects
     #
     # Nested resources can be passed through a hash, this way conditions which are
     # dependent upon the association will work when using a class.
     #
-    #   can? :create, @category => Project
-    #
-    # Any additional arguments will be passed into the "can" block definition. This
-    # can be used to pass more information about the user's request for example.
-    #
-    #   can? :create, Project, request.remote_ip
-    #
-    #   can :create Project do |project, remote_ip|
-    #     # ...
-    #   end
+    #   can? :create, @category => :projects
     #
     # Not only can you use the can? method in the controller and view (see ControllerAdditions),
     # but you can also call it directly on an ability instance.
@@ -71,22 +62,22 @@ module CanCan
     # Defines which abilities are allowed using two arguments. The first one is the action
     # you're setting the permission for, the second one is the class of object you're setting it on.
     #
-    #   can :update, Article
+    #   can :update, :articles
     #
     # You can pass an array for either of these parameters to match any one.
     # Here the user has the ability to update or destroy both articles and comments.
     #
-    #   can [:update, :destroy], [Article, Comment]
+    #   can [:update, :destroy], [:articles, :comments]
     #
     # You can pass :all to match any object and :access to match any action. Here are some examples.
     #
     #   can :access, :all
     #   can :update, :all
-    #   can :access, Project
+    #   can :access, :projects
     #
     # You can pass a hash of conditions as the third argument. Here the user can only see active projects which he owns.
     #
-    #   can :read, Project, :active => true, :user_id => user.id
+    #   can :read, :projects, :active => true, :user_id => user.id
     #
     # See ActiveRecordAdditions#accessible_by for how to use this in database queries. These conditions
     # are also used for initial attributes when building a record in ControllerAdditions#load_resource.
@@ -94,7 +85,7 @@ module CanCan
     # If the conditions hash does not give you enough control over defining abilities, you can use a block
     # along with any Ruby code you want.
     #
-    #   can :update, Project do |project|
+    #   can :update, :projects do |project|
     #     project.groups.include?(user.group)
     #   end
     #
@@ -102,22 +93,16 @@ module CanCan
     # will be denied access. The downside to using a block is that it cannot be used to generate
     # conditions for database queries.
     #
-    # You can pass custom objects into this "can" method, this is usually done with a symbol
-    # and is useful if a class isn't available to define permissions on.
+    # IMPORTANT: Neither a hash of conditions or a block will be used when checking permission on a symbol.
     #
-    #   can :read, :stats
-    #   can? :read, :stats # => true
-    #
-    # IMPORTANT: Neither a hash of conditions or a block will be used when checking permission on a class.
-    #
-    #   can :update, Project, :priority => 3
-    #   can? :update, Project # => true
+    #   can :update, :projects, :priority => 3
+    #   can? :update, :projects # => true
     #
     # If you pass no arguments to +can+, the action, class, and object will be passed to the block and the
     # block will always be executed. This allows you to override the full behavior if the permissions are
     # defined in an external source such as the database.
     #
-    #   can do |action, object_class, object|
+    #   can do |action, subject, object|
     #     # check the database and return true/false
     #   end
     #
@@ -133,7 +118,7 @@ module CanCan
     # A block can be passed just like "can", however if the logic is complex it is recommended
     # to use the "can" method.
     #
-    #   cannot :read, Product do |product|
+    #   cannot :read, :projects do |product|
     #     product.invisible?
     #   end
     #
@@ -144,19 +129,19 @@ module CanCan
     # Alias one or more actions into another one.
     #
     #   alias_action :update, :destroy, :to => :modify
-    #   can :modify, Comment
+    #   can :modify, :comments
     #
     # Then :modify permission will apply to both :update and :destroy requests.
     #
-    #   can? :update, Comment # => true
-    #   can? :destroy, Comment # => true
+    #   can? :update, :comments # => true
+    #   can? :destroy, :comments # => true
     #
     # This only works in one direction. Passing the aliased action into the "can?" call
     # will not work because aliases are meant to generate more generic actions.
     #
     #   alias_action :update, :destroy, :to => :modify
-    #   can :update, Comment
-    #   can? :modify, Comment # => false
+    #   can :update, :comments
+    #   can? :modify, :comments # => false
     #
     # The following aliases are added by default for conveniently mapping common controller actions.
     #
