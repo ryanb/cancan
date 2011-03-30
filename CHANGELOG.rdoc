@@ -1,3 +1,8 @@
+1.6.4 (March 29, 2011)
+
+* Fixed mongoid 'or' error - see issue #322
+
+
 1.6.3 (March 25, 2011)
 
 * Make sure ActiveRecord::Relation is defined before checking conditions against it so Rails 2 is supported again - see issue #312
