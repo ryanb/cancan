@@ -125,7 +125,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should only fetch associated records for nested controllers" do
+    it "should fetch only associated records when using with a scope for conditions" do
       @ability.can :read, Article, Article.where(:secret => true)
       category1 = Category.create!(:visible => false)
       category2 = Category.create!(:visible => true)
