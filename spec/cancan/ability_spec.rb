@@ -249,6 +249,13 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..5).should be_true
     @ability.can?(:read, 4..6).should be_false
   end
+  
+  it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
+    mock(object_with_foo = Object.new).foo { :bar }
+    @ability.can :read, Array, :first => { :foo => :bar }
+    @ability.can?(:read, [object_with_foo]).should be_true
+    @ability.can?(:read, []).should be_false
+  end
 
   it "should not stop at cannot definition when comparing class" do
     @ability.can :read, Range

@@ -109,7 +109,7 @@ module CanCan
                 if attribute.kind_of? Array
                   attribute.any? { |element| matches_conditions_hash? element, value }
                 else
-                  matches_conditions_hash? attribute, value
+                  !attribute.nil? && matches_conditions_hash?(attribute, value)
                 end
               elsif value.kind_of?(Array) || value.kind_of?(Range)
                 value.include? attribute
