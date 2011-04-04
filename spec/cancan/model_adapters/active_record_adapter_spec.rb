@@ -269,5 +269,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       # adapter.matches_condition?(article1, :name.nlike, "%helo%").should be_true
       # adapter.matches_condition?(article1, :name.nlike, "%ello worl%").should be_false
     end
+
+    it "should restrict articles given mixed MetaWhere and hash conditions" do
+      @ability.can :read, Article, :priority.lt => 2
+      @ability.can :read, Article, :priority => 1
+      article1 = Article.create!(:priority => 1)
+      article2 = Article.create!(:priority => 3)
+      Article.accessible_by(@ability).should == [article1]
+      @ability.should be_able_to(:read, article1)
+      @ability.should_not be_able_to(:read, article2)
+    end
   end
 end

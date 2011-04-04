@@ -113,7 +113,32 @@ module CanCan
         if conditions_hash.blank?
           behavior ? true_sql : false_sql
         else
-          conditions = sanitize_sql(conditions_hash)
+          conditions_expressions = []
+          conditions_values = []
+          unless conditions_hash.kind_of? Array
+            conditions_hash.each do |column, value|
+              if column.respond_to?(:method) && column.respond_to?(:column)
+                expression = case column.method.to_sym
+                  when :eq      then '='
+                  when :not_eq  then '!='
+                  when :lt      then '<'
+                  when :lteq    then '<='
+                  when :gt      then '>'
+                  when :gteq    then '>='
+                  else raise NotImplemented, "The #{method} MetaWhere condition is not supported."
+                end
+                column_name = column.column
+              else
+                expression = '='
+                column_name = column
+              end
+              conditions_expressions << "#{@model_class.quoted_table_name}.#{@model_class.connection.quote_column_name(column_name)} #{expression} ?"
+              conditions_values << value
+            end
+            conditions = sanitize_sql([conditions_expressions.join(' AND ')] + conditions_values)
+          else
+            conditions = sanitize_sql(conditions_hash)
+          end
           case sql
           when true_sql
             behavior ? true_sql : "not (#{conditions})"
