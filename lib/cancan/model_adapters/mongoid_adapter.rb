@@ -18,6 +18,8 @@ module CanCan
       def database_records
         if @rules.size == 0  
           @model_class.where(:_id => {'$exists' => false, '$type' => 7}) # return no records in Mongoid
+        elsif @rules.size == 1 && @rules[0].conditions.is_a?(Mongoid::Criteria)
+          @rules[0].conditions
         else
           @rules.inject(@model_class.all) do |records, rule|
             if rule.conditions.empty?
