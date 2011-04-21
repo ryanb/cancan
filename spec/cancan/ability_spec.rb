@@ -188,6 +188,14 @@ describe CanCan::Ability do
     }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read ranges ability. Use either one.")
   end
 
+  it "does not raise an error when attempting to use a block with an array of SQL conditions" do
+    lambda {
+      @ability.can :read, :ranges, ["published = ?", true] do
+        false
+      end
+    }.should_not raise_error(CanCan::Error)
+  end
+
 
   # Attributes
 
