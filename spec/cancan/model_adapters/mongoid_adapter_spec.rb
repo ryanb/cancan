@@ -68,6 +68,14 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir, lord, dude]
       end
 
+      it "should allow a scope for conditions" do
+        @ability.can :read, MongoidProject, MongoidProject.where(:title => 'Sir')
+        sir   = MongoidProject.create(:title => 'Sir')
+        lord  = MongoidProject.create(:title => 'Lord')
+        dude  = MongoidProject.create(:title => 'Dude')
+
+        MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
+      end
 
       describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
         it "should handle :field.in" do
