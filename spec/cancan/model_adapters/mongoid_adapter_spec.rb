@@ -42,6 +42,15 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.should be_able_to(:read, model)
       end
 
+      it "should be able to read hashes when field is array" do
+        one_to_three = MongoidProject.create(:numbers => ['one', 'two', 'three'])
+        two_to_five  = MongoidProject.create(:numbers => ['two', 'three', 'four', 'five'])
+
+        @ability.can :foo, MongoidProject, :numbers => 'one'
+        @ability.should be_able_to(:foo, one_to_three)
+        @ability.should_not be_able_to(:foo, two_to_five)
+      end
+
       it "should return [] when no ability is defined so no records are found" do
         MongoidProject.create(:title => 'Sir')
         MongoidProject.create(:title => 'Lord')
