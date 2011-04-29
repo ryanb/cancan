@@ -15,19 +15,16 @@ module CanCan
       end
 
       def database_records
-        scope = @model_class.all(:conditions => ["0=1"])
-        conditions.each do |condition|
-          scope += @model_class.all(:conditions => condition)
-        end
+        scope = @model_class.all(:conditions => ["0 = 1"])
+        cans, cannots = @rules.partition { |r| r.base_behavior }
+        # apply unions first, then differences. this mean cannot overrides can
+        cans.each    { |r| scope += @model_class.all(:conditions => r.conditions) }
+        cannots.each { |r| scope -= @model_class.all(:conditions => r.conditions) }
         scope
       end
-
-      def conditions
-        @rules.map(&:conditions)
-      end
-    end
-  end
-end
+    end # class DataMapper
+  end # module ModelAdapters
+end # module CanCan
 
 DataMapper::Model.class_eval do
   include CanCan::ModelAdditions::ClassMethods
