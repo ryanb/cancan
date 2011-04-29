@@ -10,7 +10,8 @@ module CanCan
       end
 
       def self.matches_conditions_hash?(subject, conditions)
-        subject.class.all(:conditions => conditions).include?(subject) # TODO don't use a database query here for performance and other instances
+        collection = DataMapper::Collection.new(subject.query, [ subject ])
+        !!collection.first(conditions)
       end
 
       def database_records
