@@ -188,6 +188,14 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, MongoidProject, :bar => 2
         MongoidProject.accessible_by(@ability, :read).entries.should =~ [obj, obj2]
       end
+
+      it "should not not filer results from :read even if more specific rules are presend for :manage" do
+        obj  = MongoidProject.create(:bar => 1)
+        obj2 = MongoidProject.create(:bar => 2)
+        @ability.can :read  , MongoidProject
+        @ability.can :manage, MongoidProject, :bar => 2
+        MongoidProject.accessible_by(@ability, :read).entries.should == [obj, obj2]
+      end
       
       it "should not allow to fetch records when ability with just block present" do
         @ability.can :read, MongoidProject do
