@@ -28,13 +28,17 @@ module CanCan
         elsif @rules.size == 1 && @rules[0].conditions.is_a?(Mongoid::Criteria)
           @rules[0].conditions
         else
-          @rules.inject(@model_class.all) do |records, rule|
-            if rule.conditions.empty?
-              records.or(:_id => {'$exists' => true}) # match everything in Mongoid
-            elsif rule.base_behavior
-              records.or(rule.conditions)
+          # we only need to process can rules if
+          # there are no rules with empty conditions
+          rules = @rules.reject { |rule| rule.conditions.empty? }
+          process_can_rules = @rules.count == rules.count
+          rules.inject(@model_class.all) do |records, rule|
+            if process_can_rules && rule.base_behavior
+              records.or rule.conditions
+            elsif !rule.base_behavior
+              records.excludes rule.conditions
             else
-              records.excludes(rule.conditions)
+              records
             end
           end
         end
