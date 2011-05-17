@@ -68,6 +68,15 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
       end
 
+      it "should be able to mix empty conditions and hashes" do
+        @ability.can :read, MongoidProject
+        @ability.can :read, MongoidProject, :title => 'Sir'
+        sir  = MongoidProject.create(:title => 'Sir')
+        lord = MongoidProject.create(:title => 'Lord')
+
+        MongoidProject.accessible_by(@ability, :read).count.should == 2
+      end
+
       it "should return everything when the defined ability is manage all" do
         @ability.can :manage, :all
         sir   = MongoidProject.create(:title => 'Sir')
