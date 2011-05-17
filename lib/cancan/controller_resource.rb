@@ -178,7 +178,7 @@ module CanCan
     def fetch_parent(name)
       if @controller.instance_variable_defined? "@#{name}"
         @controller.instance_variable_get("@#{name}")
-      elsif @controller.respond_to? name
+      elsif @controller.respond_to?(name, true)
         @controller.send(name)
       end
     end
