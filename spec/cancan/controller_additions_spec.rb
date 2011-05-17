@@ -6,7 +6,7 @@ describe CanCan::ControllerAdditions do
     @controller = @controller_class.new
     stub(@controller).params { {} }
     stub(@controller).current_user { :current_user }
-    mock(@controller_class).helper_method(:can?, :cannot?)
+    mock(@controller_class).helper_method(:can?, :cannot?, :current_ability)
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
 
