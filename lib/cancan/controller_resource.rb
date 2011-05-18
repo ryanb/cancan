@@ -159,7 +159,7 @@ module CanCan
         elsif @options[:shallow]
           resource_class
         else
-          raise AccessDenied # maybe this should be a record not found error instead?
+          raise AccessDenied.new(nil, authorization_action, resource_class) # maybe this should be a record not found error instead?
         end
       else
         resource_class

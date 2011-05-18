@@ -235,7 +235,10 @@ describe CanCan::ControllerResource do
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     lambda {
       resource.load_resource
-    }.should raise_error(CanCan::AccessDenied)
+    }.should raise_error(CanCan::AccessDenied) { |exception|
+      exception.action.should == :show
+      exception.subject.should == Project
+    }
     @controller.instance_variable_get(:@project).should be_nil
   end
 
