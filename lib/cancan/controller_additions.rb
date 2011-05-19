@@ -12,7 +12,7 @@ module CanCan
       #   end
       #
       def load_and_authorize_resource(*args)
-        cancan_resource_class.add_before_filter(self, :load_and_authorize_resource, *args)
+        cancan_resource_class.add_before_filter(self, {:load => true, :authorize => true}, *args)
       end
 
       # Sets up a before filter which loads the model resource into an instance variable.
@@ -114,7 +114,7 @@ module CanCan
       #
       def load_resource(*args)
         raise ImplementationRemoved, "The load_resource method has been removed, use load_and_authorize_resource instead."
-        cancan_resource_class.add_before_filter(self, :load_resource, *args)
+        cancan_resource_class.add_before_filter(self, {:load => true}, *args)
       end
 
       # Sets up a before filter which authorizes the resource using the instance variable.
@@ -171,7 +171,7 @@ module CanCan
       #
       def authorize_resource(*args)
         raise ImplementationRemoved, "The authorize_resource method has been removed, use load_and_authorize_resource instead."
-        cancan_resource_class.add_before_filter(self, :authorize_resource, *args)
+        cancan_resource_class.add_before_filter(self, {:authorize => true}, *args)
       end
 
       # Skip both the loading and authorization behavior of CanCan for this given controller. This is primarily

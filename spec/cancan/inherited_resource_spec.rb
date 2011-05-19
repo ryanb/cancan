@@ -14,21 +14,21 @@ describe CanCan::InheritedResource do
   it "show should load resource through @controller.resource" do
     @params.merge!(:action => "show", :id => 123)
     stub(@controller).resource { :project_resource }
-    CanCan::InheritedResource.new(@controller).load_resource
+    CanCan::InheritedResource.new(@controller, :load => true).process
     @controller.instance_variable_get(:@project).should == :project_resource
   end
 
   it "new should load through @controller.build_resource" do
     @params[:action] = "new"
     stub(@controller).build_resource { :project_resource }
-    CanCan::InheritedResource.new(@controller).load_resource
+    CanCan::InheritedResource.new(@controller, :load => true).process
     @controller.instance_variable_get(:@project).should == :project_resource
   end
 
   it "index should load through @controller.association_chain when parent" do
     @params[:action] = "index"
     stub(@controller).association_chain { @controller.instance_variable_set(:@project, :project_resource) }
-    CanCan::InheritedResource.new(@controller, :parent => true).load_resource
+    CanCan::InheritedResource.new(@controller, :load => true, :parent => true).process
     @controller.instance_variable_get(:@project).should == :project_resource
   end
 
@@ -36,7 +36,7 @@ describe CanCan::InheritedResource do
     @params[:action] = "index"
     stub(Project).accessible_by(@ability, :index) { :projects }
     stub(@controller).end_of_association_chain { Project }
-    CanCan::InheritedResource.new(@controller).load_resource
+    CanCan::InheritedResource.new(@controller, :load => true).process
     @controller.instance_variable_get(:@projects).should == :projects
   end
 end

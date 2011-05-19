@@ -33,13 +33,13 @@ describe CanCan::ControllerAdditions do
   end
 
   it "load_and_authorize_resource should setup a before filter which passes call to ControllerResource" do
-    stub(CanCan::ControllerResource).new(@controller, nil, :foo => :bar).mock!.load_and_authorize_resource
+    stub(CanCan::ControllerResource).new(@controller, nil, :load => true, :authorize => true, :foo => :bar).mock!.process
     mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
     @controller_class.load_and_authorize_resource :foo => :bar
   end
 
   it "load_and_authorize_resource should properly pass first argument as the resource name" do
-    stub(CanCan::ControllerResource).new(@controller, :project, :foo => :bar).mock!.load_and_authorize_resource
+    stub(CanCan::ControllerResource).new(@controller, :project, :load => true, :authorize => true, :foo => :bar).mock!.process
     mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
     @controller_class.load_and_authorize_resource :project, :foo => :bar
   end

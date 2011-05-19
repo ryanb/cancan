@@ -2,12 +2,12 @@ module CanCan
   # Handle the load and authorization controller logic so we don't clutter up all controllers with non-interface methods.
   # This class is used internally, so you do not need to call methods directly on it.
   class ControllerResource # :nodoc:
-    def self.add_before_filter(controller_class, method, *args)
-      options = args.extract_options!
+    def self.add_before_filter(controller_class, behavior, *args)
+      options = args.extract_options!.merge(behavior)
       resource_name = args.first
       before_filter_method = options.delete(:prepend) ? :prepend_before_filter : :before_filter
       controller_class.send(before_filter_method, options.slice(:only, :except)) do |controller|
-        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).send(method)
+        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).process
       end
     end
 
@@ -18,28 +18,24 @@ module CanCan
       @name = args.first
     end
 
-    def load_and_authorize_resource
-      load_resource
-      authorize_resource
-    end
-
-    def load_resource
-      if load_instance?
-        self.resource_instance ||= load_resource_instance
-      elsif load_collection?
-        self.collection_instance ||= load_collection
-        current_ability.fully_authorized! @params[:action], @params[:controller]
+    def process
+      if @options[:load]
+        if load_instance?
+          self.resource_instance ||= load_resource_instance
+        elsif load_collection?
+          self.collection_instance ||= load_collection
+          current_ability.fully_authorized! @params[:action], @params[:controller]
+        end
       end
-    end
-
-    def authorize_resource
-      if resource_instance
-        if @params[name] && (authorization_action == :create || authorization_action == :update)
-          @params[name].each do |key, value|
-            @controller.authorize!(authorization_action, resource_instance, key.to_sym)
+      if @options[:authorize]
+        if resource_instance
+          if @params[name] && (authorization_action == :create || authorization_action == :update)
+            @params[name].each do |key, value|
+              @controller.authorize!(authorization_action, resource_instance, key.to_sym)
+            end
+          else
+            @controller.authorize!(authorization_action, resource_instance)
           end
-        else
-          @controller.authorize!(authorization_action, resource_instance)
         end
       end
     end
