@@ -8,6 +8,7 @@ describe CanCan::ControllerResource do
     @ability = Ability.new(nil)
     stub(@controller).params { @params }
     stub(@controller).current_ability { @ability }
+    stub(@controller).authorize! { |*args| @ability.authorize!(*args) }
     # stub(@controller_class).cancan_skipper { {:authorize => {}, :load => {}} }
   end
 
@@ -272,6 +273,22 @@ describe CanCan::ControllerResource do
     @params.merge!(:action => "new", :project_id => project.id)
     stub(@controller).authorize!(:show, project) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :project, :load => true, :authorize => true, :parent => true)
+    lambda { resource.process }.should raise_error(CanCan::Unauthorized)
+  end
+
+  it "should authorize update action before setting attributes" do
+    @ability.can :update, :projects, :name => "bar"
+    project = Project.create!(:name => "foo")
+    @params.merge!(:action => "update", :id => project.id, :project => {:name => "bar"})
+    resource = CanCan::ControllerResource.new(@controller, :project, :load => true, :authorize => true)
+    lambda { resource.process }.should raise_error(CanCan::Unauthorized)
+  end
+
+  it "should authorize update action after setting attributes" do
+    @ability.can :update, :projects, :name => "foo"
+    project = Project.create!(:name => "foo")
+    @params.merge!(:action => "update", :id => project.id, :project => {:name => "bar"})
+    resource = CanCan::ControllerResource.new(@controller, :project, :load => true, :authorize => true)
     lambda { resource.process }.should raise_error(CanCan::Unauthorized)
   end
 

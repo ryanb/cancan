@@ -63,7 +63,7 @@ module CanCan
       if !parent? && new_actions.include?(@params[:action].to_sym)
         build_resource
       elsif id_param || @options[:singleton]
-        find_resource
+        find_and_update_resource
       end
     end
 
@@ -92,6 +92,15 @@ module CanCan
       current_ability.attributes_for(@params[:action].to_sym, subject_name).delete_if do |key, value|
         @params[name] && @params[name].include?(key)
       end
+    end
+
+    def find_and_update_resource
+      resource = find_resource
+      if @params[name]
+        @controller.authorize!(authorization_action, resource) if @options[:authorize]
+        resource.attributes = @params[name]
+      end
+      resource
     end
 
     def find_resource
