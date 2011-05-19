@@ -87,7 +87,7 @@ module CanCan
 
       def database_records
         if override_scope
-          override_scope
+          @model_class.scoped.merge(override_scope)
         elsif @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
           @model_class.where(conditions).joins(joins)
         else

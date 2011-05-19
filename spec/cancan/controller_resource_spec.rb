@@ -237,7 +237,10 @@ describe CanCan::ControllerResource do
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
     lambda {
       resource.load_resource
-    }.should raise_error(CanCan::Unauthorized)
+    }.should raise_error(CanCan::Unauthorized) { |exception|
+      exception.action.should == :show
+      exception.subject.should == :projects
+    }
     @controller.instance_variable_get(:@project).should be_nil
   end
 

@@ -283,6 +283,13 @@ describe CanCan::Ability do
     @ability.should be_fully_authorized(:update, :ranges)
   end
 
+  it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
+    mock(object_with_foo = Object.new).foo { :bar }
+    @ability.can :read, :arrays, :first => { :foo => :bar }
+    @ability.can?(:read, [object_with_foo]).should be_true
+    @ability.can?(:read, []).should be_false
+  end
+
   it "is not fully authorized when attributes are required but not checked in update/create actions" do
     @ability.can :access, :users, :name
     @ability.authorize! :update, :users

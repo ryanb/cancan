@@ -1,3 +1,26 @@
+1.6.5 (May 18, 2011)
+
+* pass action and subject through AccessDenied exception when :through isn't found - issue #366
+
+* many Mongoid adapter improvements (thanks rahearn, cardagin) - issues #363, #352, #343
+
+* allow :through option to work with private controller methods - issue #360
+
+* ensure Mongoid::Document is defined before loading Mongoid adapter - issue #359
+
+* many DataMapper adapter improvements (thanks emmanuel) - issue #355
+
+* handle checking nil attributes through associations (thanks thatothermitch) - issue #330
+
+* improve scope merging - issue #328
+
+
+
+1.6.4 (March 29, 2011)
+
+* Fixed mongoid 'or' error - see issue #322
+
+
 1.6.3 (March 25, 2011)
 
 * Make sure ActiveRecord::Relation is defined before checking conditions against it so Rails 2 is supported again - see issue #312

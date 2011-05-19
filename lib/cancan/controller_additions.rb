@@ -290,7 +290,7 @@ module CanCan
 
     def self.included(base)
       base.extend ClassMethods
-      base.helper_method :can?, :cannot?
+      base.helper_method :can?, :cannot?, :current_ability
     end
 
     # Raises a CanCan::Unauthorized exception if the current_ability cannot

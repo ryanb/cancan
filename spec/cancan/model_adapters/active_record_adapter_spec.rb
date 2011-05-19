@@ -125,6 +125,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Article.accessible_by(@ability).should == [article1]
     end
 
+    it "should fetch only associated records when using with a scope for conditions" do
+      @ability.can :read, :articles, Article.where(:secret => true)
+      category1 = Category.create!(:visible => false)
+      category2 = Category.create!(:visible => true)
+      article1 = Article.create!(:secret => true, :category => category1)
+      article2 = Article.create!(:secret => true, :category => category2)
+      category1.articles.accessible_by(@ability).should == [article1]
+    end    
+
     it "should raise an exception when trying to merge scope with other conditions" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, Article.where(:secret => true)
