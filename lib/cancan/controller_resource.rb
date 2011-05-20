@@ -108,7 +108,7 @@ module CanCan
           elsif @options[:finder]
             @options[:finder]
           else
-            current_ability.model_adapter.finder
+            current_ability.model_adapter(resource_base, @params[:action]).finder
           end
         resource_base.send(finder, id_param)
       end
