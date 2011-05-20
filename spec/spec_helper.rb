@@ -30,4 +30,12 @@ end
 class Project < SuperModel::Base
   belongs_to :category
   attr_accessor :category # why doesn't SuperModel do this automatically?
+
+  def self.respond_to?(method, include_private = false)
+    if method.to_s == "find_by_name!" # hack to simulate ActiveRecord
+      true
+    else
+      super
+    end
+  end
 end

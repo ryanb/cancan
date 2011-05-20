@@ -336,6 +336,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "should allow full find method to be passed into find_by option" do
+    project = Project.create!(:name => "foo")
+    @params.merge!(:action => "show", :id => "foo")
+    resource = CanCan::ControllerResource.new(@controller, :find_by => :find_by_name)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
   it "should raise ImplementationRemoved when adding :name option" do
     lambda {
       CanCan::ControllerResource.new(@controller, :name => :foo)
