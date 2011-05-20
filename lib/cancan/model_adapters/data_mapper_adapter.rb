@@ -23,6 +23,10 @@ module CanCan
         cannots.each { |r| scope -= @model_class.all(:conditions => r.conditions) }
         scope
       end
+
+      def finder
+        'get'
+      end
     end # class DataMapper
   end # module ModelAdapters
 end # module CanCan

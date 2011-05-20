@@ -100,7 +100,17 @@ module CanCan
       if @options[:singleton] && parent_resource.respond_to?(name)
         parent_resource.send(name)
       else
-        @options[:find_by] ? resource_base.send("find_by_#{@options[:find_by]}!", id_param) : resource_base.find(id_param)
+        finder =
+          if(@options[:find_by] && resource_base.respond_to?("find_by_#{@options[:find_by]}!".to_sym))
+            "find_by_#{@options[:find_by]}!"
+          elsif(@options[:find_by] && resource_base.respond_to?(@options[:find_by].to_sym))
+            @options[:find_by]
+          elsif @options[:finder]
+            @options[:finder]
+          else
+            current_ability.model_adapter(resource_base, @params[:action]).finder
+          end
+        resource_base.send(finder, id_param)
       end
     end
 
