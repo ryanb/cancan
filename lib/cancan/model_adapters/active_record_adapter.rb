@@ -57,7 +57,7 @@ module CanCan
           tableized_conditions(@rules.first.conditions).dup
         else
           @rules.reverse.inject(false_sql) do |sql, rule|
-            merge_conditions(sql, tableized_conditions(rule.conditions).dup, rule.base_behavior)
+            sql = merge_conditions(sql, tableized_conditions(rule.conditions).dup, rule.base_behavior)
           end
         end
       end
