@@ -107,9 +107,13 @@ module CanCan
             resource_base.send(@options[:find_by], id_param)
           end
         else
-          resource_base.find(id_param)
+          adapter.find(resource_base, id_param)
         end
       end
+    end
+
+    def adapter
+      ModelAdapters::AbstractAdapter.adapter_class(resource_class)
     end
 
     def authorization_action

@@ -36,6 +36,11 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         CanCan::ModelAdapters::AbstractAdapter.adapter_class(MongoidProject).should == CanCan::ModelAdapters::MongoidAdapter
       end
 
+      it "should find record" do
+        project = MongoidProject.create
+        CanCan::ModelAdapters::MongoidAdapter.find(MongoidProject, project.id).should == project
+      end
+
       it "should compare properties on mongoid documents with the conditions hash" do
         model = MongoidProject.new
         @ability.can :read, MongoidProject, :id => model.id
