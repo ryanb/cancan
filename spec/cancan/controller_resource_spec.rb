@@ -336,6 +336,14 @@ describe CanCan::ControllerResource do
     CanCan::ControllerResource.new(@controller, :authorize => true).process
   end
 
+  it "should fetch member through method when instance variable is not provided" do
+    stub(@controller).project { :some_project }
+    @params.merge!(:action => "show", :id => 123)
+    stub(@controller).authorize!(:show, :some_project) { raise CanCan::Unauthorized }
+    resource = CanCan::ControllerResource.new(@controller, :authorize => true)
+    lambda { resource.process }.should raise_error(CanCan::Unauthorized)
+  end
+
   # it "should raise ImplementationRemoved when adding :name option" do
   #   lambda {
   #     CanCan::ControllerResource.new(@controller, :name => :foo)

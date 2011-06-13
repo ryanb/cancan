@@ -148,7 +148,13 @@ module CanCan
     end
 
     def resource_instance
-      @controller.instance_variable_get("@#{instance_name}") if load_instance?
+      if load_instance?
+        if @controller.instance_variable_defined? "@#{instance_name}"
+          @controller.instance_variable_get("@#{instance_name}")
+        elsif @controller.respond_to?(instance_name, true)
+          @controller.send(instance_name)
+        end
+      end
     end
 
     def collection_instance=(instance)
