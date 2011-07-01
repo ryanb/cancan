@@ -31,6 +31,4 @@ module CanCan
   end # module ModelAdapters
 end # module CanCan
 
-DataMapper::Model.class_eval do
-  include CanCan::ModelAdditions::ClassMethods
-end
+DataMapper::Model.append_extensions(CanCan::ModelAdditions::ClassMethods)
