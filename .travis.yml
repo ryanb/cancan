@@ -1,4 +1,4 @@
-script: "bundle exec rake test"
+script: "bundle exec rake"
 rvm:
   - 1.8.7
   - 1.9.2
