@@ -30,6 +30,8 @@ module CanCan
     def matches_conditions?(action, subject, extra_args)
       if @match_all
         call_block_with_all(action, subject, extra_args)
+      elsif @block && subject_class?(subject)
+        call_block_for_class 
       elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
@@ -133,6 +135,12 @@ module CanCan
       else
         @block.call(action, subject.class, subject, *extra_args)
       end
+    end
+
+    def call_block_for_class
+      @block.call
+    rescue
+      true
     end
 
     def model_adapter(subject)
