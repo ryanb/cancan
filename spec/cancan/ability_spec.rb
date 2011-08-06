@@ -8,6 +8,11 @@ describe CanCan::Ability do
 
 
   # Basic Action & Subject
+  it "allows for the ability to read a class" do
+    Test = Class.new
+    @ability.can :read, Test
+    @ability.can?(:read, Test.new).should be_true
+  end
 
   it "allows access to only what is defined" do
     @ability.can?(:paint, :fences).should be_false
