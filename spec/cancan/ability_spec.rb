@@ -6,6 +6,12 @@ describe CanCan::Ability do
     @ability.extend(CanCan::Ability)
   end
 
+  it "allows for the ability to read a class" do
+    Test = Class.new
+    @ability.can :read, Test
+    @ability.can?(:read, Test.new).should be_true
+  end
+
   it "should be able to :read anything" do
     @ability.can :read, :all
     @ability.can?(:read, String).should be_true
