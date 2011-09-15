@@ -338,6 +338,12 @@ describe CanCan::Ability do
     @ability.can?(:read, 5..9).should be_false
   end
 
+  it "rejects permission only to a given attribute" do
+    @ability.can :update, :books
+    @ability.cannot :update, :books, :author
+    @ability.can?(:update, :books).should be_true
+    @ability.can?(:update, :books, :author).should be_false
+  end
 
   # Hash Association
 
