@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = "cancan"
+  s.name        = "codeprimate-cancan"
   s.version     = "1.6.5"
   s.author      = "Ryan Bates"
   s.email       = "ryan@railscasts.com"
