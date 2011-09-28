@@ -138,6 +138,13 @@ describe CanCan::Ability do
     @ability.can?(:read, 4..6).should be_false
   end
 
+  it "takes presedence over rule defined without a condition" do
+    @ability.can :read, :ranges
+    @ability.can :read, :ranges, :begin => 1
+    @ability.can?(:read, 1..5).should be_true
+    @ability.can?(:read, 4..6).should be_false
+  end
+
 
   # Block Conditions
 

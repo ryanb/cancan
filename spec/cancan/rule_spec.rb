@@ -36,4 +36,13 @@ describe CanCan::Rule do
     rule = CanCan::Rule.new(true, :read, :integers)
     rule.associations_hash.should == {}
   end
+
+  it "should have higher specificity for attributes/conditions" do
+    CanCan::Rule.new(true, :read, :integers).specificity.should eq(1)
+    CanCan::Rule.new(true, :read, :integers, :foo => :bar).specificity.should eq(2)
+    CanCan::Rule.new(true, :read, :integers, :foo).specificity.should eq(2)
+    CanCan::Rule.new(false, :read, :integers).specificity.should eq(3)
+    CanCan::Rule.new(false, :read, :integers, :foo => :bar).specificity.should eq(4)
+    CanCan::Rule.new(false, :read, :integers, :foo).specificity.should eq(4)
+  end
 end

@@ -176,7 +176,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     it "should return true condition for single `can` definition in front of default `can` condition" do
       @ability.can :read, :articles
       @ability.can :read, :articles, :published => false, :secret => true
-      @ability.model_adapter(Article, :read).conditions.should  == "'t'='t'"
+      @ability.model_adapter(Article, :read).conditions.should eq(:secret => true, :published => false)
     end
 
     it "should return `false condition` for single `cannot` definition in front of default `cannot` condition" do
@@ -198,7 +198,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.cannot :update, :articles, :secret => true
       @ability.model_adapter(Article, :update).conditions.should == %Q[not ("#{@article_table}"."secret" = 't') AND (("#{@article_table}"."published" = 't') OR ("#{@article_table}"."id" = 1))]
       @ability.model_adapter(Article, :access).conditions.should == {:id => 1}
-      @ability.model_adapter(Article, :read).conditions.should == "'t'='t'"
+      @ability.model_adapter(Article, :read).conditions.should == {:id => 1} # used to be "t=t" but changed with new specificity rule (issue #321)
     end
 
     it "should not forget conditions when calling with SQL string" do

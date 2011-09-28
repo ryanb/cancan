@@ -44,23 +44,23 @@ module CanCan
     end
 
     def only_block?
-      conditions_empty? && !@block.nil?
+      !conditions? && !@block.nil?
     end
 
     def only_raw_sql?
-      @block.nil? && !conditions_empty? && !@conditions.kind_of?(Hash)
+      @block.nil? && conditions? && !@conditions.kind_of?(Hash)
     end
 
     def attributes?
       @attributes.present?
     end
 
-    def instance_conditions?
-      @block || !conditions_empty?
+    def conditions?
+      @conditions.present?
     end
 
-    def conditions_empty?
-      @conditions == {} || @conditions.nil?
+    def instance_conditions?
+      @block || conditions?
     end
 
     def associations_hash(conditions = @conditions)
@@ -77,6 +77,13 @@ module CanCan
         attributes[key] = value unless [Array, Range, Hash].include? value.class
       end if @conditions.kind_of? Hash
       attributes
+    end
+
+    def specificity
+      specificity = 1
+      specificity += 1 if attributes? || conditions?
+      specificity += 2 unless base_behavior
+      specificity
     end
 
     private
