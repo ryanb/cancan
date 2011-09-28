@@ -29,8 +29,8 @@ module CanCan
       end
       if @options[:authorize]
         if resource_instance
-          if @params[name] && (authorization_action == :create || authorization_action == :update)
-            @params[name].each do |key, value|
+          if resource_params && (authorization_action == :create || authorization_action == :update)
+            resource_params.each do |key, value|
               @controller.authorize!(authorization_action, resource_instance, key.to_sym)
             end
           else
@@ -80,7 +80,7 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(@params[name] || {})
+      resource = resource_base.new(resource_params || {})
       resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
       initial_attributes.each do |attr_name, value|
         resource.send("#{attr_name}=", value)
@@ -90,15 +90,15 @@ module CanCan
 
     def initial_attributes
       current_ability.attributes_for(@params[:action].to_sym, subject_name).delete_if do |key, value|
-        @params[name] && @params[name].include?(key)
+        resource_params && resource_params.include?(key)
       end
     end
 
     def find_and_update_resource
       resource = find_resource
-      if @params[name]
+      if resource_params
         @controller.authorize!(authorization_action, resource) if @options[:authorize]
-        resource.attributes = @params[name]
+        resource.attributes = resource_params
       end
       resource
     end
@@ -222,6 +222,11 @@ module CanCan
 
     def name
       @name || name_from_controller
+    end
+
+    def resource_params
+      # since Rails includes the namespace in the params sent by the form (issue #349)
+      @params[namespaced_name.to_s.underscore.gsub("/", "_")]
     end
 
     def namespaced_name

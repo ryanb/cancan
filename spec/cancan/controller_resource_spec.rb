@@ -33,17 +33,6 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
-  it "should attempt to load a resource with the same namespace as the controller when using :: for namespace" do
-    module MyEngine
-      class Project < ::Project; end
-    end
-    project = MyEngine::Project.create!
-    @params.merge!(:controller => "MyEngine::ProjectsController", :action => "show", :id => project.id)
-    resource = CanCan::ControllerResource.new(@controller, :load => true)
-    resource.process
-    @controller.instance_variable_get(:@project).should == project
-  end
-
   it "should properly load resource for namespaced controller when using '::' for namespace" do
     project = Project.create!
     @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
@@ -351,8 +340,7 @@ describe CanCan::ControllerResource do
   it "should allow full find method to be passed into find_by option" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
-    resource = CanCan::ControllerResource.new(@controller, :find_by => :find_by_name, :load => true)
-    resource.process
+    CanCan::ControllerResource.new(@controller, :find_by => :find_by_name, :load => true).process
     @controller.instance_variable_get(:@project).should == project
   end
 
@@ -369,6 +357,26 @@ describe CanCan::ControllerResource do
     stub(@controller).authorize!(:show, :some_project) { raise CanCan::Unauthorized }
     resource = CanCan::ControllerResource.new(@controller, :authorize => true)
     lambda { resource.process }.should raise_error(CanCan::Unauthorized)
+  end
+
+  it "should attempt to load a resource with the same namespace as the controller when using :: for namespace" do
+    module Namespaced
+      class Project < ::Project; end
+    end
+    project = Namespaced::Project.create!
+    @params.merge!(:controller => "Namespaced::ProjectsController", :action => "show", :id => project.id)
+    CanCan::ControllerResource.new(@controller, :load => true).process
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  # Rails includes namespace in params, see issue #349
+  it "should create through namespaced params" do
+    module Namespaced
+      class Project < ::Project; end
+    end
+    @params.merge!(:controller => "Namespaced::ProjectsController", :action => "create", :namespaced_project => {:name => "foobar"})
+    CanCan::ControllerResource.new(@controller, :load => true).process
+    @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
   # it "should raise ImplementationRemoved when adding :name option" do
