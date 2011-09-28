@@ -15,6 +15,11 @@ module CanCan
         false # override in subclass
       end
 
+      # Override if you need custom find behavior
+      def self.find(model_class, id)
+        model_class.find(id)
+      end
+
       # Used to determine if this model adapter will override the matching behavior for a hash of conditions.
       # If this returns true then matches_conditions_hash? will be called. See Rule#matches_conditions_hash
       def self.override_conditions_hash_matching?(subject, conditions)

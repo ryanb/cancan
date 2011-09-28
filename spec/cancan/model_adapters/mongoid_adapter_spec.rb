@@ -36,6 +36,11 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         CanCan::ModelAdapters::AbstractAdapter.adapter_class(MongoidProject).should == CanCan::ModelAdapters::MongoidAdapter
       end
 
+      it "should find record" do
+        project = MongoidProject.create
+        CanCan::ModelAdapters::MongoidAdapter.find(MongoidProject, project.id).should == project
+      end
+
       it "should compare properties on mongoid documents with the conditions hash" do
         model = MongoidProject.new
         @ability.can :read, :mongoid_projects, :id => model.id
@@ -180,7 +185,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, :mongoid_projects, :foo => {:bar => 1}
         MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
       end
-      
+
       it "should exclude from the result if set to cannot" do
         obj = MongoidProject.create(:bar => 1)
         obj2 = MongoidProject.create(:bar => 2)
@@ -197,7 +202,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, :mongoid_projects, :bar => 2
         MongoidProject.accessible_by(@ability, :read).entries.should =~ [obj, obj2]
       end
-      
+
       it "should not allow to fetch records when ability with just block present" do
         @ability.can :read, :mongoid_projects do
           false

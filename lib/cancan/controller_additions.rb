@@ -188,7 +188,7 @@ module CanCan
         skip_authorize_resource(*args)
       end
 
-      # Skip both the loading behavior of CanCan. This is useful when using +load_and_authorize_resource+ but want to
+      # Skip the loading behavior of CanCan. This is useful when using +load_and_authorize_resource+ but want to
       # only do authorization on certain actions. You can pass :only and :except options to specify which actions to
       # skip the effects on. It will apply to all actions by default.
       #
@@ -205,7 +205,7 @@ module CanCan
         cancan_skipper[:load][name] = options
       end
 
-      # Skip both the authorization behavior of CanCan. This is useful when using +load_and_authorize_resource+ but want to
+      # Skip the authorization behavior of CanCan. This is useful when using +load_and_authorize_resource+ but want to
       # only do loading on certain actions. You can pass :only and :except options to specify which actions to
       # skip the effects on. It will apply to all actions by default.
       #

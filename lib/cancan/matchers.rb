@@ -1,5 +1,5 @@
-RSpec = Spec unless defined? RSpec # for RSpec 1 compatability
-RSpec::Matchers.define :be_able_to do |*args|
+rspec_module = defined?(RSpec::Core) ? 'RSpec' : 'Spec'  # for RSpec 1 compatability
+Kernel.const_get(rspec_module)::Matchers.define :be_able_to do |*args|
   match do |ability|
     ability.can?(*args)
   end
