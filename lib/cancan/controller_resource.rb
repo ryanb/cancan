@@ -141,7 +141,7 @@ module CanCan
     def resource_class
       case @options[:class]
       when false  then name.to_sym
-      when nil    then name.to_s.camelize.constantize
+      when nil    then namespaced_name.to_s.camelize.constantize
       when String then @options[:class].constantize
       else @options[:class]
       end
@@ -218,6 +218,12 @@ module CanCan
 
     def name
       @name || name_from_controller
+    end
+
+    def namespaced_name
+      @params[:controller].sub("Controller", "").singularize.camelize.constantize
+    rescue NameError
+      name
     end
 
     def name_from_controller

@@ -33,6 +33,18 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "should attempt to load a resource with the same namespace as the controller when using :: for namespace" do
+    module MyEngine
+      class Project < ::Project; end
+    end
+
+    project = MyEngine::Project.create!
+    @params.merge!(:controller => "MyEngine::ProjectsController", :action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
   it "should properly load resource for namespaced controller when using '::' for namespace" do
     project = Project.create!
     @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
