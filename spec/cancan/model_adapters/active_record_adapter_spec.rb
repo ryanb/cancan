@@ -131,8 +131,9 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       category2 = Category.create!(:visible => true)
       article1 = Article.create!(:secret => true, :category => category1)
       article2 = Article.create!(:secret => true, :category => category2)
-      category1.articles.accessible_by(@ability).should == [article1]
-    end    
+      # for some reason the objects aren't comparing equally here so it's necessary to compare by id
+      category1.articles.accessible_by(@ability).map(&:id).should == [article1.id]
+    end
 
     it "should raise an exception when trying to merge scope with other conditions" do
       @ability.can :read, :articles, :published => true
