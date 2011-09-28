@@ -97,7 +97,12 @@ module CanCan
     end
 
     def matches_attribute?(attribute)
-      @attributes.nil? || attribute.nil? || @attributes.include?(attribute.to_sym)
+      # don't consider attributes in a cannot clause when not matching - this can probably be refactored
+      if !@base_behavior && @attributes && attribute.nil?
+        false
+      else
+        @attributes.nil? || attribute.nil? || @attributes.include?(attribute.to_sym)
+      end
     end
 
     # TODO deperecate this

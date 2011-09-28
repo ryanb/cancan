@@ -345,6 +345,7 @@ describe CanCan::Ability do
     @ability.can?(:update, :books, :author).should be_false
   end
 
+
   # Hash Association
 
   it "checks permission through association when hash is passed as subject" do
