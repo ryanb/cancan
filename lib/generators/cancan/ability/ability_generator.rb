@@ -5,7 +5,7 @@ module Cancan
 
       def generate_ability
         copy_file "ability.rb", "app/models/ability.rb"
-        if File.exist?(destination_path("spec"))
+        if File.exist?(File.join(destination_root, "spec"))
           copy_file "ability_spec.rb", "spec/models/ability_spec.rb"
         else
           copy_file "ability_test.rb", "test/unit/ability_test.rb"
