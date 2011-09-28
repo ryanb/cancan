@@ -37,11 +37,10 @@ describe CanCan::ControllerResource do
     module MyEngine
       class Project < ::Project; end
     end
-
     project = MyEngine::Project.create!
     @params.merge!(:controller => "MyEngine::ProjectsController", :action => "show", :id => project.id)
-    resource = CanCan::ControllerResource.new(@controller)
-    resource.load_resource
+    resource = CanCan::ControllerResource.new(@controller, :load => true)
+    resource.process
     @controller.instance_variable_get(:@project).should == project
   end
 
