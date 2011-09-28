@@ -325,15 +325,15 @@ describe CanCan::ControllerResource do
     lambda { resource.process }.should raise_error(CanCan::Unauthorized)
     @controller.instance_variable_get(:@custom_project).should == project
   end
-  
+
   it "should load resource using custom ID param" do
     project = Project.create!
     @params.merge!(:action => "show", :the_project => project.id)
-    resource = CanCan::ControllerResource.new(@controller, :id_param => :the_project)
-    resource.load_resource
+    resource = CanCan::ControllerResource.new(@controller, :id_param => :the_project, :load => true)
+    resource.process
     @controller.instance_variable_get(:@project).should == project
   end
-  
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
