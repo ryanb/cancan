@@ -1,3 +1,22 @@
+1.6.6 (September 28, 2011)
+
+* correct "return cant jump across threads" error when using check_authorization (thanks codeprimate) - issues #463, #469
+
+* fixing tests in development by specifying with_model version  (thanks kirkconnell) - issue #476
+
+* added travis.yml file for TravisCI support (thanks bai) - issue #427
+
+* better support for namespaced models (thanks whilefalse) - issues #424
+
+* adding :id_param option to load_and_authorize_resource (thanks skhisma) - issue #425
+
+* make default unauthorized message translatable text (thanks nhocki) - issue #409
+
+* improving DataMapper behavior (thanks psanford, maxsum-corin) - issue #410, #373
+
+* allow :find_by option to be full find method name - issue #335
+
+
 1.6.5 (May 18, 2011)
 
 * pass action and subject through AccessDenied exception when :through isn't found - issue #366
@@ -13,7 +32,6 @@
 * handle checking nil attributes through associations (thanks thatothermitch) - issue #330
 
 * improve scope merging - issue #328
-
 
 
 1.6.4 (March 29, 2011)
