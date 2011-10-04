@@ -197,8 +197,8 @@ describe CanCan::ControllerResource do
 
   it "should load parent resource through proper id parameter" do
     project = Project.create!
-    @params.merge!(:action => "index", :project_id => project.id)
-    resource = CanCan::ControllerResource.new(@controller, :project, :parent => true)
+    @params.merge!(:controller => "categories", :action => "index", :project_id => project.id)
+    resource = CanCan::ControllerResource.new(@controller, :project)
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end

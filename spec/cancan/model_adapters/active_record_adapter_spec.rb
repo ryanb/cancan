@@ -1,10 +1,6 @@
 if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   require "spec_helper"
 
-  RSpec.configure do |config|
-    config.extend WithModel
-  end
-
   ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
