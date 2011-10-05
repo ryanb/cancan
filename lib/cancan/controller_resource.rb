@@ -207,8 +207,12 @@ module CanCan
       @name || name_from_controller
     end
 
+    def namespace
+      @params[:controller].split("::")[0..-2]
+    end
+
     def namespaced_name
-      @params[:controller].sub("Controller", "").singularize.camelize.constantize
+      [namespace, name.camelize].join('::').singularize.camelize.constantize
     rescue NameError
       name
     end

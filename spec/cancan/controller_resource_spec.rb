@@ -195,6 +195,14 @@ describe CanCan::ControllerResource do
     resource.should_not be_parent
   end
 
+  it "should have the specified resource_class if 'name' is passed to load_resource" do
+    class Section
+    end
+
+    resource = CanCan::ControllerResource.new(@controller, :section)
+    resource.send(:resource_class).should == Section
+  end
+
   it "should load parent resource through proper id parameter" do
     project = Project.create!
     @params.merge!(:action => "index", :project_id => project.id)
