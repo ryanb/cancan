@@ -103,6 +103,8 @@ module CanCan
         if @options[:find_by]
           if resource_base.respond_to? "find_by_#{@options[:find_by]}!"
             resource_base.send("find_by_#{@options[:find_by]}!", id_param)
+          elsif @controller.respond_to? @options[:find_by]
+            @controller.send(@options[:find_by])
           else
             resource_base.send(@options[:find_by], id_param)
           end
