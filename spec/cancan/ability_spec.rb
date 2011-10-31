@@ -416,4 +416,17 @@ describe CanCan::Ability do
       @ability.unauthorized_message(:edit, 1..3).should == "edit range"
     end
   end
+
+  describe "#merge" do
+    it "should add the rules from the given ability" do
+      @ability.can :use, :tools
+      another_ability = Object.new
+      another_ability.extend(CanCan::Ability)
+      another_ability.can :use, :search
+
+      @ability.merge(another_ability)
+      @ability.can?(:use, :search).should be_true
+      @ability.send(:rules).size.should == 2
+    end
+  end
 end
