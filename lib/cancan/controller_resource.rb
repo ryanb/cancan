@@ -214,7 +214,7 @@ module CanCan
     end
 
     def namespaced_resource
-      @name || @params[:controller].sub("Controller", "").underscore.gsub('/', '_').singularize
+      namespaced_name.to_s.underscore.gsub('/', '_').singularize
     rescue
       name
     end
