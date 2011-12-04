@@ -82,7 +82,7 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(@params[name] || {})
+      resource = resource_base.new(@params[namespaced_resource] || {})
       resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
       initial_attributes.each do |attr_name, value|
         resource.send("#{attr_name}=", value)
@@ -92,7 +92,7 @@ module CanCan
 
     def initial_attributes
       current_ability.attributes_for(@params[:action].to_sym, resource_class).delete_if do |key, value|
-        @params[name] && @params[name].include?(key)
+        @params[namespaced_resource] && @params[namespaced_resource].include?(key)
       end
     end
 
@@ -210,6 +210,12 @@ module CanCan
     def namespaced_name
       @name || @params[:controller].sub("Controller", "").singularize.camelize.constantize
     rescue NameError
+      name
+    end
+
+    def namespaced_resource
+      @name || @params[:controller].sub("Controller", "").underscore.gsub('/', '_').singularize
+    rescue
       name
     end
 
