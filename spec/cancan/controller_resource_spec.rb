@@ -82,6 +82,20 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
+  it "should build a new resource with hash if params[:id] is not specified (using param_key)" do
+     @params.merge!(:action => "create", :project_x => {:name => "foobar"})
+     resource = CanCan::ControllerResource.new(@controller, :param_key => 'project_x')
+     resource.load_resource
+     @controller.instance_variable_get(:@project).name.should == "foobar"
+   end
+
+  it "should build a new resource with hash if params[:id] is not specified (using ActiveModel::Naming)" do
+    @params.merge!(:controller => 'namespaced/models', :action => "create", :namespaced_model => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@model).name.should == "foobar"
+  end
+
   it "should build a new resource with attributes from current ability" do
     @params.merge!(:action => "new")
     @ability.can(:create, Project, :name => "from conditions")

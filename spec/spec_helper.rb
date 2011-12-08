@@ -58,3 +58,8 @@ class Project < SuperModel::Base
     end
   end
 end
+
+module Namespaced
+  class Model < SuperModel::Base
+  end
+end
