@@ -62,6 +62,20 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
+  it "should build a new resource with hash if params[:id] is not specified (using param_key)" do
+     @params.merge!(:action => "create", :project_x => {:name => "foobar"})
+     resource = CanCan::ControllerResource.new(@controller, :param_key => 'project_x')
+     resource.load_resource
+     @controller.instance_variable_get(:@project).name.should == "foobar"
+   end
+
+  it "should build a new resource with hash if params[:id] is not specified (using ActiveModel::Naming)" do
+    @params.merge!(:controller => 'namespaced/models', :action => "create", :namespaced_model => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@model).name.should == "foobar"
+  end
+
   it "should build a new resource with attributes from current ability" do
     @params.merge!(:action => "new")
     @ability.can(:create, Project, :name => "from conditions")
@@ -339,7 +353,7 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
     @controller.instance_variable_get(:@custom_project).should == project
   end
-  
+
   it "should load resource using custom ID param" do
     project = Project.create!
     @params.merge!(:action => "show", :the_project => project.id)
@@ -347,7 +361,7 @@ describe CanCan::ControllerResource do
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
-  
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
