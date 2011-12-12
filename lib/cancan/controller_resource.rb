@@ -209,8 +209,13 @@ module CanCan
 
     def namespaced_name
       @name || @params[:controller].sub("Controller", "").singularize.camelize.constantize
-    rescue NameError
-      name
+    rescue Exception => e
+      #Object is not missing Constant means we actually do have that model, un-namespaced
+      if [NameError,ArgumentError].include?(e.class)
+        name
+      else
+        raise e
+      end
     end
 
     def name_from_controller
