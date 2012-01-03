@@ -140,6 +140,7 @@ module CanCan
       when false  then name.to_sym
       when nil    then namespaced_name.to_s.camelize.constantize
       when String then @options[:class].constantize
+      when Proc   then klass = @options[:class].call; klass.is_a?(String) ? klass.constantize : klass
       else @options[:class]
       end
     end
