@@ -1,4 +1,4 @@
-= CanCan
+= CanCan {<img src="https://secure.travis-ci.org/ryanb/cancan.png" alt="Build Status" />}[http://travis-ci.org/ryanb/cancan] {<img src="https://gemnasium.com/ryanb/cancan.png" alt="Dependency Status" />}[https://gemnasium.com/ryanb/cancan]
 
 Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
