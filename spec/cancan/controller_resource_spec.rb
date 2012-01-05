@@ -62,6 +62,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
+  it "should build a new resource for namespaced model with hash if params[:id] is not specified" do
+    project = Sub::Project.create!
+    @params.merge!(:action => "create", 'sub_project' => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller, :class => ::Sub::Project)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
   it "should build a new resource with attributes from current ability" do
     @params.merge!(:action => "new")
     @ability.can(:create, Project, :name => "from conditions")
@@ -324,6 +332,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "should load the model using a custom namespaced class" do
+    project = Sub::Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller, :class => ::Sub::Project)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
   it "should authorize based on resource name if class is false" do
     @params.merge!(:action => "show", :id => 123)
     stub(@controller).authorize!(:show, :project) { raise CanCan::AccessDenied }
@@ -339,7 +355,7 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
     @controller.instance_variable_get(:@custom_project).should == project
   end
-  
+
   it "should load resource using custom ID param" do
     project = Project.create!
     @params.merge!(:action => "show", :the_project => project.id)
@@ -347,7 +363,7 @@ describe CanCan::ControllerResource do
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
-  
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
