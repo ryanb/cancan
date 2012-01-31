@@ -47,6 +47,18 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  # Rails includes namespace in params, see issue #349
+  it "should create through the namespaced params" do
+    module MyEngine
+      class Project < ::Project; end
+    end
+
+    @params.merge!(:controller => "MyEngine::ProjectsController", :action => "create", :my_engine_project => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
   it "should properly load resource for namespaced controller when using '::' for namespace" do
     project = Project.create!
     @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
