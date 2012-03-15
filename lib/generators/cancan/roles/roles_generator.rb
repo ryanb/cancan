@@ -1,10 +1,8 @@
-
 module Cancan
   module Generators
-    class RolesGenerator < Rails::Generators::Base
+    class RolesGenerator < Rails::Generators::NamedBase
       include Rails::Generators::Migration
       include Rails::Generators::Actions
-    #  include Thor::Actions
       source_root File.expand_path('../templates', __FILE__)
 
       def self.next_migration_number(path)
@@ -18,37 +16,41 @@ module Cancan
 
 			def copy_migrations
 				migration_template "roles.rb", "db/migrate/create_roles"
-				migration_template "user_roles.rb", "db/migrate/create_user_roles"
+				migration_template "migration.rb", "db/migrate/create_#{singular_name}_roles"
 			end
 			
 			def generate_role_model
 				invoke "active_record:model", ["role"], :migration => false 
+			 # invoke "active_record:model", ["#{singular_name}_role"], :migration => false
+			 create_file Rails.root.join("app", "models", "#{singular_name}_role.rb"), "class UserRole < ActiveRecord::Base
+
+end"		
 			end  
 			
-			def generate_user_role_model
-			  template "user_role.rb", "app/models/user_role.rb"			
-				#invoke "active_record:model", ["user_role"], :migration => false		
-			end	
+#			def generate_user_role_model
+#			  #template "user_role.rb", "app/models/user_role.rb"			
+#				invoke "active_record:model", ["#{singular_name}_role"], :migration => false		
+#			end	
 						
 			def insert_model_contents
-				inject_into_class 'app/models/user.rb', User do <<-RUBY
-					has_many :user_roles
-					has_many :roles, :through => :user_roles
-					# It checks the user role from the user_role table.
+				inject_into_class "app/models/#{singular_name}.rb", class_name do <<-CONTENT
+					has_many :#{singular_name}_roles
+					has_many :roles, :through => :#{singular_name}_roles
+					# It checks the #{plural_name} role from the #{singular_name}_role table.
 					 def role?(role)
 						 self.roles ? roles.map{|role| role.name}.include?(role.to_s) : false
 					 end
-				RUBY
+				CONTENT
 				end
-				inject_into_class 'app/models/role.rb', Role do <<-RUBY
-					has_many :user_roles
-		      has_many :users, :through => :user_roles
-		    RUBY
+				inject_into_class "app/models/role.rb", Role do <<-CONTENT
+					has_many :#{singular_name}_roles
+		      has_many :#{plural_name}, :through => :#{singular_name}_roles
+		    CONTENT
 				end
-				inject_into_class 'app/models/user_role.rb', UserRole do <<-RUBY
-					belongs_to :user
+				inject_into_class "app/models/#{singular_name}_role.rb", "#{class_name}Role".constantize do <<-CONTENT
+					belongs_to :#{singular_name}
           belongs_to :role
-				RUBY
+				CONTENT
 				end  
 			end
 			
