@@ -382,7 +382,7 @@ module CanCan
   end
 end
 
-if defined? ActionController
+if defined? ActionController::Base
   ActionController::Base.class_eval do
     include CanCan::ControllerAdditions
   end
