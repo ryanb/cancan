@@ -82,7 +82,7 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(resource_params || {})
+      resource = resource_base.new(@params[name] || {}, :as => @options[:assignment])
       assign_attributes(resource)
     end
 
