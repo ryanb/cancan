@@ -112,6 +112,9 @@ module CanCan
       # [:+prepend+]
       #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
+      # [:+assignment+]
+      #   Passing to ActiveRecord for support Mass-Assignment Role  
+      #
       def load_resource(*args)
         cancan_resource_class.add_before_filter(self, :load_resource, *args)
       end
