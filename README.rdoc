@@ -99,6 +99,11 @@ This will raise an exception if authorization is not performed in an action. If 
 * {See more}[https://github.com/ryanb/cancan/wiki]
 
 
+== Project Status
+
+Unfortunately I have not had time to actively work on this project recently. If you find a critical issue where it does not work as documented please {ping me on twitter}[http://twitter.com/rbates] and I'll take a look.
+
+
 == Questions or Problems?
 
 If you have any issues with CanCan which you cannot find the solution to in the documentation[https://github.com/ryanb/cancan/wiki], please add an {issue on GitHub}[https://github.com/ryanb/cancan/issues] or fork the project and send a pull request.
