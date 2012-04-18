@@ -6,6 +6,22 @@ describe CanCan::Ability do
     @ability.extend(CanCan::Ability)
   end
 
+  it "should raise exception when we pass raise the to block" do
+    lambda {
+      @ability.can :read, Symbol do |sym|
+        raise "very strange that this line is never reached!"
+      end
+      @ability.can?(:read, Symbol).should be_true
+    }.should raise_error
+  end
+
+  it "should work when block has the simplest condition ever passed in block" do
+    @ability.can :read, Symbol do |sym|
+      2 > 1
+    end
+    @ability.can?(:read, Symbol).should be_true
+  end
+ 
   it "should be able to :read anything" do
     @ability.can :read, :all
     @ability.can?(:read, String).should be_true
