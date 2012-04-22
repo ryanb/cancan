@@ -8,44 +8,44 @@ describe CanCan::Rule do
     @rule = CanCan::Rule.new(true, :read, Integer, @conditions, nil)
   end
 
-  it "should return no association joins if none exist" do
+  it "returns no association joins if none exist" do
     expect(@rule.associations_hash).to eq({})
   end
 
-  it "should return no association for joins if just attributes" do
+  it "returns no association for joins if just attributes" do
     @conditions[:foo] = :bar
     expect(@rule.associations_hash).to eq({})
   end
 
-  it "should return single association for joins" do
+  it "returns single association for joins" do
     @conditions[:foo] = {:bar => 1}
     expect(@rule.associations_hash).to eq({:foo => {}})
   end
 
-  it "should return multiple associations for joins" do
+  it "returns multiple associations for joins" do
     @conditions[:foo] = {:bar => 1}
     @conditions[:test] = {1 => 2}
     expect(@rule.associations_hash).to eq({:foo => {}, :test => {}})
   end
 
-  it "should return nested associations for joins" do
+  it "returns nested associations for joins" do
     @conditions[:foo] = {:bar => {1 => 2}}
     expect(@rule.associations_hash).to eq({:foo => {:bar => {}}})
   end
 
-  it "should return no association joins if conditions is nil" do
+  it "returns no association joins if conditions is nil" do
     rule = CanCan::Rule.new(true, :read, Integer, nil, nil)
     expect(rule.associations_hash).to eq({})
   end
 
-  it "should not be mergeable if conditions are not simple hashes" do
+  it "is not mergeable if conditions are not simple hashes" do
     meta_where = OpenStruct.new(:name => 'metawhere', :column => 'test')
     @conditions[meta_where] = :bar
 
     expect(@rule).to be_unmergeable
   end
 
-  it "should be mergeable if conditions is an empty hash" do
+  it "is not mergeable if conditions is an empty hash" do
     @conditions = {}
     expect(@rule).to_not be_unmergeable
   end
