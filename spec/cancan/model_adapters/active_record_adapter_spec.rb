@@ -1,42 +1,7 @@
 if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   require "spec_helper"
 
-  ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
-
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
-    with_model :category do
-      table do |t|
-        t.boolean "visible"
-      end
-      model do
-        has_many :articles
-      end
-    end
-
-    with_model :article do
-      table do |t|
-        t.string  "name"
-        t.boolean "published"
-        t.boolean "secret"
-        t.integer "priority"
-        t.integer "category_id"
-      end
-      model do
-        belongs_to :category
-        has_many :comments
-      end
-    end
-
-    with_model :comment do
-      table do |t|
-        t.boolean "spam"
-        t.integer "article_id"
-      end
-      model do
-        belongs_to :article
-      end
-    end
-
     before(:each) do
       Article.delete_all
       Comment.delete_all
@@ -229,6 +194,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     end
 
     it "restricts articles given a MetaWhere condition" do
+      pending
       @ability.can :read, :articles, :priority.lt => 2
       article1 = Article.create!(:priority => 1)
       article2 = Article.create!(:priority => 3)
@@ -238,6 +204,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     end
 
     it "matches any MetaWhere condition" do
+      pending
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter
       article1 = Article.new(:priority => 1, :name => "Hello World")
       adapter.matches_condition?(article1, :priority.eq, 1).should be_true

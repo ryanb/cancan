@@ -2,6 +2,8 @@ require "spec_helper"
 
 describe CanCan::ControllerResource do
   before(:each) do
+    Project.delete_all
+    Category.delete_all
     @params = HashWithIndifferentAccess.new(:controller => "projects")
     @controller_class = Class.new
     @controller = @controller_class.new
@@ -70,6 +72,9 @@ describe CanCan::ControllerResource do
   end
 
   it "does not build a collection when on index action when class does not respond to accessible_by and not mark ability as fully authorized" do
+    class CustomModel
+    end
+    @params[:controller] = "custom_models"
     @params[:action] = "index"
     CanCan::ControllerResource.new(@controller, :load => true).process
     @controller.instance_variable_get(:@project).should be_nil
