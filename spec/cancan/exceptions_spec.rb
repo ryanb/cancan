@@ -6,12 +6,12 @@ describe CanCan::Unauthorized do
       @exception = CanCan::Unauthorized.new(nil, :some_action, :some_subject)
     end
 
-    it "should have action and subject accessors" do
+    it "has action and subject accessors" do
       @exception.action.should == :some_action
       @exception.subject.should == :some_subject
     end
 
-    it "should have a changable default message" do
+    it "has a changable default message" do
       @exception.message.should == "You are not authorized to access this page."
       @exception.default_message = "Unauthorized!"
       @exception.message.should == "Unauthorized!"
@@ -23,12 +23,12 @@ describe CanCan::Unauthorized do
       @exception = CanCan::Unauthorized.new("Access denied!")
     end
 
-    it "should have nil action and subject" do
+    it "has nil action and subject" do
       @exception.action.should be_nil
       @exception.subject.should be_nil
     end
 
-    it "should have passed message" do
+    it "has passed message" do
       @exception.message.should == "Access denied!"
     end
   end

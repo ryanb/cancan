@@ -11,7 +11,7 @@ describe CanCan::ControllerAdditions do
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
 
-  it "should raise ImplementationRemoved when attempting to call load/authorize/skip/check calls on a controller" do
+  it "raises ImplementationRemoved when attempting to call load/authorize/skip/check calls on a controller" do
     lambda { @controller_class.load_resource }.should raise_error(CanCan::ImplementationRemoved)
     lambda { @controller_class.authorize_resource }.should raise_error(CanCan::ImplementationRemoved)
     lambda { @controller_class.skip_load_resource }.should raise_error(CanCan::ImplementationRemoved)
@@ -26,7 +26,7 @@ describe CanCan::ControllerAdditions do
     @controller.authorize!(:foo, :bar)
   end
 
-  it "should provide a can? and cannot? methods which go through the current ability" do
+  it "provides a can? and cannot? methods which go through the current ability" do
     @controller.current_ability.should be_kind_of(Ability)
     @controller.can?(:foo, :bar).should be_false
     @controller.cannot?(:foo, :bar).should be_true

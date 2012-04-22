@@ -46,36 +46,36 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @comment_table = Comment.table_name
     end
 
-    it "should be for only active record classes" do
+    it "is for only active record classes" do
       CanCan::ModelAdapters::ActiveRecordAdapter.should_not be_for_class(Object)
       CanCan::ModelAdapters::ActiveRecordAdapter.should be_for_class(Article)
       CanCan::ModelAdapters::AbstractAdapter.adapter_class(Article).should == CanCan::ModelAdapters::ActiveRecordAdapter
     end
 
-    it "should find record" do
+    it "finds record" do
       article = Article.create!
       CanCan::ModelAdapters::ActiveRecordAdapter.find(Article, article.id).should == article
     end
 
-    it "should not fetch any records when no abilities are defined" do
+    it "does not fetch any records when no abilities are defined" do
       Article.create!
       Article.accessible_by(@ability).should be_empty
     end
 
-    it "should fetch all articles when one can read all" do
+    it "fetches all articles when one can read all" do
       @ability.can :read, :articles
       article = Article.create!
       Article.accessible_by(@ability).should == [article]
     end
 
-    it "should fetch only the articles that are published" do
+    it "fetches only the articles that are published" do
       @ability.can :read, :articles, :published => true
       article1 = Article.create!(:published => true)
       article2 = Article.create!(:published => false)
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should fetch any articles which are published or secret" do
+    it "fetches any articles which are published or secret" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, :secret => true
       article1 = Article.create!(:published => true, :secret => false)
@@ -85,7 +85,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Article.accessible_by(@ability).should == [article1, article2, article3]
     end
 
-    it "should fetch only the articles that are published and not secret" do
+    it "fetches only the articles that are published and not secret" do
       @ability.can :read, :articles, :published => true
       @ability.cannot :read, :articles, :secret => true
       article1 = Article.create!(:published => true, :secret => false)
@@ -95,21 +95,21 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should only read comments for articles which are published" do
+    it "only reads comments for articles which are published" do
       @ability.can :read, :comments, :article => { :published => true }
       comment1 = Comment.create!(:article => Article.create!(:published => true))
       comment2 = Comment.create!(:article => Article.create!(:published => false))
       Comment.accessible_by(@ability).should == [comment1]
     end
 
-    it "should only read comments for visible categories through articles" do
+    it "only reads comments for visible categories through articles" do
       @ability.can :read, :comments, :article => { :category => { :visible => true } }
       comment1 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => true)))
       comment2 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => false)))
       Comment.accessible_by(@ability).should == [comment1]
     end
 
-    it "should allow conditions in SQL and merge with hash conditions" do
+    it "allows conditions in SQL and merge with hash conditions" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, ["secret=?", true]
       article1 = Article.create!(:published => true, :secret => false)
@@ -119,14 +119,14 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Article.accessible_by(@ability).should == [article1, article2, article3]
     end
 
-    it "should allow a scope for conditions" do
+    it "allows a scope for conditions" do
       @ability.can :read, :articles, Article.where(:secret => true)
       article1 = Article.create!(:secret => true)
       article2 = Article.create!(:secret => false)
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should fetch only associated records when using with a scope for conditions" do
+    it "fetches only associated records when using with a scope for conditions" do
       @ability.can :read, :articles, Article.where(:secret => true)
       category1 = Category.create!(:visible => false)
       category2 = Category.create!(:visible => true)
@@ -136,58 +136,58 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       category1.articles.accessible_by(@ability).map(&:id).should == [article1.id]
     end
 
-    it "should raise an exception when trying to merge scope with other conditions" do
+    it "raises an exception when trying to merge scope with other conditions" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, Article.where(:secret => true)
       lambda { Article.accessible_by(@ability) }.should raise_error(CanCan::Error, "Unable to merge an Active Record scope with other conditions. Instead use a hash or SQL for read articles ability.")
     end
 
-    it "should not allow to fetch records when ability with just block present" do
+    it "does not allow to fetch records when ability with just block present" do
       @ability.can :read, :articles do
         false
       end
       lambda { Article.accessible_by(@ability) }.should raise_error(CanCan::Error)
     end
 
-    it "should not allow to check ability on object against SQL conditions without block" do
+    it "does not allow to check ability on object against SQL conditions without block" do
       @ability.can :read, :articles, ["secret=?", true]
       lambda { @ability.can? :read, Article.new }.should raise_error(CanCan::Error)
     end
 
-    it "should have false conditions if no abilities match" do
+    it "has false conditions if no abilities match" do
       @ability.model_adapter(Article, :read).conditions.should == "'t'='f'"
     end
 
-    it "should return false conditions for cannot clause" do
+    it "returns false conditions for cannot clause" do
       @ability.cannot :read, :articles
       @ability.model_adapter(Article, :read).conditions.should == "'t'='f'"
     end
 
-    it "should return SQL for single `can` definition in front of default `cannot` condition" do
+    it "returns SQL for single `can` definition in front of default `cannot` condition" do
       @ability.cannot :read, :articles
       @ability.can :read, :articles, :published => false, :secret => true
       @ability.model_adapter(Article, :read).conditions.should orderlessly_match(%Q["#{@article_table}"."published" = 'f' AND "#{@article_table}"."secret" = 't'])
     end
 
-    it "should return true condition for single `can` definition in front of default `can` condition" do
+    it "returns true condition for single `can` definition in front of default `can` condition" do
       @ability.can :read, :articles
       @ability.can :read, :articles, :published => false, :secret => true
       @ability.model_adapter(Article, :read).conditions.should eq(:secret => true, :published => false)
     end
 
-    it "should return `false condition` for single `cannot` definition in front of default `cannot` condition" do
+    it "returns `false condition` for single `cannot` definition in front of default `cannot` condition" do
       @ability.cannot :read, :articles
       @ability.cannot :read, :articles, :published => false, :secret => true
       @ability.model_adapter(Article, :read).conditions.should  == "'t'='f'"
     end
 
-    it "should return `not (sql)` for single `cannot` definition in front of default `can` condition" do
+    it "returns `not (sql)` for single `cannot` definition in front of default `can` condition" do
       @ability.can :read, :articles
       @ability.cannot :read, :articles, :published => false, :secret => true
       @ability.model_adapter(Article, :read).conditions.should orderlessly_match(%Q["not (#{@article_table}"."published" = 'f' AND "#{@article_table}"."secret" = 't')])
     end
 
-    it "should return appropriate sql conditions in complex case" do
+    it "returns appropriate sql conditions in complex case" do
       @ability.can :read, :articles
       @ability.can :access, :articles, :id => 1
       @ability.can :update, :articles, :published => true
@@ -197,7 +197,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.model_adapter(Article, :read).conditions.should == {:id => 1} # used to be "t=t" but changed with new specificity rule (issue #321)
     end
 
-    it "should not forget conditions when calling with SQL string" do
+    it "does not forget conditions when calling with SQL string" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, ['secret=?', false]
       adapter = @ability.model_adapter(Article, :read)
@@ -206,29 +206,29 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       end
     end
 
-    it "should have nil joins if no rules" do
+    it "has nil joins if no rules" do
       @ability.model_adapter(Article, :read).joins.should be_nil
     end
 
-    it "should have nil joins if no nested hashes specified in conditions" do
+    it "has nil joins if no nested hashes specified in conditions" do
       @ability.can :read, :articles, :published => false
       @ability.can :read, :articles, :secret => true
       @ability.model_adapter(Article, :read).joins.should be_nil
     end
 
-    it "should merge separate joins into a single array" do
+    it "merges separate joins into a single array" do
       @ability.can :read, :articles, :project => { :blocked => false }
       @ability.can :read, :articles, :company => { :admin => true }
       @ability.model_adapter(Article, :read).joins.inspect.should orderlessly_match([:company, :project].inspect)
     end
 
-    it "should merge same joins into a single array" do
+    it "merges same joins into a single array" do
       @ability.can :read, :articles, :project => { :blocked => false }
       @ability.can :read, :articles, :project => { :admin => true }
       @ability.model_adapter(Article, :read).joins.should == [:project]
     end
 
-    it "should restrict articles given a MetaWhere condition" do
+    it "restricts articles given a MetaWhere condition" do
       @ability.can :read, :articles, :priority.lt => 2
       article1 = Article.create!(:priority => 1)
       article2 = Article.create!(:priority => 3)
@@ -237,7 +237,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.should_not be_able_to(:read, article2)
     end
 
-    it "should match any MetaWhere condition" do
+    it "matches any MetaWhere condition" do
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter
       article1 = Article.new(:priority => 1, :name => "Hello World")
       adapter.matches_condition?(article1, :priority.eq, 1).should be_true

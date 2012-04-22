@@ -30,24 +30,24 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         end.each(&:drop)
       end
 
-      it "should be for only Mongoid classes" do
+      it "is for only Mongoid classes" do
         CanCan::ModelAdapters::MongoidAdapter.should_not be_for_class(Object)
         CanCan::ModelAdapters::MongoidAdapter.should be_for_class(MongoidProject)
         CanCan::ModelAdapters::AbstractAdapter.adapter_class(MongoidProject).should == CanCan::ModelAdapters::MongoidAdapter
       end
 
-      it "should find record" do
+      it "finds record" do
         project = MongoidProject.create
         CanCan::ModelAdapters::MongoidAdapter.find(MongoidProject, project.id).should == project
       end
 
-      it "should compare properties on mongoid documents with the conditions hash" do
+      it "compares properties on mongoid documents with the conditions hash" do
         model = MongoidProject.new
         @ability.can :read, :mongoid_projects, :id => model.id
         @ability.should be_able_to(:read, model)
       end
 
-      it "should be able to read hashes when field is array" do
+      it "is able to read hashes when field is array" do
         one_to_three = MongoidProject.create(:numbers => ['one', 'two', 'three'])
         two_to_five  = MongoidProject.create(:numbers => ['two', 'three', 'four', 'five'])
 
@@ -56,7 +56,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.should_not be_able_to(:foo, two_to_five)
       end
 
-      it "should return [] when no ability is defined so no records are found" do
+      it "returns [] when no ability is defined so no records are found" do
         MongoidProject.create(:title => 'Sir')
         MongoidProject.create(:title => 'Lord')
         MongoidProject.create(:title => 'Dude')
@@ -64,7 +64,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == []
       end
 
-      it "should return the correct records based on the defined ability" do
+      it "returns the correct records based on the defined ability" do
         @ability.can :read, :mongoid_projects, :title => "Sir"
         sir   = MongoidProject.create(:title => 'Sir')
         lord  = MongoidProject.create(:title => 'Lord')
@@ -73,7 +73,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
       end
 
-      it "should be able to mix empty conditions and hashes" do
+      it "is able to mix empty conditions and hashes" do
         @ability.can :read, :mongoid_projects
         @ability.can :read, :mongoid_projects, :title => 'Sir'
         sir  = MongoidProject.create(:title => 'Sir')
@@ -82,7 +82,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).count.should == 2
       end
 
-      it "should return everything when the defined ability is access all" do
+      it "returns everything when the defined ability is access all" do
         @ability.can :access, :all
         sir   = MongoidProject.create(:title => 'Sir')
         lord  = MongoidProject.create(:title => 'Lord')
@@ -91,7 +91,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir, lord, dude]
       end
 
-      it "should allow a scope for conditions" do
+      it "allows a scope for conditions" do
         @ability.can :read, :mongoid_projects, MongoidProject.where(:title => 'Sir')
         sir   = MongoidProject.create(:title => 'Sir')
         lord  = MongoidProject.create(:title => 'Lord')
@@ -101,7 +101,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       end
 
       describe "Mongoid::Criteria where clause Symbol extensions using MongoDB expressions" do
-        it "should handle :field.in" do
+        it "handles :field.in" do
           obj = MongoidProject.create(:title => 'Sir')
           @ability.can :read, :mongoid_projects, :title.in => ["Sir", "Madam"]
           @ability.can?(:read, obj).should == true
@@ -127,7 +127,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           end
         end
 
-        it "should handle :field.nin" do
+        it "handles :field.nin" do
           obj = MongoidProject.create(:title => 'Sir')
           @ability.can :read, :mongoid_projects, :title.nin => ["Lord", "Madam"]
           @ability.can?(:read, obj).should == true
@@ -137,7 +137,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           @ability.can?(:read, obj2).should == false
         end
 
-        it "should handle :field.size" do
+        it "handles :field.size" do
           obj = MongoidProject.create(:titles => ['Palatin', 'Margrave'])
           @ability.can :read, :mongoid_projects, :titles.size => 2
           @ability.can?(:read, obj).should == true
@@ -147,7 +147,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           @ability.can?(:read, obj2).should == false
         end
 
-        it "should handle :field.exists" do
+        it "handles :field.exists" do
           obj = MongoidProject.create(:titles => ['Palatin', 'Margrave'])
           @ability.can :read, :mongoid_projects, :titles.exists => true
           @ability.can?(:read, obj).should == true
@@ -157,7 +157,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           @ability.can?(:read, obj2).should == false
         end
 
-        it "should handle :field.gt" do
+        it "handles :field.gt" do
           obj = MongoidProject.create(:age => 50)
           @ability.can :read, :mongoid_projects, :age.gt => 45
           @ability.can?(:read, obj).should == true
@@ -167,7 +167,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
           @ability.can?(:read, obj2).should == false
         end
 
-        it "should handle instance not saved to database" do
+        it "handles instance not saved to database" do
           obj = MongoidProject.new(:title => 'Sir')
           @ability.can :read, :mongoid_projects, :title.in => ["Sir", "Madam"]
           @ability.can?(:read, obj).should == true
@@ -180,13 +180,13 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         end
       end
 
-      it "should call where with matching ability conditions" do
+      it "calls where with matching ability conditions" do
         obj = MongoidProject.create(:foo => {:bar => 1})
         @ability.can :read, :mongoid_projects, :foo => {:bar => 1}
         MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
       end
 
-      it "should exclude from the result if set to cannot" do
+      it "excludes from the result if set to cannot" do
         obj = MongoidProject.create(:bar => 1)
         obj2 = MongoidProject.create(:bar => 2)
         @ability.can :read, :mongoid_projects
@@ -194,7 +194,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [obj]
       end
 
-      it "should combine the rules" do
+      it "combines the rules" do
         obj = MongoidProject.create(:bar => 1)
         obj2 = MongoidProject.create(:bar => 2)
         obj3 = MongoidProject.create(:bar => 3)
@@ -203,7 +203,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should =~ [obj, obj2]
       end
 
-      it "should not allow to fetch records when ability with just block present" do
+      it "does not allow to fetch records when ability with just block present" do
         @ability.can :read, :mongoid_projects do
           false
         end

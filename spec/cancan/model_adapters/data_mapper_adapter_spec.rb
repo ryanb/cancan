@@ -30,36 +30,36 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       @ability.extend(CanCan::Ability)
     end
 
-    it "should be for only data mapper classes" do
+    it "is for only data mapper classes" do
       CanCan::ModelAdapters::DataMapperAdapter.should_not be_for_class(Object)
       CanCan::ModelAdapters::DataMapperAdapter.should be_for_class(Article)
       CanCan::ModelAdapters::AbstractAdapter.adapter_class(Article).should == CanCan::ModelAdapters::DataMapperAdapter
     end
 
-    it "should find record" do
+    it "finds record" do
       article = Article.create
       CanCan::ModelAdapters::DataMapperAdapter.find(Article, article.id).should == article
     end
 
-    it "should not fetch any records when no abilities are defined" do
+    it "does not fetch any records when no abilities are defined" do
       Article.create
       Article.accessible_by(@ability).should be_empty
     end
 
-    it "should fetch all articles when one can read all" do
+    it "fetches all articles when one can read all" do
       @ability.can :read, :articles
       article = Article.create
       Article.accessible_by(@ability).should == [article]
     end
 
-    it "should fetch only the articles that are published" do
+    it "fetches only the articles that are published" do
       @ability.can :read, :articles, :published => true
       article1 = Article.create(:published => true)
       article2 = Article.create(:published => false)
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should fetch any articles which are published or secret" do
+    it "fetches any articles which are published or secret" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, :secret => true
       article1 = Article.create(:published => true, :secret => false)
@@ -69,7 +69,7 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       Article.accessible_by(@ability).should == [article1, article2, article3]
     end
 
-    it "should fetch only the articles that are published and not secret" do
+    it "fetches only the articles that are published and not secret" do
       pending "the `cannot` may require some custom SQL, maybe abstract out from Active Record adapter"
       @ability.can :read, :articles, :published => true
       @ability.cannot :read, :articles, :secret => true
@@ -80,14 +80,14 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should only read comments for articles which are published" do
+    it "only reads comments for articles which are published" do
       @ability.can :read, :comments, :article => { :published => true }
       comment1 = Comment.create(:article => Article.create!(:published => true))
       comment2 = Comment.create(:article => Article.create!(:published => false))
       Comment.accessible_by(@ability).should == [comment1]
     end
 
-    it "should allow conditions in SQL and merge with hash conditions" do
+    it "allows conditions in SQL and merge with hash conditions" do
       @ability.can :read, :articles, :published => true
       @ability.can :read, :articles, ["secret=?", true]
       article1 = Article.create(:published => true, :secret => false)
@@ -95,7 +95,7 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       Article.accessible_by(@ability).should == [article1]
     end
 
-    it "should match gt comparison" do
+    it "matches gt comparison" do
       @ability.can :read, :articles, :priority.gt => 3
       article1 = Article.create(:priority => 4)
       article2 = Article.create(:priority => 3)
@@ -104,7 +104,7 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       @ability.should_not be_able_to(:read, article2)
     end
 
-    it "should match gte comparison" do
+    it "matches gte comparison" do
       @ability.can :read, :articles, :priority.gte => 3
       article1 = Article.create(:priority => 4)
       article2 = Article.create(:priority => 3)

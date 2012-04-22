@@ -290,7 +290,7 @@ describe CanCan::Ability do
     @ability.should be_fully_authorized(:update, :ranges)
   end
 
-  it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
+  it "does not match subjects return nil for methods that must match nested a nested conditions hash" do
     object_with_foo = Object.new
     object_with_foo.should_receive(:foo) { :bar }
     @ability.can :read, :arrays, :first => { :foo => :bar }
@@ -395,14 +395,14 @@ describe CanCan::Ability do
     end
   end
 
-  it "should not raise access denied exception if ability is authorized to perform an action and return subject" do
+  it "does not raise access denied exception if ability is authorized to perform an action and return subject" do
     @ability.can :read, :foo
     lambda {
       @ability.authorize!(:read, :foo).should == :foo
     }.should_not raise_error
   end
 
-  it "should know when block is used in conditions" do
+  it "knows when block is used in conditions" do
     @ability.can :read, :foo
     @ability.should_not have_block(:read, :foo)
     @ability.can :read, :foo do |foo|
@@ -411,14 +411,14 @@ describe CanCan::Ability do
     @ability.should have_block(:read, :foo)
   end
 
-  it "should know when raw sql is used in conditions" do
+  it "knows when raw sql is used in conditions" do
     @ability.can :read, :foo
     @ability.should_not have_raw_sql(:read, :foo)
     @ability.can :read, :foo, 'false'
     @ability.should have_raw_sql(:read, :foo)
   end
 
-  it "should raise access denied exception with default message if not specified" do
+  it "raises access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :books
     rescue CanCan::Unauthorized => e
