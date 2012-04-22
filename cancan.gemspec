@@ -11,8 +11,7 @@ Gem::Specification.new do |s|
   s.require_path = "lib"
 
   s.add_development_dependency 'rspec', '~> 2.9.0'
-  s.add_development_dependency 'rails', '~> 3.0.9'
-  s.add_development_dependency 'supermodel', '~> 0.1.6'
+  s.add_development_dependency 'rails', '~> 3.2.3'
 
   s.rubyforge_project = s.name
   s.required_rubygems_version = ">= 1.3.4"
