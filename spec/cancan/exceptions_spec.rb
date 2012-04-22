@@ -6,12 +6,12 @@ describe CanCan::AccessDenied do
       @exception = CanCan::AccessDenied.new(nil, :some_action, :some_subject)
     end
 
-    it "should have action and subject accessors" do
+    it "has action and subject accessors" do
       expect(@exception.action).to eq(:some_action)
       expect(@exception.subject).to eq(:some_subject)
     end
 
-    it "should have a changable default message" do
+    it "has a changable default message" do
       expect(@exception.message).to eq("You are not authorized to access this page.")
       @exception.default_message = "Unauthorized!"
       expect(@exception.message).to eq("Unauthorized!")
@@ -23,12 +23,12 @@ describe CanCan::AccessDenied do
       @exception = CanCan::AccessDenied.new("Access denied!")
     end
 
-    it "should have nil action and subject" do
+    it "has nil action and subject" do
       expect(@exception.action).to be_nil
       expect(@exception.subject).to be_nil
     end
 
-    it "should have passed message" do
+    it "has passed message" do
       expect(@exception.message).to eq("Access denied!")
     end
   end
