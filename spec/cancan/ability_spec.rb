@@ -291,7 +291,8 @@ describe CanCan::Ability do
   end
 
   it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
-    mock(object_with_foo = Object.new).foo { :bar }
+    object_with_foo = Object.new
+    object_with_foo.should_receive(:foo) { :bar }
     @ability.can :read, :arrays, :first => { :foo => :bar }
     @ability.can?(:read, [object_with_foo]).should be_true
     @ability.can?(:read, []).should be_false
@@ -457,8 +458,8 @@ describe CanCan::Ability do
   it "determines model adapter class by asking AbstractAdapter" do
     model_class = Object.new
     adapter_class = Object.new
-    stub(CanCan::ModelAdapters::AbstractAdapter).adapter_class(model_class) { adapter_class }
-    stub(adapter_class).new(model_class, []) { :adapter_instance }
+    CanCan::ModelAdapters::AbstractAdapter.stub(:adapter_class).with(model_class) { adapter_class }
+    adapter_class.stub(:new).with(model_class, []) { :adapter_instance }
     @ability.model_adapter(model_class, :read).should == :adapter_instance
   end
 

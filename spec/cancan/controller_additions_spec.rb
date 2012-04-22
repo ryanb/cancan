@@ -5,9 +5,9 @@ describe CanCan::ControllerAdditions do
     @params = HashWithIndifferentAccess.new
     @controller_class = Class.new
     @controller = @controller_class.new
-    stub(@controller).params { @params }
-    stub(@controller).current_user { :current_user }
-    mock(@controller_class).helper_method(:can?, :cannot?, :current_ability)
+    @controller.stub(:params) { @params }
+    @controller.stub(:current_user) { :current_user }
+    @controller_class.should_receive(:helper_method).with(:can?, :cannot?, :current_ability)
     @controller_class.send(:include, CanCan::ControllerAdditions)
   end
 
@@ -22,7 +22,7 @@ describe CanCan::ControllerAdditions do
   end
 
   it "authorize! should pass args to current ability" do
-    mock(@controller.current_ability).authorize!(:foo, :bar)
+    @controller.current_ability.should_receive(:authorize!).with(:foo, :bar)
     @controller.authorize!(:foo, :bar)
   end
 
@@ -33,19 +33,23 @@ describe CanCan::ControllerAdditions do
   end
 
   it "load_and_authorize_resource should setup a before filter which passes call to ControllerResource" do
-    stub(CanCan::ControllerResource).new(@controller, nil, :load => true, :authorize => true, :foo => :bar).mock!.process
-    mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
+    controller_resource = double("controller_resource")
+    controller_resource.should_receive(:process)
+    CanCan::ControllerResource.stub(:new).with(@controller, nil, :load => true, :authorize => true, :foo => :bar) { controller_resource }
+    @controller_class.should_receive(:before_filter).with({}).and_yield(@controller)
     @controller_class.load_and_authorize_resource :foo => :bar
   end
 
   it "load_and_authorize_resource should properly pass first argument as the resource name" do
-    stub(CanCan::ControllerResource).new(@controller, :project, :load => true, :authorize => true, :foo => :bar).mock!.process
-    mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
+    controller_resource = double("controller_resource")
+    controller_resource.should_receive(:process)
+    CanCan::ControllerResource.stub(:new).with(@controller, :project, :load => true, :authorize => true, :foo => :bar) { controller_resource }
+    @controller_class.should_receive(:before_filter).with({}).and_yield(@controller)
     @controller_class.load_and_authorize_resource :project, :foo => :bar
   end
 
   it "load_and_authorize_resource with :prepend should prepend the before filter" do
-    mock(@controller_class).prepend_before_filter({})
+    @controller_class.should_receive(:prepend_before_filter).with({})
     @controller_class.load_and_authorize_resource :foo => :bar, :prepend => true
   end
 
@@ -54,23 +58,22 @@ describe CanCan::ControllerAdditions do
   end
 
   it "cancan_resource_class should be InheritedResource when class includes InheritedResources::Actions" do
-    stub(@controller.class).ancestors { ["InheritedResources::Actions"] }
+    @controller.class.stub(:ancestors) { ["InheritedResources::Actions"] }
     @controller.class.cancan_resource_class.should == CanCan::InheritedResource
   end
 
   it "enable_authorization should call authorize! with controller and action name" do
     @params.merge!(:controller => "projects", :action => "create")
-    mock(@controller).authorize!("create", "projects")
-    stub(@controller_class).before_filter(:only => :foo, :except => :bar) { |options, block| block.call(@controller) }
-    stub(@controller_class).after_filter(:only => :foo, :except => :bar)
+    @controller.should_receive(:authorize!).with("create", "projects")
+    @controller_class.stub(:before_filter).with(:only => :foo, :except => :bar).and_yield(@controller)
+    @controller_class.stub(:after_filter).with(:only => :foo, :except => :bar)
     @controller_class.enable_authorization(:only => :foo, :except => :bar)
   end
 
   it "enable_authorization should raise InsufficientAuthorizationCheck when not fully authoried" do
     @params.merge!(:controller => "projects", :action => "create")
-    stub(@ability).fully_authorized? { false }
-    stub(@controller_class).before_filter(:only => :foo, :except => :bar)
-    stub(@controller_class).after_filter(:only => :foo, :except => :bar) { |options, block| block.call(@controller) }
+    @controller_class.stub(:before_filter).with(:only => :foo, :except => :bar)
+    @controller_class.stub(:after_filter).with(:only => :foo, :except => :bar).and_yield(@controller)
     lambda {
       @controller_class.enable_authorization(:only => :foo, :except => :bar)
     }.should raise_error(CanCan::InsufficientAuthorizationCheck)
@@ -78,29 +81,29 @@ describe CanCan::ControllerAdditions do
 
   it "enable_authorization should not call authorize! when :if is false" do
     @authorize_called = false
-    stub(@controller).authorize? { false }
-    stub(@controller).authorize! { @authorize_called = true }
-    mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
-    mock(@controller_class).after_filter({}) { |options, block| block.call(@controller) }
+    @controller.stub(:authorize?) { false }
+    @controller.stub(:authorize!) { @authorize_called = true }
+    @controller_class.should_receive(:before_filter).with({}).and_yield(@controller)
+    @controller_class.should_receive(:after_filter).with({}).and_yield(@controller)
     @controller_class.enable_authorization(:if => :authorize?)
     @authorize_called.should be_false
   end
 
   it "enable_authorization should not call authorize! when :unless is true" do
     @authorize_called = false
-    stub(@controller).engine_controller? { true }
-    stub(@controller).authorize! { @authorize_called = true }
-    mock(@controller_class).before_filter({}) { |options, block| block.call(@controller) }
-    mock(@controller_class).after_filter({}) { |options, block| block.call(@controller) }
+    @controller.stub(:engine_controller?) { true }
+    @controller.stub(:authorize!) { @authorize_called = true }
+    @controller_class.should_receive(:before_filter).with({}).and_yield(@controller)
+    @controller_class.should_receive(:after_filter).with({}).and_yield(@controller)
     @controller_class.enable_authorization(:unless => :engine_controller?)
     @authorize_called.should be_false
   end
 
   it "enable_authorization should pass block to rescue_from CanCan::Unauthorized call" do
     @block_called = false
-    mock(@controller_class).before_filter({})
-    mock(@controller_class).after_filter({})
-    mock(@controller_class).rescue_from(CanCan::Unauthorized) { |options, block| block.call(:exception) }
+    @controller_class.should_receive(:before_filter).with({})
+    @controller_class.should_receive(:after_filter).with({})
+    @controller_class.should_receive(:rescue_from).with(CanCan::Unauthorized).and_yield(:exception)
     @controller_class.enable_authorization { |e| @block_called = (e == :exception) }
     @block_called.should be_true
   end
