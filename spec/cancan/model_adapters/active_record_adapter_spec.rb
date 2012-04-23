@@ -1,6 +1,30 @@
 if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   require "spec_helper"
 
+  class Category
+    has_many :articles
+  end
+
+  class Article < ActiveRecord::Base
+    connection.create_table(table_name) do |t|
+      t.integer :category_id
+      t.string :name
+      t.boolean :published
+      t.boolean :secret
+      t.integer :priority
+    end
+    belongs_to :category
+    has_many :comments
+  end
+
+  class Comment < ActiveRecord::Base
+    connection.create_table(table_name) do |t|
+      t.integer :article_id
+      t.boolean :spam
+    end
+    belongs_to :article
+  end
+
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
     before(:each) do
       Article.delete_all
