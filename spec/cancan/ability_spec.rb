@@ -249,7 +249,15 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..5).should be_true
     @ability.can?(:read, 4..6).should be_false
   end
-  
+
+  it "should accept a set as a condition value" do
+    mock(object_with_foo_2 = Object.new).foo { 2 }
+    mock(object_with_foo_3 = Object.new).foo { 3 }
+    @ability.can :read, Object, :foo => [1, 2, 5].to_set
+    @ability.can?(:read, object_with_foo_2).should be_true
+    @ability.can?(:read, object_with_foo_3).should be_false
+  end
+
   it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
     mock(object_with_foo = Object.new).foo { :bar }
     @ability.can :read, Array, :first => { :foo => :bar }
