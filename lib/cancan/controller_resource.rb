@@ -82,7 +82,10 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(@params[name] || {})
+      params = @options[:class] \
+        ? @params[@options[:class].to_s.underscore.gsub('/', '_')] \
+        : @params[name] || {}
+      resource = resource_base.new(params)
       resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
       initial_attributes.each do |attr_name, value|
         resource.send("#{attr_name}=", value)
