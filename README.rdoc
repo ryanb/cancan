@@ -31,6 +31,15 @@ User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 
 
   rails g cancan:ability
 
+In Rails 2.3, just add a new class in `app/models/ability.rb` with the folowing contents:
+
+  class Ability
+    include CanCan::Ability
+
+    def initialize(user)
+    end
+  end
+
 See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
 
 
