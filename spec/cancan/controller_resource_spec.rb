@@ -339,7 +339,7 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
     @controller.instance_variable_get(:@custom_project).should == project
   end
-  
+
   it "should load resource using custom ID param" do
     project = Project.create!
     @params.merge!(:action => "show", :the_project => project.id)
@@ -347,7 +347,7 @@ describe CanCan::ControllerResource do
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
-  
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
@@ -360,6 +360,17 @@ describe CanCan::ControllerResource do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
     resource = CanCan::ControllerResource.new(@controller, :find_by => :find_by_name)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  it "should allow full controller level find method to be passed into find_by option" do
+    project = Project.create!(:name => "foo")
+    @params.merge!(:action => "show", :id => "foo")
+
+    stub(@controller).controller_method { project }
+
+    resource = CanCan::ControllerResource.new(@controller, :find_by => :controller_method)
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
