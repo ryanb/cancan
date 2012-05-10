@@ -151,6 +151,9 @@ module CanCan
       # [:+except+]
       #   Does not apply before filter to given actions.
       #
+      # [:+singleton+]
+      #   Pass +true+ if this is a singleton resource through a +has_one+ association.
+      #
       # [:+parent+]
       #   True or false depending on if the resource is considered a parent resource. This defaults to +true+ if a resource
       #   name is given which does not match the controller.
