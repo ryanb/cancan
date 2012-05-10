@@ -47,6 +47,18 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  # Rails includes namespace in params, see issue #349
+  it "should create through the namespaced params" do
+    module MyEngine
+      class Project < ::Project; end
+    end
+
+    @params.merge!(:controller => "MyEngine::ProjectsController", :action => "create", :my_engine_project => {:name => "foobar"})
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
   it "should properly load resource for namespaced controller when using '::' for namespace" do
     project = Project.create!
     @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
@@ -339,7 +351,7 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should raise_error(CanCan::AccessDenied)
     @controller.instance_variable_get(:@custom_project).should == project
   end
-  
+
   it "should load resource using custom ID param" do
     project = Project.create!
     @params.merge!(:action => "show", :the_project => project.id)
@@ -347,7 +359,7 @@ describe CanCan::ControllerResource do
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
-  
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
