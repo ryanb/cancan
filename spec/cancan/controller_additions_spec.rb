@@ -49,14 +49,14 @@ describe CanCan::ControllerAdditions do
 
   it "authorize_resource should setup a before filter which passes call to ControllerResource" do
     stub(CanCan::ControllerResource).new(@controller, nil, :foo => :bar).mock!.authorize_resource
-    mock(@controller_class).before_filter(:except => :show) { |options, block| block.call(@controller) }
-    @controller_class.authorize_resource :foo => :bar, :except => :show
+    mock(@controller_class).before_filter(:except => :show, :if => true) { |options, block| block.call(@controller) }
+    @controller_class.authorize_resource :foo => :bar, :except => :show, :if => true
   end
 
   it "load_resource should setup a before filter which passes call to ControllerResource" do
     stub(CanCan::ControllerResource).new(@controller, nil, :foo => :bar).mock!.load_resource
-    mock(@controller_class).before_filter(:only => [:show, :index]) { |options, block| block.call(@controller) }
-    @controller_class.load_resource :foo => :bar, :only => [:show, :index]
+    mock(@controller_class).before_filter(:only => [:show, :index], :unless => false) { |options, block| block.call(@controller) }
+    @controller_class.load_resource :foo => :bar, :only => [:show, :index], :unless => false
   end
 
   it "skip_authorization_check should set up a before filter which sets @_authorized to true" do
