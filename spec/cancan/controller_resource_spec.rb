@@ -384,6 +384,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
+  it "should properly authorize resource for namespaced controller" do
+    @ability.can(:index, "admin/dashboard")
+    @params.merge!(:controller => "admin/dashboard", :action => "index")
+    @controller.authorize!(:index, "admin/dashboard")
+    resource = CanCan::ControllerResource.new(@controller, :authorize => true).process
+    lambda { resource.process }.should_not raise_error(CanCan::Unauthorized)
+  end
+
   # it "raises ImplementationRemoved when adding :name option" do
   #   lambda {
   #     CanCan::ControllerResource.new(@controller, :name => :foo)
