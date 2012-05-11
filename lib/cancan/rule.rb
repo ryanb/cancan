@@ -111,7 +111,7 @@ module CanCan
                 else
                   !attribute.nil? && matches_conditions_hash?(attribute, value)
                 end
-              elsif value.kind_of?(Array) || value.kind_of?(Range)
+              elsif value.kind_of?(Enumerable)
                 value.include? attribute
               else
                 attribute == value
@@ -123,7 +123,7 @@ module CanCan
     end
 
     def nested_subject_matches_conditions?(subject_hash)
-      parent, child = subject_hash.shift
+      parent, child = subject_hash.first
       matches_conditions_hash?(parent, @conditions[parent.class.name.downcase.to_sym] || {})
     end
 

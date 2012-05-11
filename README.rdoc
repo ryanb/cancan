@@ -1,4 +1,4 @@
-= CanCan
+= CanCan {<img src="https://secure.travis-ci.org/ryanb/cancan.png" />}[http://travis-ci.org/ryanb/cancan]
 
 Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
@@ -30,6 +30,15 @@ CanCan expects a +current_user+ method to exist in the controller. First, set up
 User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 3 generator for creating this class.
 
   rails g cancan:ability
+
+In Rails 2.3, just add a new class in `app/models/ability.rb` with the folowing contents:
+
+  class Ability
+    include CanCan::Ability
+
+    def initialize(user)
+    end
+  end
 
 See {Defining Abilities}[https://github.com/ryanb/cancan/wiki/defining-abilities] for details.
 
@@ -97,6 +106,11 @@ This will raise an exception if authorization is not performed in an action. If 
 * {Exception Handling}[https://github.com/ryanb/cancan/wiki/Exception-Handling]
 * {Changing Defaults}[https://github.com/ryanb/cancan/wiki/Changing-Defaults]
 * {See more}[https://github.com/ryanb/cancan/wiki]
+
+
+== Project Status
+
+Unfortunately I have not had time to actively work on this project recently. If you find a critical issue where it does not work as documented please {ping me on twitter}[http://twitter.com/rbates] and I'll take a look.
 
 
 == Questions or Problems?

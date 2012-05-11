@@ -6,8 +6,8 @@ module CanCan
       options = args.extract_options!
       resource_name = args.first
       before_filter_method = options.delete(:prepend) ? :prepend_before_filter : :before_filter
-      controller_class.send(before_filter_method, options.slice(:only, :except)) do |controller|
-        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).send(method)
+      controller_class.send(before_filter_method, options.slice(:only, :except, :if, :unless)) do |controller|
+        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except, :if, :unless)).send(method)
       end
     end
 
@@ -82,7 +82,10 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(@params[name] || {})
+      params = @options[:class] \
+        ? @params[@options[:class].to_s.underscore.gsub('/', '_')] \
+        : @params[name] || {}
+      resource = resource_base.new(params)
       resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
       initial_attributes.each do |attr_name, value|
         resource.send("#{attr_name}=", value)
