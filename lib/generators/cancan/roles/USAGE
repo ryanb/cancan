@@ -1,0 +1,3 @@
+Description:
+  The cancan:roles generator creates an Role class in the models
+  directory along with Join table of associated namedbased model e.g. (User or Account) along with there migration files and run migration at the sametime.   
