@@ -17,7 +17,7 @@ RSpec.configure do |config|
     Project.delete_all
     Category.delete_all
   end
-  config.extend WithModel
+  config.extend WithModel if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
 end
 
 class Ability
