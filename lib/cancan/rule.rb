@@ -100,7 +100,7 @@ module CanCan
 
     def matches_subject?(subject)
       subject = subject_name(subject) if subject_object? subject
-      @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject.to_sym) # || matches_subject_class?(subject)
+      @expanded_subjects.include?(:all) || @expanded_subjects.include?(subject.to_sym) || @expanded_subjects.include?(subject) # || matches_subject_class?(subject)
     end
 
     def matches_attribute?(attribute)
