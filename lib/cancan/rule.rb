@@ -136,7 +136,7 @@ module CanCan
     end
 
     def model_adapter(subject)
-      ModelAdapters::AbstractAdapter.adapter_class(subject_class?(subject) ? subject : subject.class)
+      CanCan::ModelAdapters::AbstractAdapter.adapter_class(subject_class?(subject) ? subject : subject.class)
     end
   end
 end
