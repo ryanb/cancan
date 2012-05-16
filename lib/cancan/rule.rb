@@ -10,13 +10,14 @@ module CanCan
     # value. True for "can" and false for "cannot". The next two arguments are the action
     # and subject respectively (such as :read, @project). The third argument is a hash
     # of conditions and the last one is the block passed to the "can" call.
-    def initialize(base_behavior, action, subject, conditions, block)
+    def initialize(base_behavior, action, subject, conditions, use_risky_blocks, block)
       raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block.nil?
       @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
       @conditions = conditions || {}
+      @use_risky_blocks = use_risky_blocks == true || use_risky_blocks == nil
       @block = block
     end
 
@@ -30,8 +31,8 @@ module CanCan
     def matches_conditions?(action, subject, extra_args)
       if @match_all
         call_block_with_all(action, subject, extra_args)
-      elsif @block && !subject_class?(subject)
-        @block.call(subject, *extra_args)
+      elsif @block
+        subject_class?(subject) ? @use_risky_blocks : @block.call(subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
