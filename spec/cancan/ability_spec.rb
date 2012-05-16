@@ -64,6 +64,29 @@ describe CanCan::Ability do
     @block_called.should be_false
   end
 
+  it "should not allow methods by default when strict class access was enabled" do
+    @block_called = false
+    @ability.strict_class_access = true
+    @ability.can :destroy, :all do |object|
+      @block_called = true
+      false
+    end
+    @ability.can?(:destroy, Hash).should be_false
+    @block_called.should be_false
+  end
+
+  it "should allow granted method when strict class access was enabled" do
+    @block_called = false
+    @ability.strict_class_access = true
+    @ability.can :destroy, :all do |object|
+      @block_called = true
+      false
+    end
+    @ability.can :destroy, Hash
+    @ability.can?(:destroy, Hash).should be_true
+    @block_called.should be_false
+  end
+
   it "should pass only object for global manage actions" do
     @ability.can :manage, String do |object|
       object.should == "foo"
