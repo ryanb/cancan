@@ -11,6 +11,8 @@ when "data_mapper"
   require "dm-migrations"
 when "mongoid"
   require "mongoid"
+when "mongo_mapper"
+  require "mongo_mapper"
 end
 
 require 'active_support/all'

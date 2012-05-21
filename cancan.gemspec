@@ -21,6 +21,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "mongoid", "~> 2.4.8"
   s.add_development_dependency "bson_ext", "~> 1.6.2"
 
+  s.add_development_dependency "mongo_mapper", "~> 0.11.1"
+
   s.rubyforge_project = s.name
   s.required_rubygems_version = ">= 1.3.4"
 end
