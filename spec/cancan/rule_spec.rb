@@ -36,4 +36,11 @@ describe CanCan::Rule do
     rule = CanCan::Rule.new(true, :read, Integer, nil, nil)
     rule.associations_hash.should == {}
   end
+
+  it "should not be mergeable if conditions are not simple hashes" do
+    meta_where = OpenStruct.new(:name => 'metawhere', :column => 'test')
+    @conditions[meta_where] = :bar
+
+    @rule.should be_unmergeable
+  end
 end
