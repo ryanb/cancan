@@ -228,6 +228,13 @@ module CanCan
       relevant_rules(action, subject).any?(&:only_raw_sql?)
     end
 
+    def merge(ability)
+      ability.send(:rules).each do |rule|
+        rules << rule.dup
+      end
+      self
+    end
+
     private
 
     def unauthorized_message_keys(action, subject)
