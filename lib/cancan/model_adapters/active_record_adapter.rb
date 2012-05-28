@@ -89,7 +89,12 @@ module CanCan
         if override_scope
           @model_class.scoped.merge(override_scope)
         elsif @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
-          @model_class.where(conditions).joins(joins)
+          mergeable_conditions = @rules.select {|rule| rule.unmergeable? }.blank?
+          if mergeable_conditions
+            @model_class.where(conditions).joins(joins)
+          else
+            @model_class.where(*(@rules.map(&:conditions))).joins(joins)
+          end
         else
           @model_class.scoped(:conditions => conditions, :joins => joins)
         end
