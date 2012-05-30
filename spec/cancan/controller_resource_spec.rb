@@ -222,6 +222,19 @@ describe CanCan::ControllerResource do
     }
     @controller.instance_variable_get(:@project).should be_nil
   end
+  
+  it "named resources should not be loaded independently of the controller" do
+    category = Category.create!
+    @params.merge!(:action => "new", :category_id => category.id)
+    
+    CanCan::ControllerResource.new(@controller, :category, :load => true).process
+    CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category).process
+    
+    @controller.instance_variable_get(:@category).should eq(category)
+    
+    project = @controller.instance_variable_get(:@project)
+    project.category.should eq(category)
+  end
 
   it "authorizes nested resource through parent association on index action" do
     pending

@@ -145,7 +145,7 @@ module CanCan
     def resource_class
       case @options[:class]
       when false  then name.to_sym
-      when nil    then namespaced_name.to_s.camelize.constantize
+      when nil    then (@name || namespaced_name).to_s.classify.constantize
       when String then @options[:class].constantize
       else @options[:class]
       end
