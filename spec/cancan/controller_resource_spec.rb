@@ -222,8 +222,8 @@ describe CanCan::ControllerResource do
     }
     @controller.instance_variable_get(:@project).should be_nil
   end
-  
-  it "named resources should not be loaded independently of the controller" do
+
+  it "named resources should be loaded independently of the controller name" do
     category = Category.create!
     @params.merge!(:action => "new", :category_id => category.id)
     
