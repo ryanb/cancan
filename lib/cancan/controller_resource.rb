@@ -230,7 +230,7 @@ module CanCan
     end
 
     def namespaced_name
-      @params[:controller].sub("Controller", "").singularize.camelize.constantize
+      (@name || @params[:controller].sub("Controller", "")).singularize.camelize.constantize
     rescue NameError
       name
     end
