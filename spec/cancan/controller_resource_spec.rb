@@ -235,6 +235,18 @@ describe CanCan::ControllerResource do
     project = @controller.instance_variable_get(:@project)
     project.category.should eq(category)
   end
+  
+  it "parent resources shouldn't be altered" do
+    category = Category.create!
+    @params.merge!(:action => "create", :category_id => category.id, :project => { :name => 'foo' })
+    
+    CanCan::ControllerResource.new(@controller, :category, :load => true).process
+    CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category).process
+    
+    project = @controller.instance_variable_get(:@project)
+    project.new_record?.should eq(true)
+    project.name.should eq('foo')
+  end
 
   it "authorizes nested resource through parent association on index action" do
     pending
