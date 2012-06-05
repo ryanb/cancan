@@ -39,4 +39,22 @@ describe CanCan::InheritedResource do
     CanCan::InheritedResource.new(@controller).load_resource
     @controller.instance_variable_get(:@projects).should == :projects
   end
+
+  it "should build a new resource with attributes from current ability" do
+    @params[:action] = "new"
+    @ability.can(:create, Project, :name => "from conditions")
+    stub(@controller).build_resource { Struct.new(:name).new }
+    resource = CanCan::InheritedResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "from conditions"
+  end
+
+  it "should override initial attributes with params" do
+    @params.merge!(:action => "new", :project => {:name => "from params"})
+    @ability.can(:create, Project, :name => "from conditions")
+    stub(@controller).build_resource { Struct.new(:name).new }
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).name.should == "from params"
+  end
 end
