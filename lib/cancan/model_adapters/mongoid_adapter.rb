@@ -30,8 +30,9 @@ module CanCan
         else
           # we only need to process can rules if
           # there are no rules with empty conditions
-          rules = @rules.reject { |rule| rule.conditions.empty? }
+          rules = @rules.reject { |rule| rule.conditions.empty? && rule.base_behavior }
           process_can_rules = @rules.count == rules.count
+
           rules.inject(@model_class.all) do |records, rule|
             if process_can_rules && rule.base_behavior
               records.or rule.conditions

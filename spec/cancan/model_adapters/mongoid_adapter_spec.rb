@@ -73,6 +73,17 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
       end
 
+      it "should return the correct records when a mix of can and cannot rules in defined ability" do
+        @ability.can :manage, MongoidProject, :title => 'Sir'
+        @ability.cannot :destroy, MongoidProject
+
+        sir   = MongoidProject.create(:title => 'Sir')
+        lord  = MongoidProject.create(:title => 'Lord')
+        dude  = MongoidProject.create(:title => 'Dude')
+
+        MongoidProject.accessible_by(@ability, :destroy).entries.should == [sir]
+      end
+
       it "should be able to mix empty conditions and hashes" do
         @ability.can :read, MongoidProject
         @ability.can :read, MongoidProject, :title => 'Sir'
@@ -185,7 +196,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, MongoidProject, :foo => {:bar => 1}
         MongoidProject.accessible_by(@ability, :read).entries.first.should == obj
       end
-      
+
       it "should exclude from the result if set to cannot" do
         obj = MongoidProject.create(:bar => 1)
         obj2 = MongoidProject.create(:bar => 2)
@@ -202,7 +213,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.can :read, MongoidProject, :bar => 2
         MongoidProject.accessible_by(@ability, :read).entries.should =~ [obj, obj2]
       end
-      
+
       it "should not allow to fetch records when ability with just block present" do
         @ability.can :read, MongoidProject do
           false
