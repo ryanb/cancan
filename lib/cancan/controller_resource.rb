@@ -140,6 +140,7 @@ module CanCan
       when false  then name.to_sym
       when nil    then namespaced_name.to_s.camelize.constantize
       when String then @options[:class].constantize
+      when Proc   then klass = @options[:class].call(@controller); klass.is_a?(String) ? klass.constantize : klass
       else @options[:class]
       end
     end
@@ -217,8 +218,13 @@ module CanCan
 
     def namespaced_name
       @name || @params[:controller].sub("Controller", "").singularize.camelize.constantize
-    rescue NameError
-      name
+    rescue Exception => e
+      #Object is not missing Constant means we actually do have that model, un-namespaced
+      if [NameError,ArgumentError].include?(e.class)
+        name
+      else
+        raise e
+      end
     end
 
     def name_from_controller

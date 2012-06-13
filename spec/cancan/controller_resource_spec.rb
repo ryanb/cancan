@@ -344,6 +344,22 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "should load the model using a custom class that is a proced constant" do
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller, :class => lambda{ Project })
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  it "should load the model using a custom class that is a proced string" do
+    project = Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller, :class => lambda{ "Project" })
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
+
   it "should load the model using a custom namespaced class" do
     project = Sub::Project.create!
     @params.merge!(:action => "show", :id => project.id)
