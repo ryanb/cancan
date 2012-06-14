@@ -22,9 +22,16 @@ module CanCan
         scope = @model_class.all(:conditions => ["0 = 1"])
         cans, cannots = @rules.partition { |r| r.base_behavior }
         return scope if cans.empty?
+
         # apply unions first, then differences. this mean cannot overrides can
         cans.each    { |r| scope += @model_class.all(:conditions => r.conditions) }
-        cannots.each { |r| scope -= @model_class.all(:conditions => r.conditions) }
+        cannots.each { |r|
+          if r.conditions.empty?
+            scope -= @model_class.all(:conditions => {:id.not => []})
+          else
+            scope -= @model_class.all(:conditions => r.conditions)
+          end
+        }
         scope
       end
     end # class DataMapper

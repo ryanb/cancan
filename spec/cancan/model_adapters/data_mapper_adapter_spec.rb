@@ -86,6 +86,21 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       Comment.accessible_by(@ability).should == [comment1]
     end
 
+    it "should not be able to destroy any article" do
+      @ability.can :manage, Article, :published => true
+      @ability.cannot :destroy, Article
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => true)
+      Article.accessible_by(@ability, :destroy).should == []
+    end
+
+    it "should not be able to destroy any article when only one cannot rule is defined" do
+      @ability.cannot :destroy, Article
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => true)
+      Article.accessible_by(@ability, :destroy).should == []
+    end
+
     it "should allow conditions in SQL and merge with hash conditions" do
       @ability.can :read, Article, :published => true
       @ability.can :read, Article, ["secret=?", true]

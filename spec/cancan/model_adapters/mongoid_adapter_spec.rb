@@ -81,7 +81,17 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         lord  = MongoidProject.create(:title => 'Lord')
         dude  = MongoidProject.create(:title => 'Dude')
 
-        MongoidProject.accessible_by(@ability, :destroy).entries.should == [sir]
+        MongoidProject.accessible_by(@ability, :destroy).entries.should == []
+      end
+
+      it "should return the correct records when a single cannot rule in defined ability" do
+        @ability.cannot :read, MongoidProject
+
+        sir   = MongoidProject.create(:title => 'Sir')
+        lord  = MongoidProject.create(:title => 'Lord')
+        dude  = MongoidProject.create(:title => 'Dude')
+
+        MongoidProject.accessible_by(@ability, :read).entries.should == []
       end
 
       it "should be able to mix empty conditions and hashes" do
