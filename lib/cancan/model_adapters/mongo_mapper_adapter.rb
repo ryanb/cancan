@@ -17,14 +17,12 @@ module CanCan
       end
 
       def self.matches_conditions_hash?(subject, conditions)
-        # To avoid hitting the db, retrieve the raw Mongo selector from
-        # the Mongoid Criteria and use Mongoid::Matchers#matches?
-        subject.matches?( subject.class.where(conditions).selector )
+        subject.class.where(conditions).include? subject
       end
 
       def database_records
         if @rules.size == 0
-          []
+          @model_class.where(:_id => {:$exists => false, :$type => 7}) # return no records
         elsif @rules.size == 1
           @model_class.where(@rules[0].conditions)
         else
@@ -34,9 +32,10 @@ module CanCan
           process_can_rules = @rules.count == rules.count
           rules.inject(@model_class.where) do |records, rule|
             if process_can_rules && rule.base_behavior
-              records.or rule.conditions
+              records.where rule.conditions
             elsif !rule.base_behavior
-              records.excludes rule.conditions
+              records.remove rule.conditions
+              records
             else
               records
             end
