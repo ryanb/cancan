@@ -379,6 +379,15 @@ module CanCan
     def cannot?(*args)
       current_ability.cannot?(*args)
     end
+
+    # Loads a resource instance variable within the controller instance
+    # Works similarly to the class-level method but allows you to perform loading conditionality
+    # within the action or inside a filter
+    def load_and_authorize_resource!(*args)
+      options = args.extract_options!.merge({:load => true, :authorize => true})
+      resource_name = args.first      
+      self.class.cancan_resource_class.new(self, resource_name, options.except(:only, :except)).process
+    end
   end
 end
 
