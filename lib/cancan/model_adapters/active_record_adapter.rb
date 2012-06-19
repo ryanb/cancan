@@ -145,8 +145,8 @@ module CanCan
       # Takes two hashes and does a deep merge.
       def merge_joins(base, add)
         add.each do |name, nested|
-          if base[name].is_a?(Hash) && !nested.empty?
-            merge_joins(base[name], nested)
+          if base[name].is_a?(Hash)
+            merge_joins(base[name], nested) unless nested.empty?
           else
             base[name] = nested
           end
