@@ -305,15 +305,15 @@ describe CanCan::Ability do
     @ability.can?(:read, "foobar" => Range).should be_false
     @ability.can?(:read, 123 => Range).should be_true
   end
-  
+
   it "passing a hash of subjects with multiple definitions should check permissions correctly" do
     @ability.can :read, Range, :string => {:length => 4}
     @ability.can [:create, :read], Range, :string => {:upcase => 'FOO'}
     @ability.can?(:read, "foo" => Range).should be_true
     @ability.can?(:read, "foobar" => Range).should be_false
     @ability.can?(:read, 1234 => Range).should be_true
-  end  
-  
+  end
+
   it "should allow to check ability on Hash-like object" do
     class Container < Hash; end
     @ability.can :read, Container

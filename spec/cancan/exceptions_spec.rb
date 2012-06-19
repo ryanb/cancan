@@ -32,23 +32,23 @@ describe CanCan::AccessDenied do
       @exception.message.should == "Access denied!"
     end
   end
-  
+
   describe "i18n in the default message" do
     after(:each) do
       I18n.backend = nil
     end
-    
+
     it "uses i18n for the default message" do
       I18n.backend.store_translations :en, :unauthorized => {:default => "This is a different message"}
       @exception = CanCan::AccessDenied.new
       @exception.message.should == "This is a different message"
     end
-    
+
     it "defaults to a nice message" do
       @exception = CanCan::AccessDenied.new
       @exception.message.should == "You are not authorized to access this page."
     end
-    
+
     it "does not use translation if a message is given" do
       @exception = CanCan::AccessDenied.new("Hey! You're not welcome here")
       @exception.message.should == "Hey! You're not welcome here"
