@@ -1,7 +1,7 @@
 if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   require "spec_helper"
 
-  ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+  ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:") unless ActiveRecord::Base.connected?
 
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
     with_model :category do
