@@ -1,4 +1,5 @@
 require "spec_helper"
+require "ostruct" # for OpenStruct below
 
 # Most of Rule functionality is tested in Ability specs
 describe CanCan::Rule do
