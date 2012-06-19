@@ -94,16 +94,6 @@ module CanCan
       resource
     end
 
-    def resource_params
-      if @params[param_key]
-        @params[param_key]
-      elsif resource_param_key && @params[resource_param_key]
-        @params[resource_param_key]
-      else
-        {}
-      end
-    end
-
     def param_key
       @options.has_key?(:param_key) ? @options[:param_key] : name
     end
@@ -116,6 +106,16 @@ module CanCan
         when 0
           ActiveModel::Naming.singular(resource_class)
         end
+      end
+    end
+
+    def resource_params
+      if @params[param_key]
+        @params[param_key]
+      elsif resource_param_key && @params[resource_param_key]
+        @params[resource_param_key]
+      else
+        {}
       end
     end
 
@@ -234,14 +234,6 @@ module CanCan
 
     def name
       @name || name_from_controller
-    end
-
-    def resource_params
-      if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
-      else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
-      end
     end
 
     def namespace
