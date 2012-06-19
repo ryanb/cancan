@@ -6,7 +6,8 @@ module CanCan
         @controller.send :association_chain
         @controller.instance_variable_get("@#{instance_name}")
       elsif new_actions.include? @params[:action].to_sym
-        @controller.send :build_resource
+        resource = @controller.send :build_resource
+        assign_attributes(resource)
       else
         @controller.send :resource
       end
