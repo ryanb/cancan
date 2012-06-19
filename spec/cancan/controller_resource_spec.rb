@@ -501,9 +501,9 @@ describe CanCan::ControllerResource do
         project.secret.should be_false
       end
 
-      it "should be able to mass assign secret when using assignment" do
+      it "should be able to mass assign secret when using :assign_as" do
         @params.merge!(:action => "create", :project => { :name => "foobar", :secret => "1" })
-        resource = CanCan::ControllerResource.new(@controller, :assignment => :admin)
+        resource = CanCan::ControllerResource.new(@controller, :assign_as => :admin)
         resource.load_resource
 
         project = @controller.instance_variable_get(:@project)
