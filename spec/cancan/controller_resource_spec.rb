@@ -465,4 +465,51 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should_not raise_error
     @controller.instance_variable_get(:@project).should be_nil
   end
+
+  if ENV["MODEL_ADAPTER"] == "active_record_31"
+    context "using an ActiveRecord model with :as" do
+      ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:") unless ActiveRecord::Base.connected?
+
+      with_model :project do
+        table do |t|
+          t.string "name"
+          t.boolean "secret", :default => false
+        end
+        model do
+          attr_accessible :name
+          attr_accessible :name, :secret, :as => :admin
+        end
+      end
+
+      it "should be able to mass assign name" do
+        @params.merge!(:action => "create", :project => { :name => "foobar" })
+        resource = CanCan::ControllerResource.new(@controller)
+        resource.load_resource
+
+        project = @controller.instance_variable_get(:@project)
+        project.name.should eql("foobar")
+        project.secret.should be_false
+      end
+
+      it "should not be able to mass assign secret" do
+        @params.merge!(:action => "create", :project => { :name => "foobar", :secret => "1" })
+        resource = CanCan::ControllerResource.new(@controller)
+        resource.load_resource
+
+        project = @controller.instance_variable_get(:@project)
+        project.name.should eql("foobar")
+        project.secret.should be_false
+      end
+
+      it "should be able to mass assign secret when using :assign_as" do
+        @params.merge!(:action => "create", :project => { :name => "foobar", :secret => "1" })
+        resource = CanCan::ControllerResource.new(@controller, :assign_as => :admin)
+        resource.load_resource
+
+        project = @controller.instance_variable_get(:@project)
+        project.name.should eql("foobar")
+        project.secret.should be_true
+      end
+    end
+  end
 end
