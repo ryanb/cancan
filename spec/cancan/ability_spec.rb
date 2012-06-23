@@ -87,6 +87,10 @@ describe CanCan::Ability do
     @ability.can?(:increment, 123).should be_true
   end
 
+  it "should raise an Error if alias target is an exist action" do
+    lambda{ @ability.alias_action :show, :to => :show }.should raise_error(CanCan::Error, "You can't specify target (show) as alias because it is real action name")
+  end
+
   it "should always call block with arguments when passing no arguments to can" do
     @ability.can do |action, object_class, object|
       action.should == :foo
