@@ -1,4 +1,4 @@
-1.6.8 (unreleased)
+1.6.8 (June 25, 2012)
 
 * improved support for namespaced controllers and models
 
@@ -12,7 +12,7 @@
 
 * various fixes for DataMapper, Mongoid, and Inherited Resource integration
 
-* {see the full list of changes}[https://github.com/ryanb/cancan/compare/1.6.7...master]
+* {see the full list of changes}[https://github.com/ryanb/cancan/compare/1.6.7...1.6.8]
 
 
 1.6.7 (October 4, 2011)
