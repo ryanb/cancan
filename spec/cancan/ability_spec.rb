@@ -290,6 +290,16 @@ describe CanCan::Ability do
     @ability.should be_fully_authorized(:update, :ranges)
   end
 
+  it "should accept a set as a condition value" do
+    object_with_foo_2 = Object.new
+    object_with_foo_2.should_receive(:foo) { 2 }
+    object_with_foo_3 = Object.new
+    object_with_foo_3.should_receive(:foo) { 3 }
+    @ability.can :read, :objects, :foo => [1, 2, 5].to_set
+    @ability.can?(:read, object_with_foo_2).should be_true
+    @ability.can?(:read, object_with_foo_3).should be_false
+  end
+
   it "does not match subjects return nil for methods that must match nested a nested conditions hash" do
     object_with_foo = Object.new
     object_with_foo.should_receive(:foo) { :bar }
@@ -353,13 +363,21 @@ describe CanCan::Ability do
     @ability.can?(:update, :books, :author).should be_false
   end
 
-
   # Hash Association
 
   it "checks permission through association when hash is passed as subject" do
     @ability.can :read, :books, :range => {:begin => 3}
     @ability.can?(:read, (1..4) => :books).should be_false
     @ability.can?(:read, (3..5) => :books).should be_true
+    @ability.can?(:read, 123 => :books).should be_true
+  end
+
+  it "checks permissions on association hash with multiple rules" do
+    @ability.can :read, :books, :range => {:begin => 3}
+    @ability.can :read, :books, :range => {:end => 6}
+    @ability.can?(:read, (1..4) => :books).should be_false
+    @ability.can?(:read, (3..5) => :books).should be_true
+    @ability.can?(:read, (1..6) => :books).should be_true
     @ability.can?(:read, 123 => :books).should be_true
   end
 
@@ -508,5 +526,16 @@ describe CanCan::Ability do
       @ability.unauthorized_message(:edit, 1..3).should == "edit ranges"
       # @ability.unauthorized_message(:update, ArgumentError).should == "update argument error"
     end
+  end
+
+  it "merges the rules from another ability" do
+    @ability.can :use, :tools
+    another_ability = Object.new
+    another_ability.extend(CanCan::Ability)
+    another_ability.can :use, :search
+
+    @ability.merge(another_ability)
+    @ability.can?(:use, :search).should be_true
+    @ability.send(:rules).size.should == 2
   end
 end

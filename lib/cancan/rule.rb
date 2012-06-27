@@ -63,6 +63,10 @@ module CanCan
       @block || conditions?
     end
 
+    def unmergeable?
+      @conditions.respond_to?(:keys) && (! @conditions.keys.first.kind_of? Symbol)
+    end
+
     def associations_hash(conditions = @conditions)
       hash = {}
       conditions.map do |name, value|
@@ -139,7 +143,7 @@ module CanCan
                 else
                   attribute && matches_conditions_hash?(attribute, value)
                 end
-              elsif value.kind_of?(Array) || value.kind_of?(Range)
+              elsif value.kind_of?(Enumerable)
                 value.include? attribute
               else
                 attribute == value
@@ -151,7 +155,7 @@ module CanCan
     end
 
     def nested_subject_matches_conditions?(subject_hash)
-      parent, child = subject_hash.shift
+      parent, child = subject_hash.first
       matches_conditions_hash?(parent, @conditions[parent.class.name.downcase.to_sym] || {})
     end
 
@@ -168,7 +172,7 @@ module CanCan
     end
 
     def model_adapter(subject)
-      ModelAdapters::AbstractAdapter.adapter_class(subject_object?(subject) ? subject.class : subject)
+      CanCan::ModelAdapters::AbstractAdapter.adapter_class(subject_object?(subject) ? subject.class : subject)
     end
   end
 end

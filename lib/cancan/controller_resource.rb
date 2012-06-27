@@ -6,8 +6,8 @@ module CanCan
       options = args.extract_options!.merge(behavior)
       resource_name = args.first
       before_filter_method = options.delete(:prepend) ? :prepend_before_filter : :before_filter
-      controller_class.send(before_filter_method, options.slice(:only, :except)) do |controller|
-        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except)).process
+      controller_class.send(before_filter_method, options.slice(:only, :except, :if, :unless)) do |controller|
+        controller.class.cancan_resource_class.new(controller, resource_name, options.except(:only, :except, :if, :unless)).process
       end
     end
 
@@ -81,6 +81,10 @@ module CanCan
 
     def build_resource
       resource = resource_base.new(resource_params || {})
+      assign_attributes(resource)
+    end
+
+    def assign_attributes(resource)
       resource.send("#{parent_name}=", parent_resource) if @options[:singleton] && parent_resource
       initial_attributes.each do |attr_name, value|
         resource.send("#{attr_name}=", value)
@@ -225,12 +229,19 @@ module CanCan
     end
 
     def resource_params
-      # since Rails includes the namespace in the params sent by the form (issue #349)
-      @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+      if @options[:class]
+        @params[@options[:class].to_s.underscore.gsub('/', '_')]
+      else
+        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+      end
+    end
+
+    def namespace
+      @params[:controller].split("::")[0..-2]
     end
 
     def namespaced_name
-      (@name || @params[:controller].sub("Controller", "")).singularize.camelize.constantize
+      [namespace, name.camelize].join('::').singularize.camelize.constantize
     rescue NameError
       name
     end

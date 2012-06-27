@@ -94,7 +94,7 @@ module CanCan
       # [:+find_by+]
       #   Find using a different attribute other than id. For example.
       #
-      #     load_resource :find_by => :permalink # will use find_by_permlink!(params[:id])
+      #     load_resource :find_by => :permalink # will use find_by_permalink!(params[:id])
       #
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
@@ -151,6 +151,9 @@ module CanCan
       #
       # [:+except+]
       #   Does not apply before filter to given actions.
+      #
+      # [:+singleton+]
+      #   Pass +true+ if this is a singleton resource through a +has_one+ association.
       #
       # [:+parent+]
       #   True or false depending on if the resource is considered a parent resource. This defaults to +true+ if a resource
@@ -382,7 +385,7 @@ module CanCan
   end
 end
 
-if defined? ActionController
+if defined? ActionController::Base
   ActionController::Base.class_eval do
     include CanCan::ControllerAdditions
   end

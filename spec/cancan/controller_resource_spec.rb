@@ -35,6 +35,26 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "attempts to load a resource with the same namespace as the controller when using :: for namespace" do
+    module SomeEngine
+      class Project < ::Project; end
+    end
+    project = SomeEngine::Project.create!
+    @params.merge!(:controller => "SomeEngine::ProjectsController", :action => "show", :id => project.id)
+    CanCan::ControllerResource.new(@controller, :load => true).process
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  # Rails includes namespace in params, see issue #349
+  it "creates through the namespaced params" do
+    module SomeEngine
+      class Project < ::Project; end
+    end
+    @params.merge!(:controller => "SomeEngine::ProjectsController", :action => "create", :some_engine_project => {:name => "foobar"})
+    CanCan::ControllerResource.new(@controller, :load => true).process
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
   it "loads resource for namespaced controller when using '::' for namespace" do
     project = Project.create!
     @params.merge!(:controller => "Admin::ProjectsController", :action => "show", :id => project.id)
@@ -45,6 +65,15 @@ describe CanCan::ControllerResource do
   it "builds a new resource with hash if params[:id] is not specified and authorize on each attribute" do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
     CanCan::ControllerResource.new(@controller, :load => true).process
+    @controller.instance_variable_get(:@project).name.should == "foobar"
+  end
+
+  it "builds a new resource for namespaced model with hash if params[:id] is not specified" do
+    module SomeEngine
+      class Project < ::Project; end
+    end
+    @params.merge!(:action => "create", :some_engine_project => {:name => "foobar"})
+    CanCan::ControllerResource.new(@controller, :load => true, :class => SomeEngine::Project).process
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
 
@@ -169,6 +198,11 @@ describe CanCan::ControllerResource do
     resource.should_not be_parent
   end
 
+  it "has the specified resource_class if name is passed to load_resource" do
+    resource = CanCan::ControllerResource.new(@controller, :category)
+    resource.send(:resource_class).should == Category
+  end
+
   it "loads parent resource through proper id parameter" do
     project = Project.create!
     @params.merge!(:action => "index", :project_id => project.id)
@@ -226,23 +260,18 @@ describe CanCan::ControllerResource do
   it "named resources should be loaded independently of the controller name" do
     category = Category.create!
     @params.merge!(:action => "new", :category_id => category.id)
-    
     CanCan::ControllerResource.new(@controller, :category, :load => true).process
     CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category).process
-    
     @controller.instance_variable_get(:@category).should eq(category)
-    
     project = @controller.instance_variable_get(:@project)
     project.category.should eq(category)
   end
-  
+
   it "parent resources shouldn't be altered" do
     category = Category.create!
     @params.merge!(:action => "create", :category_id => category.id, :project => { :name => 'foo' })
-    
     CanCan::ControllerResource.new(@controller, :category, :load => true).process
     CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category).process
-    
     project = @controller.instance_variable_get(:@project)
     project.new_record?.should eq(true)
     project.name.should eq('foo')
@@ -326,6 +355,16 @@ describe CanCan::ControllerResource do
     project = Project.create!
     @params.merge!(:action => "show", :id => project.id)
     CanCan::ControllerResource.new(@controller, :load => true, :class => Project).process
+    @controller.instance_variable_get(:@project).should == project
+  end
+
+  it "loads the model using a custom namespaced class" do
+    module SomeEngine
+      class Project < ::Project; end
+    end
+    project = SomeEngine::Project.create!
+    @params.merge!(:action => "show", :id => project.id)
+    CanCan::ControllerResource.new(@controller, :load => true, :class => SomeEngine::Project).process
     @controller.instance_variable_get(:@project).should == project
   end
 

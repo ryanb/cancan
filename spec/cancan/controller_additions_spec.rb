@@ -32,7 +32,7 @@ describe CanCan::ControllerAdditions do
     @controller.cannot?(:foo, :bar).should be_true
   end
 
-  it "load_and_authorize_resource should setup a before filter which passes call to ControllerResource" do
+  it "load_and_authorize_resource adds a before filter which passes call to ControllerResource" do
     controller_resource = double("controller_resource")
     controller_resource.should_receive(:process)
     CanCan::ControllerResource.stub(:new).with(@controller, nil, :load => true, :authorize => true, :foo => :bar) { controller_resource }
@@ -40,7 +40,7 @@ describe CanCan::ControllerAdditions do
     @controller_class.load_and_authorize_resource :foo => :bar
   end
 
-  it "load_and_authorize_resource should properly pass first argument as the resource name" do
+  it "load_and_authorize_resource passes first argument as the resource name" do
     controller_resource = double("controller_resource")
     controller_resource.should_receive(:process)
     CanCan::ControllerResource.stub(:new).with(@controller, :project, :load => true, :authorize => true, :foo => :bar) { controller_resource }
@@ -48,7 +48,15 @@ describe CanCan::ControllerAdditions do
     @controller_class.load_and_authorize_resource :project, :foo => :bar
   end
 
-  it "load_and_authorize_resource with :prepend should prepend the before filter" do
+  it "load_and_authorize_resource passes :only, :except, :if, :unless options to before filter" do
+    controller_resource = double("controller_resource")
+    controller_resource.should_receive(:process)
+    CanCan::ControllerResource.stub(:new).with(@controller, nil, :load => true, :authorize => true) { controller_resource }
+    @controller_class.should_receive(:before_filter).with(:only => 1, :except => 2, :if => 3, :unless => 4).and_yield(@controller)
+    @controller_class.load_and_authorize_resource :only => 1, :except => 2, :if => 3, :unless => 4
+  end
+
+  it "load_and_authorize_resource with :prepend prepends the before filter" do
     @controller_class.should_receive(:prepend_before_filter).with({})
     @controller_class.load_and_authorize_resource :foo => :bar, :prepend => true
   end

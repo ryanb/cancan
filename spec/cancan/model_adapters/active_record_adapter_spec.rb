@@ -228,6 +228,17 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.should_not be_able_to(:read, article2)
     end
 
+    it "should merge MetaWhere and non-MetaWhere conditions" do
+      pending
+      @ability.can :read, Article, :priority.lt => 2
+      @ability.can :read, Article, :priority => 1
+      article1 = Article.create!(:priority => 1)
+      article2 = Article.create!(:priority => 3)
+      Article.accessible_by(@ability).should == [article1]
+      @ability.should be_able_to(:read, article1)
+      @ability.should_not be_able_to(:read, article2)
+    end
+
     it "matches any MetaWhere condition" do
       pending
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter

@@ -1,4 +1,4 @@
-= CanCan
+= CanCan {<img src="https://secure.travis-ci.org/ryanb/cancan.png" />}[http://travis-ci.org/ryanb/cancan]
 
 This is the branch for CanCan 2.0 which is in very early development. For a stable release please check out the {master branch}[https://github.com/ryanb/cancan]
 

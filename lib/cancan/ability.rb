@@ -254,6 +254,13 @@ module CanCan
       @fully_authorized << [action.to_sym, subject.to_sym]
     end
 
+    def merge(ability)
+      ability.send(:rules).each do |rule|
+        rules << rule.dup
+      end
+      self
+    end
+
     private
 
     def unauthorized_message_keys(action, subject)

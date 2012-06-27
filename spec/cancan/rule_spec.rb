@@ -1,4 +1,5 @@
 require "spec_helper"
+require "ostruct" # for OpenStruct below
 
 # Most of Rule functionality is tested in Ability specs
 describe CanCan::Rule do
@@ -44,5 +45,11 @@ describe CanCan::Rule do
     CanCan::Rule.new(false, :read, :integers).specificity.should eq(3)
     CanCan::Rule.new(false, :read, :integers, :foo => :bar).specificity.should eq(4)
     CanCan::Rule.new(false, :read, :integers, :foo).specificity.should eq(4)
+  end
+
+  it "should not be mergeable if conditions are not simple hashes" do
+    meta_where = OpenStruct.new(:name => 'metawhere', :column => 'test')
+    @conditions[meta_where] = :bar
+    @rule.should be_unmergeable
   end
 end
