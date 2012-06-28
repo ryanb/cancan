@@ -227,6 +227,12 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.model_adapter(Article, :read).joins.should == [:project]
     end
 
+    it "should merge nested and non-nested joins" do
+      @ability.can :read, Article, :project => { :blocked => false }
+      @ability.can :read, Article, :project => { :comments => { :spam => true } }
+      @ability.model_adapter(Article, :read).joins.should == [{:project=>[:comments]}]
+    end
+
     it "should restrict articles given a MetaWhere condition" do
       @ability.can :read, Article, :priority.lt => 2
       article1 = Article.create!(:priority => 1)
