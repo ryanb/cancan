@@ -13,6 +13,9 @@ when "data_mapper"
 when "mongoid"
   gem "bson_ext", "~> 1.1"
   gem "mongoid", "~> 2.0.0.beta.20"
+when "mongo_mapper"
+  gem "bson_ext"
+  gem "mongo_mapper"
 else
   raise "Unknown model adapter: #{ENV["MODEL_ADAPTER"]}"
 end
