@@ -67,6 +67,16 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "has the specified nested resource_class when using / for namespace" do
+    module Admin
+      class Dashboard; end
+    end
+    @ability.can(:index, "admin/dashboard")
+    @params.merge!(:controller => "admin/dashboard", :action => "index")
+    resource = CanCan::ControllerResource.new(@controller, :authorize => true)
+    resource.send(:resource_class).should == Admin::Dashboard
+  end
+
   it "should build a new resource with hash if params[:id] is not specified" do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
     resource = CanCan::ControllerResource.new(@controller)
