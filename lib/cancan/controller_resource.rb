@@ -213,10 +213,15 @@ module CanCan
 
     def resource_params
       if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
-      else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+        params_key = extract_key(@options[:class])
+        return @params[params_key] if @params[params_key]
       end
+
+      resource_params_by_namespaced_name
+    end
+
+    def resource_params_by_namespaced_name
+      @params[extract_key(namespaced_name)]
     end
 
     def namespace
@@ -243,6 +248,12 @@ module CanCan
 
     def new_actions
       [:new, :create] + [@options[:new]].flatten
+    end
+
+    private
+
+    def extract_key(value)
+       value.to_s.underscore.gsub('/', '_')
     end
   end
 end
