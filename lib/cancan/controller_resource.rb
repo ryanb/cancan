@@ -82,7 +82,7 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(resource_params || {})
+      resource = resource_base.new(resource_params)
       assign_attributes(resource)
     end
 
@@ -94,9 +94,34 @@ module CanCan
       resource
     end
 
+    def param_key
+      @options.has_key?(:param_key) ? @options[:param_key] : name
+    end
+
+    def resource_param_key
+      if defined? ActiveModel
+        case ActiveModel::VERSION::MINOR
+        when 1
+          ActiveModel::Naming.param_key(resource_class)
+        when 0
+          ActiveModel::Naming.singular(resource_class)
+        end
+      end
+    end
+
+    def resource_params
+      if @params[param_key]
+        @params[param_key]
+      elsif resource_param_key && @params[resource_param_key]
+        @params[resource_param_key]
+      else
+        {}
+      end
+    end
+
     def initial_attributes
       current_ability.attributes_for(@params[:action].to_sym, resource_class).delete_if do |key, value|
-        resource_params && resource_params.include?(key)
+        resource_params.include?(key)
       end
     end
 
@@ -211,20 +236,8 @@ module CanCan
       @name || name_from_controller
     end
 
-    def resource_params
-      if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
-      else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
-      end
-    end
-
-    def namespace
-      @params[:controller].split("::")[0..-2]
-    end
-
     def namespaced_name
-      [namespace, name.camelize].join('::').singularize.camelize.constantize
+      @name || @params[:controller].sub("Controller", "").singularize.camelize.constantize
     rescue NameError
       name
     end
