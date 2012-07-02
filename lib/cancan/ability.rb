@@ -172,8 +172,14 @@ module CanCan
     # This way one can use params[:action] in the controller to determine the permission.
     def alias_action(*args)
       target = args.pop[:to]
+      validate_target(target)
       aliased_actions[target] ||= []
       aliased_actions[target] += args
+    end
+
+    # User shouldn't specify targets with names of real actions or it will cause Seg fault
+    def validate_target(target)
+      raise Error, "You can't specify target (#{target}) as alias because it is real action name" if aliased_actions.values.flatten.include? target
     end
 
     # Returns a hash of aliased actions. The key is the target and the value is an array of actions aliasing the key.
