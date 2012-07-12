@@ -88,7 +88,7 @@ module CanCan
       else
         resource = resource_base.new(resource_params || {})
       end
-      #assign_attributes(resource)
+      assign_attributes(resource)
     end
 
     def assign_attributes(resource)
