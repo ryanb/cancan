@@ -341,6 +341,7 @@ module CanCan
           :create => [:new],
           :update => [:edit],
           :destroy => [:delete],
+          :manage => [:index, :show, :new, :edit, :delete]
         }
       }
     end
