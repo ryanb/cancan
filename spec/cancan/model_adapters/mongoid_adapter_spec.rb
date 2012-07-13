@@ -84,9 +84,8 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       end
 
       it "is able to mix empty conditions and hashes" do
-        pending "TODO figure out why this isn't working"
-        @ability.can :read, :mongoid_projects
         @ability.can :read, :mongoid_projects, :title => 'Sir'
+        @ability.can :read, :mongoid_projects
         sir  = MongoidProject.create(:title => 'Sir')
         lord = MongoidProject.create(:title => 'Lord')
 
