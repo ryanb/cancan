@@ -72,7 +72,6 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       end
 
       it "returns the correct records when a mix of can and cannot rules in defined ability" do
-        pending "TODO figure out why this isn't working"
         @ability.can :manage, :mongoid_projects, :title => 'Sir'
         @ability.cannot :destroy, :mongoid_projects
 
@@ -80,7 +79,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         lord  = MongoidProject.create(:title => 'Lord')
         dude  = MongoidProject.create(:title => 'Dude')
 
-        MongoidProject.accessible_by(@ability, :destroy).entries.should == [sir]
+        MongoidProject.accessible_by(@ability, :delete).entries.should == [sir]
       end
 
       it "is able to mix empty conditions and hashes" do
