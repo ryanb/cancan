@@ -66,6 +66,14 @@ describe CanCan::ControllerResource do
     resource.load_resource
     @controller.instance_variable_get(:@project).should == project
   end
+  
+  it "should properly load resource for namespaced controller when using '/' for namespace" do
+    project = Project.create!
+    @params.merge!(:controller => "admin/projects_controller", :action => "show", :id => project.id)
+    resource = CanCan::ControllerResource.new(@controller)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should == project
+  end
 
   it "should build a new resource with hash if params[:id] is not specified" do
     @params.merge!(:action => "create", :project => {:name => "foobar"})
