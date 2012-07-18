@@ -37,7 +37,11 @@ module CanCan
             if process_can_rules && rule.base_behavior
               records.or rule.conditions
             elsif !rule.base_behavior
-              records.excludes rule.conditions
+              if rule.conditions.empty?
+                records.in(:_id => [])
+              else
+                records.excludes rule.conditions
+               end
             else
               records
             end

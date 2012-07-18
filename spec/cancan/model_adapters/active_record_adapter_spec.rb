@@ -102,6 +102,21 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Comment.accessible_by(@ability).should == [comment1]
     end
 
+    it "should not be able to destroy any article" do
+      @ability.can :manage, Article, :published => true
+      @ability.cannot :destroy, Article
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => true)
+      Article.accessible_by(@ability, :destroy).should == []
+    end
+
+    it "should not be able to destroy any article when only one cannot rule is defined" do
+      @ability.cannot :destroy, Article
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => true)
+      Article.accessible_by(@ability, :destroy).should == []
+    end
+
     it "should only read comments for visible categories through articles" do
       @ability.can :read, Comment, :article => { :category => { :visible => true } }
       comment1 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => true)))
