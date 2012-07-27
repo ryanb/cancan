@@ -44,4 +44,14 @@ describe CanCan::Rule do
 
     @rule.should be_unmergeable
   end
+
+  it "should be able to accept the name of a mapped method" do
+    rule = CanCan::Rule.new(true, :read, Integer, nil, :evaluate)
+    rule.instance_variable_get(:@block).should be nil
+    rule.instance_variable_get(:@method).should be :evaluate
+
+    rule = CanCan::Rule.new(true, :read, Integer, nil, proc{})
+    rule.instance_variable_get(:@block).should_not be nil
+    rule.instance_variable_get(:@method).should be nil
+  end
 end

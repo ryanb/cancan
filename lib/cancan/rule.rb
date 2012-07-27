@@ -10,14 +10,16 @@ module CanCan
     # value. True for "can" and false for "cannot". The next two arguments are the action
     # and subject respectively (such as :read, @project). The third argument is a hash
     # of conditions and the last one is the block passed to the "can" call.
-    def initialize(base_behavior, action, subject, conditions, block)
-      raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block.nil?
+    def initialize(base_behavior, action, subject, conditions, block_or_method, ability = nil)
+      raise Error, "You are not able to supply a block or method with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block_or_method.nil?
       @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
       @conditions = conditions || {}
-      @block = block
+      @block = block_or_method if block_or_method.is_a?(Proc)
+      @method = block_or_method unless block_or_method.is_a?(Proc)
+      @ability = ability
     end
 
     # Matches both the subject and action, not necessarily the conditions
@@ -29,9 +31,15 @@ module CanCan
     # Matches the block or conditions hash
     def matches_conditions?(action, subject, extra_args)
       if @match_all
-        call_block_with_all(action, subject, extra_args)
+        if @block
+          call_block_with_all(action, subject, extra_args)
+        else
+          call_method_with_all(action, subject, extra_args)
+        end
       elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
+      elsif @method && !subject_class?(subject)
+        @ability.send(@method, subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
@@ -43,11 +51,11 @@ module CanCan
     end
 
     def only_block?
-      conditions_empty? && !@block.nil?
+      conditions_empty? && !(@block || @method).nil?
     end
 
     def only_raw_sql?
-      @block.nil? && !conditions_empty? && !@conditions.kind_of?(Hash)
+      (@block || @method).nil? && !conditions_empty? && !@conditions.kind_of?(Hash)
     end
 
     def conditions_empty?
@@ -136,6 +144,14 @@ module CanCan
         @block.call(action, subject, nil, *extra_args)
       else
         @block.call(action, subject.class, subject, *extra_args)
+      end
+    end
+
+    def call_method_with_all(action, subject, extra_args)
+      if subject.class == Class
+        @ability.send(@method, action, subject, nil, *extra_args)
+      else
+        @ability.send(@method, subject.class, subject, *extra_args)
       end
     end
 

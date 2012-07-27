@@ -121,8 +121,11 @@ module CanCan
     #     # check the database and return true/false
     #   end
     #
-    def can(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(true, action, subject, conditions, block)
+    def can(action = nil, subject = nil, conditions = nil, method = nil, &block)
+      if method && block_given?
+        raise ArgumentError, "You cannot pass both a block and a mapped method when defining an ability"
+      end
+      rules << Rule.new(true, action, subject, conditions, method || block, self)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -137,8 +140,11 @@ module CanCan
     #     product.invisible?
     #   end
     #
-    def cannot(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(false, action, subject, conditions, block)
+    def cannot(action = nil, subject = nil, conditions = nil, method = nil, &block)
+      if method && block_given?
+        raise ArgumentError, "You cannot pass both a block and a mapped method when defining an inability"
+      end
+      rules << Rule.new(false, action, subject, conditions, method || block, self)
     end
 
     # Alias one or more actions into another one.

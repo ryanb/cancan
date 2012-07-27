@@ -391,7 +391,7 @@ describe CanCan::Ability do
       @ability.can :read, Array, :published => true do
         false
       end
-    }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
+    }.should raise_error(CanCan::Error, "You are not able to supply a block or method with a hash of conditions in read Array ability. Use either one.")
   end
 
   describe "unauthorized message" do
@@ -447,6 +447,55 @@ describe CanCan::Ability do
       @ability.merge(another_ability)
       @ability.can?(:use, :search).should be_true
       @ability.send(:rules).size.should == 2
+    end
+  end
+
+  describe "method mapping" do
+    class Foo
+      include CanCan::Ability
+      def evaluate(instance)
+        instance == "A"
+      end
+    end
+
+    before do
+      @ability = Foo.new
+    end
+
+    it "should be able to accept the name of a mapped method when defining an ability" do
+      @ability.can :read, String, nil, :evaluate
+      @ability.send(:rules).last.instance_variables.should include "@method"
+    end
+
+    it "should be able to accept the name of a mapped method when defining an inability" do
+      @ability.cannot :read, String, nil, :evaluate
+      @ability.send(:rules).last.instance_variables.should include "@method"
+    end
+
+    it "should raise an exception when passing both a block and a mapped method when defining an ability" do
+      block = proc{}
+      error_message = "You cannot pass both a block and a mapped method when defining an ability"
+      lambda { @ability.can :read, String, nil, :evaluate, &block }.should raise_error(ArgumentError, error_message)
+    end
+
+    it "should raise an exception when passing both a block and a mapped method when defining an inability" do
+      block = proc{}
+      error_message = "You cannot pass both a block and a mapped method when defining an inability"
+      lambda { @ability.cannot :read, String, nil, :evaluate, &block }.should raise_error(ArgumentError, error_message)
+    end
+
+    it "should invoke the mapped method when checking ability" do
+      @ability.can :read, String, nil, :evaluate
+      @ability.can?(:read, "A").should be true
+      @ability.can?(:read, "B").should be false
+    end
+
+    it "should be able to be dumped using Marshal.load" do
+      @ability.can :read, String, nil, :evaluate
+      lambda { Marshal.dump @ability }.should_not raise_error
+
+      @ability.can :read, String, nil do |instance| instance == "A" end
+      lambda { Marshal.dump @ability }.should raise_error(TypeError)
     end
   end
 end
