@@ -391,7 +391,7 @@ describe CanCan::Ability do
       @ability.can :read, Array, :published => true do
         false
       end
-    }.should raise_error(CanCan::Error, "You are not able to supply a block or method with a hash of conditions in read Array ability. Use either one.")
+    }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
   end
 
   describe "unauthorized message" do
@@ -453,7 +453,7 @@ describe CanCan::Ability do
   describe "method mapping" do
     class Foo
       include CanCan::Ability
-      def evaluate(instance)
+      def evaluate(instance, conditions)
         instance == "A"
       end
     end

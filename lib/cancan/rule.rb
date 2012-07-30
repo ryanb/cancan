@@ -11,14 +11,14 @@ module CanCan
     # and subject respectively (such as :read, @project). The third argument is a hash
     # of conditions and the last one is the block passed to the "can" call.
     def initialize(base_behavior, action, subject, conditions, block_or_method, ability = nil)
-      raise Error, "You are not able to supply a block or method with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && !block_or_method.nil?
+      raise Error, "You are not able to supply a block with a hash of conditions in #{action} #{subject} ability. Use either one." if conditions.kind_of?(Hash) && block_or_method.kind_of?(Proc)
       @match_all = action.nil? && subject.nil?
       @base_behavior = base_behavior
       @actions = [action].flatten
       @subjects = [subject].flatten
       @conditions = conditions || {}
-      @block = block_or_method if block_or_method.is_a?(Proc)
-      @method = block_or_method unless block_or_method.is_a?(Proc)
+      @block = block_or_method if block_or_method.kind_of?(Proc)
+      @method = block_or_method unless block_or_method.kind_of?(Proc)
       @ability = ability
     end
 
@@ -39,7 +39,7 @@ module CanCan
       elsif @block && !subject_class?(subject)
         @block.call(subject, *extra_args)
       elsif @method && !subject_class?(subject)
-        @ability.send(@method, subject, *extra_args)
+        @ability.send(@method, subject, @conditions, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
@@ -149,9 +149,9 @@ module CanCan
 
     def call_method_with_all(action, subject, extra_args)
       if subject.class == Class
-        @ability.send(@method, action, subject, nil, *extra_args)
+        @ability.send(@method, action, subject, nil, @conditions, *extra_args)
       else
-        @ability.send(@method, subject.class, subject, *extra_args)
+        @ability.send(@method, action, subject.class, subject, @conditions, *extra_args)
       end
     end
 
