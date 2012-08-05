@@ -3,6 +3,7 @@ require 'bundler/setup'
 
 require "sqlite3"
 require "active_record"
+require "squeel"
 
 case ENV["MODEL_ADAPTER"]
 when "data_mapper"
@@ -22,6 +23,13 @@ RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true
   config.filter_run :focus => true
   config.run_all_when_everything_filtered = true
+end
+
+Squeel.configure do |config|
+  config.load_core_extensions :symbol
+  config.alias_predicate :ne, :not_eq
+  config.alias_predicate :nin, :not_in
+  config.alias_predicate :nlike, :not_like
 end
 
 class Ability
