@@ -109,6 +109,14 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Comment.accessible_by(@ability).should == [comment1]
     end
 
+    it "should fetch articles matching the most liberal ability" do
+      @ability.can :read, Article
+      @ability.can :read, Article, :published => true
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => false)
+      Article.accessible_by(@ability).should == [article1, article2]
+    end
+
     it "should allow conditions in SQL and merge with hash conditions" do
       @ability.can :read, Article, :published => true
       @ability.can :read, Article, ["secret=?", true]
