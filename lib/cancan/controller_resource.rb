@@ -229,10 +229,14 @@ module CanCan
     end
 
     def resource_params
-      if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
+      if @options[:no_params]
+        {}
       else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+        if @options[:class]
+          @params[@options[:class].to_s.underscore.gsub('/', '_')]
+        else
+          @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+        end
       end
     end
 
