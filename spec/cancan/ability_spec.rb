@@ -408,6 +408,19 @@ describe CanCan::Ability do
       e.message.should == "Access denied!"
       e.action.should == :read
       e.subject.should == :books
+      e.attribute.should be_nil
+    else
+      fail "Expected CanCan::Unauthorized exception to be raised"
+    end
+  end
+
+  it "raises CanCan::Unauthorized when calling authorize! on unauthorized attribute" do
+    begin
+      @ability.authorize! :read, :books, :title
+    rescue CanCan::Unauthorized => e
+      e.action.should == :read
+      e.subject.should == :books
+      e.attribute.should == :title
     else
       fail "Expected CanCan::Unauthorized exception to be raised"
     end

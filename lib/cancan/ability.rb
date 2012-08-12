@@ -204,7 +204,7 @@ module CanCan
       attribute = args.first
       if cannot?(action, subject, *args)
         message ||= unauthorized_message(action, subject)
-        raise Unauthorized.new(message, action, subject)
+        raise Unauthorized.new(message, action, subject, attribute)
       elsif sufficient_attribute_check?(action, subject, attribute) && sufficient_condition_check?(action, subject)
         fully_authorized!(action, subject)
       end
