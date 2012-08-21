@@ -214,7 +214,7 @@ module CanCan
     def unauthorized_message(action, subject)
       keys = unauthorized_message_keys(action, subject)
       variables = {:action => action.to_s}
-      variables[:subject] = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.humanize.downcase.pluralize)
+      variables[:subject] = (subject.kind_of?(Symbol) ? subject.to_s : subject.class.to_s.underscore.humanize.downcase)
       message = I18n.translate(nil, variables.merge(:scope => :unauthorized, :default => keys + [""]))
       message.blank? ? nil : message
     end
