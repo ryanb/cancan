@@ -187,8 +187,10 @@ module CanCan
       #
       # You can also pass the resource name as the first argument to skip that resource.
       def skip_load_and_authorize_resource(*args)
-        skip_load_resource(*args)
-        skip_authorize_resource(*args)
+        options = args.extract_options!
+        name = args.first
+        cancan_skipper[:load][name] = options
+        cancan_skipper[:authorize][name] = options
       end
 
       # Skip the loading behavior of CanCan. This is useful when using +load_and_authorize_resource+ but want to
