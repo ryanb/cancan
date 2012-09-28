@@ -32,4 +32,8 @@ Kernel.const_get(rspec_module)::Matchers.define :be_able_to do |*args|
     message << " but was able to #{(@actions - @errors).inspect}" if args.first.kind_of?(Array)
     message
   end
+
+  description do
+    "be able to #{args.map(&:inspect).join(" ")}"
+  end
 end

@@ -31,6 +31,10 @@ describe "be_able_to" do
     end.should raise_error('expected to be able to :read 123 456')
   end
 
+  it "has a nice description" do
+    be_able_to(:read, 123).description.should eq 'be able to :read 123'
+  end
+
   describe "multiple checks" do
     let(:object) { Object.new }
 
@@ -39,7 +43,6 @@ describe "be_able_to" do
       object.should_receive(:can?).with(:update, 123) { true }
       object.should be_able_to([:read, :update], 123)
     end
-
 
     it "reports a nice failure message for should when all fail" do
       object.should_receive(:can?).with(:read, 123) { false }
