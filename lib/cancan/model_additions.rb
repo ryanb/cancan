@@ -2,6 +2,8 @@ module CanCan
 
   # This module adds the accessible_by class method to a model. It is included in the model adapters.
   module ModelAdditions
+    extend ActiveSupport::Concern
+
     module ClassMethods
       # Returns a scope which fetches only the records that the passed ability
       # can perform a given action on. The action defaults to :index. This
@@ -22,10 +24,6 @@ module CanCan
       def accessible_by(ability, action = :index)
         ability.model_adapter(self, action).database_records
       end
-    end
-
-    def self.included(base)
-      base.extend ClassMethods
     end
   end
 end
