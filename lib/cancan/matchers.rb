@@ -5,9 +5,8 @@ Kernel.const_get(rspec_module)::Matchers.define :be_able_to do |*args|
   @errors = []
 
   def ability_can?(ability, *args)
-    extra_args = args[1..-1]
     @actions.each do |action|
-      @errors << action unless ability.can?(action, *extra_args)
+      @errors << action unless ability.can?(action, *args[1..-1])
     end
   end
 
