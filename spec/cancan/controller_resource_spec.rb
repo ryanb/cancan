@@ -476,7 +476,7 @@ describe CanCan::ControllerResource do
     @params.merge!(:action => "new", :project => {:title => "title"})
     @controller.instance_exec do
       def resource_params
-        # params.require(:project).permit(:title, :body)
+        # params.require(:project).permit(:title, :body) if params[:project]
         params[:project][:body] = "body"
       end
     end
