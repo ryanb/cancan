@@ -471,4 +471,17 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should_not raise_error
     @controller.instance_variable_get(:@project).should be_nil
   end
+
+  it "should allow override resource_params" do
+    @params.merge!(:action => "new", :project => {:title => "title"})
+    @controller.instance_exec do
+      def resource_params
+        # params.require(:project).permit(:title, :body)
+        params[:project][:body] = "body"
+      end
+    end
+    resource = CanCan::ControllerResource.new(@controller, :project)
+    resource.load_resource
+    @params[:project][:body].should == "body"
+  end
 end
