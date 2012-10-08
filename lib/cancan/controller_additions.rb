@@ -382,6 +382,23 @@ module CanCan
     def cannot?(*args)
       current_ability.cannot?(*args)
     end
+
+    # Loads and authorizes a resource at runtime within the controller instance.
+    #
+    #   before_filter lambda {
+    #     if params.has_key? :parent_id
+    #       load_and_authorize_resource! :parent
+    #       load_and_authorize_resource! through: :parent
+    #     else
+    #       load_and_authorize_resource!
+    #     end
+    #   }
+    #
+    def load_and_authorize_resource!(*args)
+      options = args.extract_options!.merge({:load => true, :authorize => true})
+      resource_name = args.first      
+      self.class.cancan_resource_class.new(self, resource_name, options.except(:only, :except)).process
+    end
   end
 end
 
