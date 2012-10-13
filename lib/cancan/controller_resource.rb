@@ -228,12 +228,21 @@ module CanCan
       @name || name_from_controller
     end
 
+    def strong_parameters?
+      klass = ActionController.const_get 'Parameters'
+      return klass.is_a?(Class)
+    rescue
+      return false
+    end
+
     def resource_params
-      if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
-      else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+      param_name = (@options[:class] || namespaced_name).to_s.underscore.gsub('/', '_')
+      if strong_parameters? || @options[:params]
+        params_method = (@options[:params] == true || ! @options[:params]) ?
+          "#{param_name}_params" : @options[:params]
+        return @controller.send params_method if @controller.send :respond_to?, params_method
       end
+      @params[param_name]
     end
 
     def namespace
