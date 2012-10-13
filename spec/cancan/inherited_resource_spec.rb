@@ -49,7 +49,7 @@ describe CanCan::InheritedResource do
   end
 
   it "should override initial attributes with params" do
-    @params.merge!(:action => "new", :project => {:name => "from params"})
+    @params.merge!(:action => "create", :project => {:name => "from params"})
     @ability.can(:create, :projects, :name => "from conditions")
     @controller.stub(:build_resource) { Struct.new(:name).new }
     CanCan::ControllerResource.new(@controller, :load => true).process
