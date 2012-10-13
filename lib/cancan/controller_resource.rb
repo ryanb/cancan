@@ -236,13 +236,15 @@ module CanCan
     end
 
     def resource_params
-      param_name = (@options[:class] || namespaced_name).to_s.underscore.gsub('/', '_')
-      if strong_parameters? || @options[:params]
-        params_method = (@options[:params] == true || ! @options[:params]) ?
-          "#{param_name}_params" : @options[:params]
-        return @controller.send params_method if @controller.send :respond_to?, params_method
+      if [:create, :update].member? @params[:action].to_sym
+        param_name = (@options[:class] || namespaced_name).to_s.underscore.gsub('/', '_')
+        if strong_parameters? || @options[:params]
+          params_method = (@options[:params] == true || ! @options[:params]) ?
+            "#{param_name}_params" : @options[:params]
+          return @controller.send params_method if @controller.send :respond_to?, params_method
+        end
+        @params[param_name]
       end
-      @params[param_name]
     end
 
     def namespace
