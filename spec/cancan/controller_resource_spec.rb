@@ -491,7 +491,7 @@ describe CanCan::ControllerResource do
   end
 
   it "should revert back to parameters if the method does not exist within the controller" do
-    @params.merge!(:action => "create", :project => { name: 'foobar' })
+    @params.merge!(:action => "create", :project => { :name => 'foobar' })
     CanCan::ControllerResource.new(@controller, :load => true, :params => true).process
     @controller.instance_variable_get(:@project).name.should == "foobar"
   end
