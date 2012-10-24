@@ -44,4 +44,9 @@ describe CanCan::Rule do
 
     @rule.should be_unmergeable
   end
+
+  it "should be mergeable if conditions is an empty hash" do
+    @conditions = {}
+    @rule.should_not be_unmergeable
+  end
 end
