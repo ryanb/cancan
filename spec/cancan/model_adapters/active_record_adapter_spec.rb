@@ -20,10 +20,12 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
         t.boolean "secret"
         t.integer "priority"
         t.integer "category_id"
+        t.integer "user_id"
       end
       model do
         belongs_to :category
         has_many :comments
+        belongs_to :user
       end
     end
 
@@ -34,6 +36,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       end
       model do
         belongs_to :article
+      end
+    end
+
+    with_model :user do
+      table do |t|
+
+      end
+      model do
+        has_many :articles
       end
     end
 
@@ -231,6 +242,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.can :read, Article, :project => { :blocked => false }
       @ability.can :read, Article, :project => { :comments => { :spam => true } }
       @ability.model_adapter(Article, :read).joins.should == [{:project=>[:comments]}]
+    end
+
+    it "should merge :all conditions with other conditions" do
+      user = User.create!
+      article = Article.create!(:user => user)
+      ability = Ability.new(user)
+      ability.can :manage, :all
+      ability.can :manage, Article, :user_id => user.id
+      Article.accessible_by(ability).should == [article]
     end
 
     it "should restrict articles given a MetaWhere condition" do
