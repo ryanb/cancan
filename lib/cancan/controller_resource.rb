@@ -235,7 +235,7 @@ module CanCan
     # `resource_params` method.
     #
     def resource_params
-      params = @controller.try(:resource_params)
+      params = @controller.try(:resource_params) if @controller.respond_to?(:resource_params)
       params ||= if @options[:class]
         @params[@options[:class].to_s.underscore.gsub('/', '_')]
       else
