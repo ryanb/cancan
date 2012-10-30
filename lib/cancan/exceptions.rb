@@ -18,7 +18,7 @@ module CanCan
   # This usually happens within a call to ControllerAdditions#authorize! but can be
   # raised manually.
   #
-  #   raise CanCan::Unauthorized.new("Not authorized!", :read, Article)
+  #   raise CanCan::Unauthorized.new("Not authorized!", :read, Article, :name)
   #
   # The passed message, action, and subject are optional and can later be retrieved when
   # rescuing from the exception.
@@ -26,6 +26,7 @@ module CanCan
   #   exception.message # => "Not authorized!"
   #   exception.action # => :read
   #   exception.subject # => Article
+  #   exception.attribute # => :name
   #
   # If the message is not specified (or is nil) it will default to "You are not authorized
   # to access this page." This default can be overridden by setting default_message.
@@ -36,13 +37,14 @@ module CanCan
   # See ControllerAdditions#authorize! for more information on rescuing from this exception
   # and customizing the message using I18n.
   class Unauthorized < Error
-    attr_reader :action, :subject
+    attr_reader :action, :subject, :attribute
     attr_writer :default_message
 
-    def initialize(message = nil, action = nil, subject = nil)
+    def initialize(message = nil, action = nil, subject = nil, attribute = nil)
       @message = message
       @action = action
       @subject = subject
+      @attribute = attribute
       @default_message = I18n.t(:"unauthorized.default", :default => "You are not authorized to access this page.")
     end
 

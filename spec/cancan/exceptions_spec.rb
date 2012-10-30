@@ -3,12 +3,13 @@ require "spec_helper"
 describe CanCan::Unauthorized do
   describe "with action and subject" do
     before(:each) do
-      @exception = CanCan::Unauthorized.new(nil, :some_action, :some_subject)
+      @exception = CanCan::Unauthorized.new(nil, :some_action, :some_subject, :some_attribute)
     end
 
     it "has action and subject accessors" do
       @exception.action.should == :some_action
       @exception.subject.should == :some_subject
+      @exception.attribute.should == :some_attribute
     end
 
     it "has a changable default message" do
@@ -23,9 +24,10 @@ describe CanCan::Unauthorized do
       @exception = CanCan::Unauthorized.new("Access denied!")
     end
 
-    it "has nil action and subject" do
+    it "has nil action, subject and attribute" do
       @exception.action.should be_nil
       @exception.subject.should be_nil
+      @exception.attribute.should be_nil
     end
 
     it "has passed message" do
