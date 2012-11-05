@@ -3,7 +3,7 @@ module CanCan
   # it holds the information about a "can" call made on Ability and provides
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
-    attr_reader :base_behavior, :subjects, :actions, :conditions
+    attr_reader :base_behavior, :subjects, :actions
     attr_writer :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
@@ -18,6 +18,22 @@ module CanCan
       @subjects = [subject].flatten
       @conditions = conditions || {}
       @block = block
+    end
+
+    # Process the conditions that are a Proc or a callable Object
+    def conditions
+      case @conditions
+      when Array
+        @conditions.map do |condition|
+          condition.respond_to?(:call) ? condition.call : condition
+        end
+      when Hash
+        @conditions.each_with_object({}) do |(key, condition), processed_conditions|
+          processed_conditions[key] = condition.respond_to?(:call) ? condition.call : condition
+        end
+      else
+        @conditions
+      end
     end
 
     # Matches both the subject and action, not necessarily the conditions
