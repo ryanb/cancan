@@ -35,7 +35,7 @@ module CanCan
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
-        matches_conditions_hash?(subject)
+        matches_conditions_hash?(subject, conditions)
       else
         # Don't stop at "cannot" definitions when there are conditions.
         @conditions.empty? ? true : @base_behavior
@@ -98,7 +98,7 @@ module CanCan
     # This behavior can be overriden by a model adapter by defining two class methods:
     # override_matching_for_conditions?(subject, conditions) and
     # matches_conditions_hash?(subject, conditions)
-    def matches_conditions_hash?(subject, conditions = @conditions)
+    def matches_conditions_hash?(subject, conditions)
       if conditions.empty?
         true
       else
