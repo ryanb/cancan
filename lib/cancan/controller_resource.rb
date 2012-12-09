@@ -229,15 +229,12 @@ module CanCan
     end
 
     def strong_parameters?
-      klass = ActionController.const_get 'Parameters'
-      return klass.is_a?(Class)
-    rescue
-      return false
+      @params.class.name == 'ActionController::Parameters'
     end
 
     def resource_params
       if [:create, :update].member? @params[:action].to_sym
-        param_name = (@options[:class] || namespaced_name).to_s.underscore.gsub('/', '_')
+        param_name = @options[:instance_name] || (@options[:class] || namespaced_name).to_s.underscore.gsub('/', '_')
         if strong_parameters? || @options[:params]
           params_method = (@options[:params] == true || ! @options[:params]) ?
             "#{param_name}_params" : @options[:params]
