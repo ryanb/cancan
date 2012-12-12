@@ -1,4 +1,4 @@
-= CanCan {<img src="https://secure.travis-ci.org/ryanb/cancan.png?branch=master" />}[http://travis-ci.org/ryanb/cancan] {<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/ryanb/cancan]
+= CanCan {<img src="https://fury-badge.herokuapp.com/rb/cancan.png" alt="Gem Version" />}[http://badge.fury.io/rb/cancan] {<img src="https://secure.travis-ci.org/ryanb/cancan.png?branch=master" />}[http://travis-ci.org/ryanb/cancan] {<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/ryanb/cancan]
 
 Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
