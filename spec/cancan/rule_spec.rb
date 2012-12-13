@@ -49,4 +49,10 @@ describe CanCan::Rule do
     @conditions = {}
     @rule.should_not be_unmergeable
   end
+
+  it "should execute proc conditions" do
+    @conditions[:foo] = proc { 1 }
+    @conditions[:bar] = 2
+    @rule.conditions.should == {:foo => 1, :bar => 2}
+  end
 end
