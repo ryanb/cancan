@@ -392,7 +392,6 @@ describe CanCan::ControllerResource do
 
   # CVE-2012-5664
   it "should always convert id param to string" do
-    project = Project.create!
     @params.merge!(:action => "show", :the_project => { :malicious => "I am" })
     resource = CanCan::ControllerResource.new(@controller, :id_param => :the_project)
     resource.send(:id_param).class.should == String
