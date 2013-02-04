@@ -1,3 +1,14 @@
+1.6.9 (February 4, 2013)
+
+* fix inserting AND (NULL) to end of SQL queries (thanks jonsgreen) - issue #687
+
+* fix merge_joins for nested association hashes (thanks DavidMikeSimon) - issues #655, #560
+
+* raise error on recursive alias_action (thanks fl00r) - issue #660
+
+* fix namespace controllers not loading params (thanks andhapp) - issues #670, #664
+
+
 1.6.8 (June 25, 2012)
 
 * improved support for namespaced controllers and models
