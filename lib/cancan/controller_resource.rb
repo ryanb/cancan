@@ -27,6 +27,7 @@ module CanCan
     end
 
     def load_resource
+      return if resource_instance_loaded?
       unless skip?(:load)
         if load_instance?
           self.resource_instance ||= load_resource_instance
@@ -158,6 +159,10 @@ module CanCan
 
     def resource_instance
       @controller.instance_variable_get("@#{instance_name}") if load_instance?
+    end
+
+    def resource_instance_loaded?
+      !@controller.instance_variable_get("@#{instance_name}").nil?
     end
 
     def collection_instance=(instance)
