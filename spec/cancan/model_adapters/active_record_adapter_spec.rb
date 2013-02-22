@@ -207,6 +207,16 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.model_adapter(Article, :read).conditions.should == "'t'='t'"
     end
 
+    it "should return appropriate sql conditions in complex case with nested joins" do
+      @ability.can :read, Comment, :article => { :category => { :visible => true } }
+      @ability.model_adapter(Comment, :read).conditions.should == { Category.table_name.to_sym => { :visible => true } }
+    end
+
+    it "should return appropriate sql conditions in complex case with nested joins of different depth" do
+      @ability.can :read, Comment, :article => { :published => true, :category => { :visible => true } }
+      @ability.model_adapter(Comment, :read).conditions.should == { Article.table_name.to_sym => { :published => true }, Category.table_name.to_sym => { :visible => true } }
+    end
+
     it "should not forget conditions when calling with SQL string" do
       @ability.can :read, Article, :published => true
       @ability.can :read, Article, ['secret=?', false]

@@ -66,11 +66,22 @@ module CanCan
         return conditions unless conditions.kind_of? Hash
         conditions.inject({}) do |result_hash, (name, value)|
           if value.kind_of? Hash
+            value = value.dup
             association_class = model_class.reflect_on_association(name).class_name.constantize
-            name = model_class.reflect_on_association(name).table_name.to_sym
-            value = tableized_conditions(value, association_class)
+            nested = value.inject({}) do |nested,(k,v)|
+              if v.kind_of? Hash
+                value.delete(k)
+                nested[k] = v
+              else
+                name = model_class.reflect_on_association(name).table_name.to_sym
+                result_hash[name] = value
+              end
+              nested
+            end
+            result_hash.merge!(tableized_conditions(nested,association_class))
+          else
+            result_hash[name] = value
           end
-          result_hash[name] = value
           result_hash
         end
       end
