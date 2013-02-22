@@ -83,14 +83,13 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         MongoidProject.accessible_by(@ability, :destroy).entries.should == [sir]
       end
 
-      it "is able to mix empty conditions and hashes" do
-        pending "TODO figure out why this isn't working"
+      it "takes presedence over rule defined without a condition" do
         @ability.can :read, :mongoid_projects
         @ability.can :read, :mongoid_projects, :title => 'Sir'
         sir  = MongoidProject.create(:title => 'Sir')
         lord = MongoidProject.create(:title => 'Lord')
 
-        MongoidProject.accessible_by(@ability, :read).count.should == 2
+        MongoidProject.accessible_by(@ability, :read).entries.should == [sir]
       end
 
       it "returns everything when the defined ability is access all" do
