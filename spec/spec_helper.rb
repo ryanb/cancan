@@ -20,6 +20,18 @@ RSpec.configure do |config|
   config.extend WithModel if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
 end
 
+# Working around CVE-2012-5664 requires us to convert all ID params
+# to strings. Let's switch to using string IDs in tests, otherwise
+# SuperModel and/or RR will fail (as strings are not fixnums).
+
+module SuperModel
+  class Base
+    def generate_id
+      object_id.to_s
+    end
+  end
+end
+
 class Ability
   include CanCan::Ability
 
