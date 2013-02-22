@@ -284,8 +284,24 @@ describe CanCan::ControllerResource do
     CanCan::ControllerResource.new(@controller, :category, :load => true).process
     CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category).process
     project = @controller.instance_variable_get(:@project)
-    project.new_record?.should eq(true)
+    project.should be_new_record
     project.name.should eq('foo')
+  end
+
+  it "does not overrides an attribute if it is based on parent resource" do
+    user = double('user')
+    user.should_receive(:category_id).and_return nil
+    @ability = Ability.new user
+    @ability.can :new, :projects, :category_id => user.category_id
+    category = Category.create!
+    @controller.instance_variable_set(:@category, category)
+
+    @params.merge! :action => 'new', :category_id => category.id
+    CanCan::ControllerResource.new(@controller, :category, :load => true).process
+    CanCan::ControllerResource.new(@controller, :project, :load => true, :through => :category, :singleton => true).process
+    project = @controller.instance_variable_get(:@project)
+    project.category_id.should_not be_nil
+    project.category.should eq(category)
   end
 
   it "authorizes nested resource through parent association on index action" do
