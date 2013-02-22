@@ -92,7 +92,6 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     end
 
     it "only reads comments for visible categories through articles" do
-      pending "does ActiveRecord no longer support a deep nested hash of conditions?"
       @ability.can :read, :comments, :article => { :category => { :visible => true } }
       comment1 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => true)))
       comment2 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => false)))
@@ -219,19 +218,17 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     end
 
     it "restricts articles given a MetaWhere condition" do
-      pending
       @ability.can :read, :articles, :priority.lt => 2
       article1 = Article.create!(:priority => 1)
       article2 = Article.create!(:priority => 3)
       Article.accessible_by(@ability).should == [article1]
-      @ability.should be_able_to(:read, article1)
+      @ability.can?(:read, article1).should be_true
       @ability.should_not be_able_to(:read, article2)
     end
 
     it "should merge MetaWhere and non-MetaWhere conditions" do
-      pending
-      @ability.can :read, Article, :priority.lt => 2
-      @ability.can :read, Article, :priority => 1
+      @ability.can :read, :articles, :priority.lt => 2
+      @ability.can :read, :articles, :priority => 1
       article1 = Article.create!(:priority => 1)
       article2 = Article.create!(:priority => 3)
       Article.accessible_by(@ability).should == [article1]
@@ -240,7 +237,6 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
     end
 
     it "matches any MetaWhere condition" do
-      pending
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter
       article1 = Article.new(:priority => 1, :name => "Hello World")
       adapter.matches_condition?(article1, :priority.eq, 1).should be_true
@@ -270,9 +266,8 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       adapter.matches_condition?(article1, :name.like, "%helo%").should be_false
       adapter.matches_condition?(article1, :name.like, "hello").should be_false
       adapter.matches_condition?(article1, :name.like, "hello.world").should be_false
-      # For some reason this is reporting "The not_matches MetaWhere condition is not supported."
-      # adapter.matches_condition?(article1, :name.nlike, "%helo%").should be_true
-      # adapter.matches_condition?(article1, :name.nlike, "%ello worl%").should be_false
+      adapter.matches_condition?(article1, :name.nlike, "%helo%").should be_true
+      adapter.matches_condition?(article1, :name.nlike, "%ello worl%").should be_false
     end
   end
 end

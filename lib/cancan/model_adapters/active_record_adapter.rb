@@ -6,17 +6,17 @@ module CanCan
       end
 
       def self.override_condition_matching?(subject, name, value)
-        name.kind_of?(MetaWhere::Column) if defined? MetaWhere
+        name.kind_of?(Squeel::Nodes::Predicate) if defined? Squeel
       end
 
       def self.matches_condition?(subject, name, value)
-        subject_value = subject.send(name.column)
-        if name.method.to_s.ends_with? "_any"
-          value.any? { |v| meta_where_match? subject_value, name.method.to_s.sub("_any", ""), v }
-        elsif name.method.to_s.ends_with? "_all"
-          value.all? { |v| meta_where_match? subject_value, name.method.to_s.sub("_all", ""), v }
+        subject_value = subject.send(name.expr)
+        if name.method_name.to_s.ends_with? "_any"
+          value.any? { |v| meta_where_match? subject_value, name.method_name.to_s.sub("_any", ""), v }
+        elsif name.method_name.to_s.ends_with? "_all"
+          value.all? { |v| meta_where_match? subject_value, name.method_name.to_s.sub("_all", ""), v }
         else
-          meta_where_match? subject_value, name.method, value
+          meta_where_match? subject_value, name.method_name, value
         end
       end
 
