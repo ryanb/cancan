@@ -112,6 +112,17 @@ module CanCan
       # [:+prepend+]
       #   Passing +true+ will use prepend_before_filter instead of a normal before_filter.
       #
+      # [:+params+]
+      #   Allows you to define a pre-processor for resource attributes. Set this to a symbol relating
+      #   to a method name within the controller. In Rails 4 or when using the strong_parameters gem
+      #   this defaults to +:<resource_name>_params+.
+      #
+      #     load_resource :params => :resource_params
+      #
+      #     def resource_params
+      #       params[:resource].except :foo
+      #     end
+      #
       def load_resource(*args)
         raise ImplementationRemoved, "The load_resource method has been removed, use load_and_authorize_resource instead."
         cancan_resource_class.add_before_filter(self, {:load => true}, *args)
