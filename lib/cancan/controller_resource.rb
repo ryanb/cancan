@@ -216,14 +216,24 @@ module CanCan
     def resource_params
       if @options[:class]
         params_key = extract_key(@options[:class])
-        return @params[params_key] if @params[params_key]
+        if params = fetch_params(params_key)
+          return params
+        end
       end
 
       resource_params_by_namespaced_name
     end
 
     def resource_params_by_namespaced_name
-      @params[extract_key(namespaced_name)]
+      fetch_params extract_key(namespaced_name)
+    end
+
+    def fetch_params(key)
+      @controller.respond_to?(params_method(key), true) ? @controller.send(params_method(key)) : @params[key]
+    end
+
+    def params_method(key)
+      "#{key}_params".to_sym
     end
 
     def namespace
