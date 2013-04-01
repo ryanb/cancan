@@ -282,6 +282,16 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.should_not be_able_to(:read, article2)
     end
 
+    it "should invert merged negative MetaWhere and non-MetaWhere cannot rules" do
+      @ability.can :read, Article, :priority => [1,3]
+      @ability.cannot :read, Article, :priority.lt => 2
+      article1 = Article.create!(:priority => 1)
+      article2 = Article.create!(:priority => 3)
+      Article.accessible_by(@ability).should == [article2]
+      @ability.should_not be_able_to(:read, article1)
+      @ability.should be_able_to(:read, article2)
+    end
+
     it "should match any MetaWhere condition" do
       adapter = CanCan::ModelAdapters::ActiveRecordAdapter
       article1 = Article.new(:priority => 1, :name => "Hello World")

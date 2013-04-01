@@ -104,7 +104,8 @@ module CanCan
           if mergeable_conditions
             @model_class.where(conditions).joins(joins)
           else
-            @model_class.where(*(@rules.map(&:conditions))).joins(joins)
+            adapt = ->(r) {@model_class.where(r.conditions).arel.wheres.map {|wv| r.base_behavior ? wv : wv.not} }
+            @model_class.where(*(@rules.map(&adapt).flatten)).joins(joins)
           end
         else
           @model_class.scoped(:conditions => conditions, :joins => joins)
