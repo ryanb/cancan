@@ -56,7 +56,7 @@ describe CanCan::ControllerResource do
     @params.merge!(:controller => "my_engine/projects_controller", :action => "show", :id => project.id)
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).should == project
+    @controller.instance_variable_get(:@project).should eq project
   end
 
   # Rails includes namespace in params, see issue #349
