@@ -224,6 +224,20 @@ describe CanCan::Ability do
     @ability.can?(:update, :users, "name").should be_true
   end
 
+  it "understands multiparameter attributes as strings" do
+    @ability.can :update, :users, :date
+    @ability.can?(:update, :users, "date(i1)").should be_true
+    @ability.can?(:update, :users, "date(i2)").should be_true
+    @ability.can?(:update, :users, "date(i3)").should be_true
+  end
+
+  it "understands multiparameter attributes as symbols" do
+    @ability.can :update, :users, :date
+    @ability.can?(:update, :users, :"date(i1)").should be_true
+    @ability.can?(:update, :users, :"date(i2)").should be_true
+    @ability.can?(:update, :users, :"date(i3)").should be_true
+  end
+
   it "combines attribute check with conditions hash" do
     @ability.can :update, :ranges, :begin => 1
     @ability.can :update, :ranges, :name, :begin => 2

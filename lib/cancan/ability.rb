@@ -306,6 +306,9 @@ module CanCan
     # Returns an array of Rule instances which match the action and subject
     # This does not take into consideration any hash conditions or block statements
     def relevant_rules(action, subject, attribute = nil)
+      if attribute
+        attribute = attribute.to_s.split('(').first.to_sym
+      end
       specificity = 0
       rules.reverse.each_with_object([]) do |rule, relevant_rules|
         rule.expanded_actions = expand_aliases(:actions, rule.actions)
