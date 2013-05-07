@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "cancan"
-  s.version     = "1.6.9"
+  s.version     = "1.6.10"
   s.author      = "Ryan Bates"
   s.email       = "ryan@railscasts.com"
   s.homepage    = "http://github.com/ryanb/cancan"

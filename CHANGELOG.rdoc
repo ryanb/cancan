@@ -1,3 +1,15 @@
+1.6.10 (May 7, 2013)
+
+* fix matches_conditons_hash for string values on 1.8 (thanks rrosen)
+
+* work around SQL injection vulnerability in older Rails versions (thanks steerio) - issue #800
+
+* add support for nested join conditions (thanks yuszuv) - issue #806
+
+* fix load_resource "find_by" in mongoid resources (thanks albertobajo) - issue #705
+
+* fix namespace split behavior (thanks xinuc) - issue #668
+
 1.6.9 (February 4, 2013)
 
 * fix inserting AND (NULL) to end of SQL queries (thanks jonsgreen) - issue #687
