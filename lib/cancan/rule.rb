@@ -116,7 +116,7 @@ module CanCan
                 else
                   !attribute.nil? && matches_conditions_hash?(attribute, value)
                 end
-              elsif value.kind_of?(Enumerable)
+              elsif !value.is_a?(String) && value.kind_of?(Enumerable)
                 value.include? attribute
               else
                 attribute == value

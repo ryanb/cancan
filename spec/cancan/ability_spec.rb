@@ -269,6 +269,12 @@ describe CanCan::Ability do
     @ability.can?(:read, []).should be_false
   end
 
+  it "should match strings but not substrings specified in a conditions hash" do
+    @ability.can :read, String, :presence => "declassified"
+    @ability.can?(:read, "declassified").should be_true
+    @ability.can?(:read, "classified").should be_false
+  end
+
   it "should not stop at cannot definition when comparing class" do
     @ability.can :read, Range
     @ability.cannot :read, Range, :begin => 1
