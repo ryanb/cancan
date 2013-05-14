@@ -230,11 +230,14 @@ module CanCan
     end
 
     def resource_params
-      if @options[:class]
-        @params[@options[:class].to_s.underscore.gsub('/', '_')]
+      resource_key = if @options[:class]
+        @options[:class].to_s.underscore.gsub('/', '_')
       else
-        @params[namespaced_name.to_s.underscore.gsub("/", "_")]
+        namespaced_name.to_s.underscore.gsub("/", "_")
       end
+      return nil unless @params[resource_key]
+      param_method_name = "#{resource_key}_params"
+      @controller.respond_to?(param_method_name, true) ? @controller.send(param_method_name) : @params[resource_key]
     end
 
     def namespace
