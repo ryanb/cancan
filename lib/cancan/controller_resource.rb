@@ -240,7 +240,7 @@ module CanCan
       if @controller.respond_to?(param_method_name, true)
         @controller.send(param_method_name)
       elsif @controller.respond_to?(:permitted_params, true)
-        @controller.send(:permitted_params)
+        @controller.send(:permitted_params)[resource_key]
       else
         @params[resource_key]
       end
