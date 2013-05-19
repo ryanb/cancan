@@ -237,7 +237,13 @@ module CanCan
       end
       return nil unless @params[resource_key]
       param_method_name = "#{resource_key}_params"
-      @controller.respond_to?(param_method_name, true) ? @controller.send(param_method_name) : @params[resource_key]
+      if @controller.respond_to?(param_method_name, true)
+        @controller.send(param_method_name)
+      elsif @controller.respond_to?(:permitted_params, true)
+        @controller.send(:permitted_params)
+      else
+        @params[resource_key]
+      end
     end
 
     def namespace
