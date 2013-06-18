@@ -60,11 +60,11 @@ module CanCan
         conditions.inject({}) do |result_hash, (name, value)|
           if value.kind_of? Hash
             value = value.dup
-            association_class = model_class.association_reflection(name)[:cache][:class]
+            association_class = model_class.association_reflection(name).associated_class
             nested = value.inject({}) do |nested, (k, v)|
               if v.kind_of?(Hash)
                 value.delete(k)
-                nested_class = association_class.association_reflection(k)[:cache][:class]
+                nested_class = association_class.association_reflection(k).associated_class
                 nested[k] = nested_class.where(normalize_conditions(v, association_class))
               else
                 nested[k] = v
