@@ -78,6 +78,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
         @ability.cannot :destroy, MongoidProject
         @ability.can :manage, MongoidProject, :title => 'Sir'
 
+
         sir   = MongoidProject.create(:title => 'Sir')
         lord  = MongoidProject.create(:title => 'Lord')
         dude  = MongoidProject.create(:title => 'Dude')
