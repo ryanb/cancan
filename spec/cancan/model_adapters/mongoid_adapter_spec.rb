@@ -74,8 +74,9 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
       end
 
       it "should return the correct records when a mix of can and cannot rules in defined ability" do
-        @ability.can :manage, MongoidProject, :title => 'Sir'
+        @ability.can :manage, :all
         @ability.cannot :destroy, MongoidProject
+        @ability.can :manage, MongoidProject, :title => 'Sir'
 
         sir   = MongoidProject.create(:title => 'Sir')
         lord  = MongoidProject.create(:title => 'Lord')

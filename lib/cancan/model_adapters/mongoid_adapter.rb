@@ -28,18 +28,18 @@ module CanCan
         elsif @rules.size == 1 && @rules[0].conditions.is_a?(Mongoid::Criteria)
           @rules[0].conditions
         else
-          # we only need to process can rules if
-          # there are no rules with empty conditions
-          rules = @rules.reject { |rule| rule.conditions.empty? && rule.base_behavior }
-          process_can_rules = @rules.count == rules.count
-
-          rules.inject(@model_class.all) do |records, rule|
-            if process_can_rules && rule.base_behavior
-              records.or rule.conditions
-            elsif !rule.base_behavior
-              records.excludes rule.conditions
+          @rules.reverse.inject(no_records) do |records, rule|
+            if rule.conditions.empty?
+              rule.base_behavior ? all_records : no_records
             else
-              records
+              case records
+              when all_records
+                rule.base_behavior ? all_records : all_records.excludes(rule.conditions)
+              when no_records
+                rule.base_behavior ? all_records.or rule.conditions : no_records
+              else
+                rule.base_behavior ? records.or(rule.conditions) : records.excludes(rule.conditions)
+              end
             end
           end
         end
