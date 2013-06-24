@@ -36,7 +36,7 @@ module CanCan
               when all_records
                 rule.base_behavior ? all_records : all_records.excludes(rule.conditions)
               when no_records
-                rule.base_behavior ? all_records.or rule.conditions : no_records
+                rule.base_behavior ? all_records.or(rule.conditions) : no_records
               else
                 rule.base_behavior ? records.or(rule.conditions) : records.excludes(rule.conditions)
               end
