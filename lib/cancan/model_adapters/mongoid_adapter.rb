@@ -22,6 +22,14 @@ module CanCan
         subject.matches?( subject.class.where(conditions).selector )
       end
 
+      def no_records
+        @model_class.where(:_id => {'$exists' => false, '$type' => 7})
+      end
+
+      def all_records
+        @model_class.all
+      end
+      
       def database_records
         if @rules.size == 0
           @model_class.where(:_id => {'$exists' => false, '$type' => 7}) # return no records in Mongoid
