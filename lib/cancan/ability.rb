@@ -34,7 +34,7 @@ module CanCan
     #
     #   can? :create, Project, request.remote_ip
     #
-    #   can :create Project do |project, remote_ip|
+    #   can :create, Project do |project, remote_ip|
     #     # ...
     #   end
     #
