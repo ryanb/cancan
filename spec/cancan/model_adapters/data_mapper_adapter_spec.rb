@@ -26,8 +26,7 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
     before(:each) do
       Article.destroy
       Comment.destroy
-      @ability = Object.new
-      @ability.extend(CanCan::Ability)
+      (@ability = double).extend(CanCan::Ability)
     end
 
     it "should be for only data mapper classes" do

@@ -20,8 +20,7 @@ if ENV["MODEL_ADAPTER"] == "mongoid"
   describe CanCan::ModelAdapters::MongoidAdapter do
     context "Mongoid defined" do
       before(:each) do
-        @ability = Object.new
-        @ability.extend(CanCan::Ability)
+        (@ability = double).extend(CanCan::Ability)
       end
 
       after(:each) do
