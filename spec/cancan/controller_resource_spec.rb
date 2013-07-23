@@ -249,7 +249,7 @@ describe CanCan::ControllerResource do
 
   it "should load resource through the association of another parent resource using instance variable" do
     @params.merge!(:action => "show", :id => "123")
-    category = double(projects: {})
+    category = double(:projects => {})
     @controller.instance_variable_set(:@category, category)
     allow(category.projects).to receive(:find).with("123") { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
@@ -259,7 +259,7 @@ describe CanCan::ControllerResource do
 
   it "should load resource through the custom association name" do
     @params.merge!(:action => "show", :id => "123")
-    category = double(custom_projects: {})
+    category = double(:custom_projects => {})
     @controller.instance_variable_set(:@category, category)
     allow(category.custom_projects).to receive(:find).with("123") { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :through_association => :custom_projects)
@@ -269,7 +269,7 @@ describe CanCan::ControllerResource do
 
   it "should load resource through the association of another parent resource using method" do
     @params.merge!(:action => "show", :id => "123")
-    category = double(projects: {})
+    category = double(:projects => {})
     allow(@controller).to receive(:category) { category }
     allow(category.projects).to receive(:find).with("123") { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => :category)
@@ -308,7 +308,7 @@ describe CanCan::ControllerResource do
 
   it "should load through first matching if multiple are given" do
     @params.merge!(:action => "show", :id => "123")
-    category = double(projects: {})
+    category = double(:projects => {})
     @controller.instance_variable_set(:@category, category)
     allow(category.projects).to receive(:find).with("123") { :some_project }
     resource = CanCan::ControllerResource.new(@controller, :through => [:category, :user])
@@ -318,7 +318,7 @@ describe CanCan::ControllerResource do
 
   it "should find record through has_one association with :singleton option without id param" do
     @params.merge!(:action => "show", :id => nil)
-    category = double(project: :some_project)
+    category = double(:project => :some_project)
     @controller.instance_variable_set(:@category, category)
     resource = CanCan::ControllerResource.new(@controller, :through => :category, :singleton => true)
     resource.load_resource
