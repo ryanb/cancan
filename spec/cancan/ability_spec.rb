@@ -254,15 +254,15 @@ describe CanCan::Ability do
   end
 
   it "should accept a set as a condition value" do
-    expect(object_with_foo_2 = double(foo: 2)).to receive(:foo)
-    expect(object_with_foo_3 = double(foo: 3)).to receive(:foo) 
+    expect(object_with_foo_2 = double(:foo => 2)).to receive(:foo)
+    expect(object_with_foo_3 = double(:foo => 3)).to receive(:foo) 
     @ability.can :read, Object, :foo => [1, 2, 5].to_set
     expect(@ability.can?(:read, object_with_foo_2)).to be_true
     expect(@ability.can?(:read, object_with_foo_3)).to be_false
   end
 
   it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
-    (object_with_foo = double(foo: :bar)).should_receive(:foo)
+    (object_with_foo = double(:foo => :bar)).should_receive(:foo)
     @ability.can :read, Array, :first => { :foo => :bar }
     expect(@ability.can?(:read, [object_with_foo])).to be_true
     expect(@ability.can?(:read, [])).to be_false
