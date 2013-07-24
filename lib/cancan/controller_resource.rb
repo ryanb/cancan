@@ -46,20 +46,23 @@ module CanCan
       @options.has_key?(:parent) ? @options[:parent] : @name && @name != name_from_controller.to_sym
     end
 
-    def skip?(behavior) # This could probably use some refactoring
+    def skip?(behavior)
       options = @controller.class.cancan_skipper[behavior][@name]
-      if options.nil?
-        false
-      elsif options == {}
-        true
-      elsif options[:except] && ![options[:except]].flatten.include?(@params[:action].to_sym)
-        true
-      elsif [options[:only]].flatten.include?(@params[:action].to_sym)
-        true
-      end
+      return false if options.nil?
+      return true  if options == {}
+      return true  if options[:except] && excluded?(@params[:action], options[:except])
+      return true  if options[:only]   && included?(@params[:action], options[:only])
     end
 
     protected
+
+    def included?(item, collection)
+      Array(collection).flatten.compact.include?(item.to_sym)
+    end
+
+    def excluded?(*args)
+      !included?(*args)
+    end
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
