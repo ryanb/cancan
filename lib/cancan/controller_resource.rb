@@ -12,6 +12,7 @@ module CanCan
     end
 
     def initialize(controller, *args)
+      @params_method = args.last[:attributes] if args.last.respond_to?(:[])
       @controller = controller
       @params = controller.params
       @options = args.extract_options!
@@ -223,7 +224,13 @@ module CanCan
     end
 
     def resource_params_by_namespaced_name
-      @params[extract_key(namespaced_name)]
+      if @params_method
+        begin
+          @controller.send(@params_method.to_sym)
+        rescue
+          nil
+        end
+      end
     end
 
     def namespace
