@@ -230,6 +230,8 @@ module CanCan
         rescue
           nil
         end
+      else
+        @params[extract_key(namespaced_name)]
       end
     end
 
