@@ -387,6 +387,26 @@ module CanCan
     def cannot?(*args)
       current_ability.cannot?(*args)
     end
+
+    # Check if the user has any of the permissions on any of the resources
+    #
+    # can_any? [:create, :destroy], [Project, User]
+    #
+    # Return true if any of the actions is accepted for any of the
+    # resources. You can check for one action in several resources, like:
+    #
+    # can_any? :update, [Project, User]
+    #
+    # Return true if the user has :update permission on Project or on User
+    # Or, you can check for several actions on a single resource.
+    #
+    # can_any? [:update, :destroy], Project
+    #
+    # Return true if the current user any of the permissions on the given
+    # resource.
+    def can_any?(*args)
+      current_ability.can_any?(*args)
+    end
   end
 end
 
