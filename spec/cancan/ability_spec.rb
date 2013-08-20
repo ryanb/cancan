@@ -400,6 +400,39 @@ describe CanCan::Ability do
     }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
   end
 
+  describe "#can_any?" do
+    it "should return true if the user has the permission on any of the resources" do
+      @ability.can :manage, String
+      @ability.cannot :manage, Integer
+      @ability.can_any?(:update, [String, Integer]).should be_true
+    end
+
+    it "should return false if the user hasn't the permission on any of the resources" do
+      @ability.cannot :manage, String
+      @ability.cannot :manage, Integer
+      @ability.can_any?(:update, [String, Integer, Hash]).should be_false
+    end
+
+    it "should return true if the user has any of the permissions on any of the resources" do
+      @ability.cannot :manage, String
+      @ability.can :manage, Integer
+      @ability.can_any?([:update, :destroy], [String, Integer, Hash]).should be_true
+    end
+
+    it "should return true if the user has any of the permissions on the resource" do
+      @ability.can :update, String
+      @ability.cannot :destroy, String
+      @ability.can_any?([:update, :destroy], String).should be_true
+    end
+
+    it "should return false if the user hasn't any of the permissions on the resource" do
+      @ability.cannot :update, String
+      @ability.can :read, String
+      @ability.can_any?([:destroy, :create], String).should be_false
+    end
+
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil
