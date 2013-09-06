@@ -1,4 +1,4 @@
-source "http://rubygems.org"
+source "https://rubygems.org"
 
 case ENV["MODEL_ADAPTER"]
 when nil, "active_record"
