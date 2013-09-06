@@ -99,7 +99,7 @@ module CanCan
       # [:+id_param+]
       #   Find using a param key other than :id. For example:
       #
-      #     load_resource :id_key => :url # will use find(params[:url])
+      #     load_resource :id_param => :url # will use find(params[:url])
       #
       # [:+collection+]
       #   Specify which actions are resource collection actions in addition to :+index+. This
