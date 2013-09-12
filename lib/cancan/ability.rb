@@ -68,6 +68,35 @@ module CanCan
       !can?(*args)
     end
 
+    # Check if the user has any of the permissions on any of the resources
+    #
+    # can_any? [:create, :destroy], [Project, User]
+    #
+    # Return true if any of the actions is accepted for any of the
+    # resources. You can check for one action in several resources, like:
+    #
+    # can_any? :update, [Project, User]
+    #
+    # Return true if the user has :update permission on Project or on User
+    # Or, you can check for several actions on a single resource.
+    #
+    # can_any? [:update, :destroy], Project
+    #
+    # Return true if the current user any of the permissions on the given
+    # resource.
+    #
+    # You can also see the RSpec Matchers on the #can_any? section.
+    def can_any?(action, subject, *extra_args)
+      subject = [subject] unless subject.is_a? Array
+      action = [action] unless action.is_a? Array
+      subject.map do |s|
+        action.each do |a|
+          return true if can?(a, s, *extra_args)
+        end
+      end
+      subject.include?(true)
+    end
+
     # Defines which abilities are allowed using two arguments. The first one is the action
     # you're setting the permission for, the second one is the class of object you're setting it on.
     #
