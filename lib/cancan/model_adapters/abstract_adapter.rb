@@ -17,6 +17,12 @@ module CanCan
 
       # Override if you need custom find behavior
       def self.find(model_class, id)
+
+        # Nasty hack to properly work with FriendlyId 5 due to refactoring
+        # FriendlyId 5 does not overwrite the find() method on ActiveRecord anymore
+        # Hence friendly urls are not properly parsed
+        model_class.friendly.find(id)
+      rescue
         model_class.find(id)
       end
 
