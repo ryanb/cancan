@@ -73,8 +73,8 @@ module CanCan
                 value.delete(k)
                 nested[k] = v
               else
-                name = model_class.reflect_on_association(name).table_name.to_sym
-                result_hash[name] = value
+                assoc = model_class.reflect_on_association(name).table_name.to_sym
+                result_hash[assoc] = value
               end
               nested
             end
