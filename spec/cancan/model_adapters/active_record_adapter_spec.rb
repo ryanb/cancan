@@ -6,6 +6,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
   describe CanCan::ModelAdapters::ActiveRecordAdapter do
     with_model :category do
       table do |t|
+        t.string "name"
         t.boolean "visible"
       end
       model do
@@ -157,6 +158,15 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
         false
       end
       lambda { Article.accessible_by(@ability) }.should raise_error(CanCan::Error)
+    end
+
+    it "should support more than one deeply nested conditions" do
+      @ability.can :read, Comment, :article => {
+        :category => {
+          :name => 'foo', :visible => true
+        }
+      }
+      expect { Comment.accessible_by(@ability) }.to_not raise_error
     end
 
     it "should not allow to check ability on object against SQL conditions without block" do
