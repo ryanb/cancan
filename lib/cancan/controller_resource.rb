@@ -128,14 +128,22 @@ module CanCan
 
     def id_param
       if @options[:id_param]
-        @params[@options[:id_param]]
+        @params[id_param_name]
       else
         @params[parent? ? :"#{name}_id" : :id]
       end.to_s
     end
 
+    def id_param_name
+      if @options[:id_param].kind_of?Array
+        @options[:id_param].find { |id_param| @params.include?(id_param) }
+      else
+        @options[:id_param]
+      end
+    end
+
     def member_action?
-      new_actions.include?(@params[:action].to_sym) || @options[:singleton] || ( (@params[:id] || @params[@options[:id_param]]) && !collection_actions.include?(@params[:action].to_sym))
+      new_actions.include?(@params[:action].to_sym) || @options[:singleton] || ( (@params[:id] || @params[id_param_name]) && !collection_actions.include?(@params[:action].to_sym))
     end
 
     # Returns the class used for this resource. This can be overriden by the :class option.
