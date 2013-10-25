@@ -107,7 +107,7 @@ module CanCan
             @model_class.where(*(@rules.map(&:conditions))).joins(joins)
           end
         else
-          @model_class.scoped(:conditions => conditions, :joins => joins)
+          @model_class.all(:conditions => conditions, :joins => joins)
         end
       end
 
