@@ -247,6 +247,14 @@ describe CanCan::ControllerResource do
     @controller.instance_variable_get(:@project).should == project
   end
 
+  it "should not load parent resource if the id param isn't given" do
+    project = Project.create!
+    @params.merge!(:controller => "categories", :action => "index")
+    resource = CanCan::ControllerResource.new(@controller, :project)
+    resource.load_resource
+    @controller.instance_variable_get(:@project).should be_nil
+  end
+
   it "should load resource through the association of another parent resource using instance variable" do
     @params.merge!(:action => "show", :id => "123")
     category = Object.new
