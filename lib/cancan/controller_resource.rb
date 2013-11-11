@@ -224,7 +224,11 @@ module CanCan
     end
 
     def resource_params_by_namespaced_name
-      @params[extract_key(namespaced_name)]
+      if @params_method && @controller.respond_to?(@params_method)
+        @controller.send(@params_method)
+      else
+        @params[extract_key(namespaced_name)]
+      end
     end
 
     def namespace
