@@ -488,4 +488,14 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should_not raise_error
     @controller.instance_variable_get(:@project).should be_nil
   end
+
+  context "given load_and_authorize_resource has an attributes method name" do
+    it "should use attributes method to acquire resource params" do
+      @params.merge!(:controller => "project", :action => "create")
+      sanitized = {:first => 1, :second => 2}
+      stub(@controller).attributes_method {sanitized}
+      resource = CanCan::ControllerResource.new(@controller, {:attributes => :attributes_method})
+      resource.send("resource_params_by_namespaced_name").should eq(sanitized)
+    end
+  end
 end
