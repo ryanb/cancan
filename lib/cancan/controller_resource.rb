@@ -16,6 +16,7 @@ module CanCan
       @params = controller.params
       @options = args.extract_options!
       @name = args.first
+      @params_method = @options[:attributes] && @options[:attributes].to_sym
       raise CanCan::ImplementationRemoved, "The :nested option is no longer supported, instead use :through with separate load/authorize call." if @options[:nested]
       raise CanCan::ImplementationRemoved, "The :name option is no longer supported, instead pass the name as the first argument." if @options[:name]
       raise CanCan::ImplementationRemoved, "The :resource option has been renamed back to :class, use false if no class." if @options[:resource]
