@@ -224,9 +224,9 @@ module CanCan
     end
 
     def resource_params_by_namespaced_name
-      if @params_method && @controller.respond_to?(@params_method)
+      begin
         @controller.send(@params_method)
-      else
+      rescue
         @params[extract_key(namespaced_name)]
       end
     end
