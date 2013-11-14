@@ -9,6 +9,7 @@ describe CanCan::InheritedResource do
     stub(@controller).params { @params }
     stub(@controller).current_ability { @ability }
     stub(@controller_class).cancan_skipper { {:authorize => {}, :load => {}} }
+    stub(@controller).resources_configuration { { :self => { :request_name => 'project' } } }
   end
 
   it "show should load resource through @controller.resource" do

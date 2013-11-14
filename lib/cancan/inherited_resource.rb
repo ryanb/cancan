@@ -16,5 +16,9 @@ module CanCan
     def resource_base
       @controller.send :end_of_association_chain
     end
+    
+    def name_from_controller
+      @controller.send(:resources_configuration).fetch(:self).fetch(:request_name)
+    end
   end
 end
