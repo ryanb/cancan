@@ -163,8 +163,8 @@ module CanCan
     #   ability.can :destroy, Hash                # specifically allow destroying Hashes
     #   ability.can? :destroy, Hash  # => true    # true returned, since we specifically allowed it
     #
-    def strict_class_access= bool
-      @strict_class_access = bool
+    def strict_class_access
+      @strict_class_access = true
     end
 
     # Alias one or more actions into another one.

@@ -66,7 +66,7 @@ describe CanCan::Ability do
 
   it "should not allow methods by default when strict class access was enabled" do
     @block_called = false
-    @ability.strict_class_access = true
+    @ability.strict_class_access
     @ability.can :destroy, :all do |object|
       @block_called = true
       false
@@ -77,7 +77,7 @@ describe CanCan::Ability do
 
   it "should allow granted method when strict class access was enabled" do
     @block_called = false
-    @ability.strict_class_access = true
+    @ability.strict_class_access
     @ability.can :destroy, :all do |object|
       @block_called = true
       false
