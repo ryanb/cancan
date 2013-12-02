@@ -127,11 +127,15 @@ module CanCan
     end
 
     def id_param
+      @params[id_param_key].to_s if @params[id_param_key]
+    end
+
+    def id_param_key
       if @options[:id_param]
-        @params[@options[:id_param]]
+        @options[:id_param]
       else
-        @params[parent? ? :"#{name}_id" : :id]
-      end.to_s
+        parent? ? :"#{name}_id" : :id
+      end
     end
 
     def member_action?

@@ -407,6 +407,12 @@ describe CanCan::ControllerResource do
     resource.send(:id_param).class.should == String
   end
 
+  it "should id param return nil if param is nil" do
+    @params.merge!(:action => "show", :the_project => nil)
+    resource = CanCan::ControllerResource.new(@controller, :id_param => :the_project)
+    resource.send(:id_param).class.should == NilClass
+  end
+
   it "should load resource using custom find_by attribute" do
     project = Project.create!(:name => "foo")
     @params.merge!(:action => "show", :id => "foo")
