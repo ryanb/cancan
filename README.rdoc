@@ -1,4 +1,7 @@
-= CanCan {<img src="https://fury-badge.herokuapp.com/rb/cancan.png" alt="Gem Version" />}[http://badge.fury.io/rb/cancan] {<img src="https://secure.travis-ci.org/ryanb/cancan.png?branch=master" />}[http://travis-ci.org/ryanb/cancan] {<img src="https://codeclimate.com/badge.png" />}[https://codeclimate.com/github/ryanb/cancan]
+= CanCan
+{<img src="https://fury-badge.herokuapp.com/rb/cancan.png" alt="Gem Version" />}[http://badge.fury.io/rb/cancan] 
+{<img src="https://secure.travis-ci.org/ryanb/cancan.png?branch=master" />}[http://travis-ci.org/ryanb/cancan] 
+{<img src="https://codeclimate.com/github/ryanb/cancan.png" />}[https://codeclimate.com/github/ryanb/cancan]
 
 Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
@@ -31,7 +34,7 @@ User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 
 
   rails g cancan:ability
 
-In Rails 2.3, just add a new class in `app/models/ability.rb` with the folowing contents:
+In Rails 2.3, just add a new class in `app/models/ability.rb` with the following contents:
 
   class Ability
     include CanCan::Ability
