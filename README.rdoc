@@ -68,6 +68,7 @@ If you try visiting any of the project pages at this point you will see a <tt>Ca
   end
 
 However this can get tedious. Instead CanCan provides a +load_and_authorize_resource+ method to load the <tt>@project</tt> instance in every controller action and authorize it.
+Please note that +load_and_authorize_resource+ does not work with Rails 4 strong parameters, use +authorize_resource+ instead.
 
   class ProjectsController < ApplicationController
     load_and_authorize_resource
