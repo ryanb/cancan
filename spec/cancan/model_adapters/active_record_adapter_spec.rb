@@ -326,5 +326,17 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       # adapter.matches_condition?(article1, :name.nlike, "%helo%").should be_true
       # adapter.matches_condition?(article1, :name.nlike, "%ello worl%").should be_false
     end
+
+    it 'should not execute a scope when checking ability on the class' do
+      relation = Article.where(:secret => true)
+      @ability.can :read, Article, relation do |article|
+        article.secret == true
+      end
+
+      # Ensure the ActiveRecord::Relation condition does not trigger a count query
+      stub(relation).count { fail 'Unexpected scope execution.' }
+
+      expect { @ability.can? :read, Article }.not_to raise_error
+    end
   end
 end
