@@ -177,7 +177,9 @@ module CanCan
     def resource_base
       if @options[:through]
         if parent_resource
-          @options[:singleton] ? resource_class : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
+          base = @options[:singleton] ? resource_class : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
+          base = base.scoped if base.respond_to? :scoped
+          base
         elsif @options[:shallow]
           resource_class
         else
