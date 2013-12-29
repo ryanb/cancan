@@ -247,11 +247,11 @@ module CanCan
     end
 
     def collection_actions
-      [:index] + [@options[:collection]].flatten
+      [:index] + Array(@options[:collection])
     end
 
     def new_actions
-      [:new, :create] + [@options[:new]].flatten
+      [:new, :create] + Array(@options[:new])
     end
 
     private
