@@ -45,7 +45,7 @@ module CanCan
     #
     # This makes testing a user's abilities very easy.
     #
-    #   def test "user can only destroy projects which he owns"
+    #   test "user can only destroy projects which he owns" do
     #     user = User.new
     #     ability = Ability.new(user)
     #     assert ability.can?(:destroy, Project.new(:user => user))
