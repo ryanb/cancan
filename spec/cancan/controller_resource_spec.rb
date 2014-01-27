@@ -408,7 +408,7 @@ describe CanCan::ControllerResource do
   it "should id param return nil if param is nil" do
     @params.merge!(:action => "show", :the_project => nil)
     resource = CanCan::ControllerResource.new(@controller, :id_param => :the_project)
-    resource.send(:id_param).class.should == NilClass
+    expect(resource.send(:id_param)).to be_nil
   end
 
   it "loads resource using custom find_by attribute" do

@@ -119,7 +119,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       article1 = Article.create!(:published => true)
       article2 = Article.create!(:published => false)
       article3 = Article.create!(:published => false, :category => Category.create!(:visible => true))
-      Article.accessible_by(@ability).should == [article1, article3]
+      expect(Article.accessible_by(@ability)).to eq([article1, article3])
     end
 
     it "should only read categories once even if they have multiple articles" do
@@ -128,7 +128,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       category = Category.create!
       Article.create!(:published => true, :category => category)
       Article.create!(:published => true, :category => category)
-      Category.accessible_by(@ability).should == [category]
+      expect(Category.accessible_by(@ability)).to eq([category])
     end
 
     it "only reads comments for visible categories through articles" do
@@ -350,8 +350,7 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
         article.secret == true
       end
 
-      # Ensure the ActiveRecord::Relation condition does not trigger a count query
-      stub(relation).count { fail 'Unexpected scope execution.' }
+      relation.stub(:count).and_raise('Unexpected scope execution.')
 
       expect { @ability.can? :read, Article }.not_to raise_error
     end
