@@ -220,7 +220,9 @@ module CanCan
     end
 
     def resource_params
-      if @options[:class]
+      if param_actions.include?(@params[:action].to_sym) && params_method.present?
+        return @controller.send(params_method)
+      elsif @options[:class]
         params_key = extract_key(@options[:class])
         return @params[params_key] if @params[params_key]
       end
@@ -230,6 +232,19 @@ module CanCan
 
     def resource_params_by_namespaced_name
       @params[extract_key(namespaced_name)]
+    end
+
+    def params_method
+      params_methods.each do |method|
+        return method if @controller.respond_to?(method, true)
+      end
+      nil
+    end
+
+    def params_methods
+      methods = ["#{@params[:action]}_params".to_sym, "#{name}_params".to_sym, :resource_params]
+      methods.unshift(@options[:param_method]) if @options[:param_method].present?
+      methods
     end
 
     def namespace
@@ -256,6 +271,10 @@ module CanCan
 
     def new_actions
       [:new, :create] + Array(@options[:new])
+    end
+
+    def param_actions
+      [:create, :update]
     end
 
     private
