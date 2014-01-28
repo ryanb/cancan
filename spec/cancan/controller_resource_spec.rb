@@ -497,9 +497,9 @@ describe CanCan::ControllerResource do
 
     it "only calls the santitize method with actions matching param_actions" do
       @params.merge!(:controller => "project", :action => "update")
-      @controller.stub(:resource_params).and_return(resource: 'params')
+      @controller.stub(:resource_params).and_return(:resource => 'params')
       resource = CanCan::ControllerResource.new(@controller)
-      resource.stub(param_actions: [:create])
+      resource.stub(:param_actions => [:create])
 
       @controller.should_not_receive(:send).with(:resource_params)
       resource.send("resource_params")
@@ -507,39 +507,47 @@ describe CanCan::ControllerResource do
 
     it "uses the specified option for santitizing input" do
       @params.merge!(:controller => "project", :action => "create")
-      @controller.stub(:resource_params).and_return(resource: 'params')
-      @controller.stub(:project_params).and_return(model: 'params')
-      @controller.stub(:create_params).and_return(create: 'params')
-      @controller.stub(:custom_params).and_return(custom: 'params')
-      resource = CanCan::ControllerResource.new(@controller, {param_method: :custom_params})
-      expect(resource.send("resource_params")).to eq(custom: 'params')
+      @controller.stub(:resource_params).and_return(:resource => 'params')
+      @controller.stub(:project_params).and_return(:model => 'params')
+      @controller.stub(:create_params).and_return(:create => 'params')
+      @controller.stub(:custom_params).and_return(:custom => 'params')
+      resource = CanCan::ControllerResource.new(@controller, {:param_method => :custom_params})
+      expect(resource.send("resource_params")).to eq(:custom => 'params')
     end
 
     it "prefers to use the create_params method for santitizing input" do
       @params.merge!(:controller => "project", :action => "create")
-      @controller.stub(:resource_params).and_return(resource: 'params')
-      @controller.stub(:project_params).and_return(model: 'params')
-      @controller.stub(:create_params).and_return(create: 'params')
-      @controller.stub(:custom_params).and_return(custom: 'params')
+      @controller.stub(:resource_params).and_return(:resource => 'params')
+      @controller.stub(:project_params).and_return(:model => 'params')
+      @controller.stub(:create_params).and_return(:create => 'params')
+      @controller.stub(:custom_params).and_return(:custom => 'params')
       resource = CanCan::ControllerResource.new(@controller)
-      expect(resource.send("resource_params")).to eq(create: 'params')
+      expect(resource.send("resource_params")).to eq(:create => 'params')
+    end
+
+    it "uses the proper action param based on the action" do
+      @params.merge!(:controller => "project", :action => "update")
+      @controller.stub(:create_params).and_return(:create => 'params')
+      @controller.stub(:update_params).and_return(:update => 'params')
+      resource = CanCan::ControllerResource.new(@controller)
+      expect(resource.send("resource_params")).to eq(:update => 'params')
     end
 
     it "prefers to use the <model_name>_params method for santitizing input if create is not found" do
       @params.merge!(:controller => "project", :action => "create")
-      @controller.stub(:resource_params).and_return(resource: 'params')
-      @controller.stub(:project_params).and_return(model: 'params')
-      @controller.stub(:custom_params).and_return(custom: 'params')
+      @controller.stub(:resource_params).and_return(:resource => 'params')
+      @controller.stub(:project_params).and_return(:model => 'params')
+      @controller.stub(:custom_params).and_return(:custom => 'params')
       resource = CanCan::ControllerResource.new(@controller)
-      expect(resource.send("resource_params")).to eq(model: 'params')
+      expect(resource.send("resource_params")).to eq(:model => 'params')
     end
 
     it "prefers to use the resource_params method for santitizing input if create or model is not found" do
       @params.merge!(:controller => "project", :action => "create")
-      @controller.stub(:resource_params).and_return(resource: 'params')
-      @controller.stub(:custom_params).and_return(custom: 'params')
+      @controller.stub(:resource_params).and_return(:resource => 'params')
+      @controller.stub(:custom_params).and_return(:custom => 'params')
       resource = CanCan::ControllerResource.new(@controller)
-      expect(resource.send("resource_params")).to eq(resource: 'params')
+      expect(resource.send("resource_params")).to eq(:resource => 'params')
     end
   end
 end
