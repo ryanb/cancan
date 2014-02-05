@@ -139,10 +139,10 @@ module CanCan
       #
       #   class BooksController < ApplicationController
       #     authorize_resource :author
-      #     authorize_resource :book
+      #     authorize_resource :show
       #   end
       #
-      # Here it will authorize :+show+, @+author+ on every action before authorizing the book.
+      # Here it will authorize @+author+, @+show+ on every action before authorizing the book.
       #
       # That first argument is optional and will default to the singular name of the controller.
       # A hash of options (see below) can also be passed to this method to further customize it.
