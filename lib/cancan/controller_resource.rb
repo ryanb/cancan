@@ -46,20 +46,23 @@ module CanCan
       @options.has_key?(:parent) ? @options[:parent] : @name && @name != name_from_controller.to_sym
     end
 
-    def skip?(behavior) # This could probably use some refactoring
+    def skip?(behavior)
       options = @controller.class.cancan_skipper[behavior][@name]
-      if options.nil?
-        false
-      elsif options == {}
-        true
-      elsif options[:except] && ![options[:except]].flatten.include?(@params[:action].to_sym)
-        true
-      elsif [options[:only]].flatten.include?(@params[:action].to_sym)
-        true
-      end
+      return false if options.nil?
+      return true  if options == {}
+      return true  if options[:except] && excluded?(@params[:action], options[:except])
+      return true  if options[:only]   && included?(@params[:action], options[:only])
     end
 
     protected
+
+    def included?(item, collection)
+      Array(collection).flatten.compact.include?(item.to_sym)
+    end
+
+    def excluded?(*args)
+      !included?(*args)
+    end
 
     def load_resource_instance
       if !parent? && new_actions.include?(@params[:action].to_sym)
@@ -101,21 +104,11 @@ module CanCan
     end
 
     def find_resource
-      if @options[:singleton] && parent_resource.respond_to?(name)
-        parent_resource.send(name)
-      else
-        if @options[:find_by]
-          if resource_base.respond_to? "find_by_#{@options[:find_by]}!"
-            resource_base.send("find_by_#{@options[:find_by]}!", id_param)
-          elsif resource_base.respond_to? "find_by"
-            resource_base.send("find_by", { @options[:find_by].to_sym => id_param })
-          else
-            resource_base.send(@options[:find_by], id_param)
-          end
-        else
-          adapter.find(resource_base, id_param)
-        end
-      end
+      return parent_resource.send(name) if @options[:singleton] && parent_resource.respond_to?(name)
+      return adapter.find(resource_base, id_param) unless @options[:find_by]
+      return resource_base.send("find_by_#{@options[:find_by]}!", id_param) if resource_base.respond_to? "find_by_#{@options[:find_by]}!"
+      return resource_base.send("find_by", { @options[:find_by].to_sym => id_param }) if resource_base.respond_to? "find_by"
+      return resource_base.send(@options[:find_by], id_param)
     end
 
     def adapter
@@ -175,17 +168,26 @@ module CanCan
     # If the :shallow option is passed it will use the resource_class if there's no parent
     # If the :singleton option is passed it won't use the association because it needs to be handled later.
     def resource_base
-      if @options[:through]
-        if parent_resource
-          @options[:singleton] ? resource_class : parent_resource.send(@options[:through_association] || name.to_s.pluralize)
-        elsif @options[:shallow]
-          resource_class
-        else
-          raise AccessDenied.new(nil, authorization_action, resource_class) # maybe this should be a record not found error instead?
-        end
-      else
-        resource_class
-      end
+      return resource_class if !through_association? or (!parent_resource and shallow?) or (parent_resource and singleton?)
+      return resource_through_association if (parent_resource and !singleton?)
+      
+      raise AccessDenied.new(nil, authorization_action, resource_class) # maybe this should be a record not found error instead?
+    end
+
+    def shallow?
+      !!@options[:shallow]
+    end
+
+    def singleton?
+      !!@options[:singleton]
+    end
+
+    def through_association?
+      !!@options[:through]
+    end
+
+    def resource_through_association
+      parent_resource.send(@options[:through_association] || name.to_s.pluralize)
     end
 
     def parent_name
