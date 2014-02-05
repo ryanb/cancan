@@ -4,7 +4,7 @@ module CanCan
   # helpful methods to determine permission checking and conditions hash generation.
   class Rule # :nodoc:
     attr_reader :base_behavior, :subjects, :actions, :conditions
-    attr_writer :expanded_actions
+    attr_accessor :expanded_actions
 
     # The first argument when initializing is the base_behavior which is a true/false
     # value. True for "can" and false for "cannot". The next two arguments are the action
