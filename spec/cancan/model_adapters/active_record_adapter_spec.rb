@@ -254,6 +254,13 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       @ability.model_adapter(Article, :read).joins.should == [{:project=>[:comments]}]
     end
 
+    it "should not mark object as readonly when nested conditions specified" do
+      category = Category.create!(:visible => true)
+      @ability.can :read, Article, :category => { :visible => true }
+      Article.create!(:category => category)
+      Article.accessible_by(@ability).first.should_not be_readonly
+    end
+
     it "should merge :all conditions with other conditions" do
       user = User.create!
       article = Article.create!(:user => user)
