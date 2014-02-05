@@ -134,4 +134,25 @@ describe CanCan::ControllerAdditions do
     @controller_class.cancan_skipper[:load][:project].should == {:only => [:index, :show]}
     @controller_class.cancan_skipper[:authorize][:project].should == {:only => [:index, :show]}
   end
+
+  describe "when inheriting" do
+    before(:each) do
+      @super_controller_class = Class.new
+      @super_controller = @super_controller_class.new
+      mock(@super_controller_class).helper_method(:can?, :cannot?, :current_ability)
+      @super_controller_class.send(:include, CanCan::ControllerAdditions)
+      @super_controller_class.send(:skip_load_and_authorize_resource, :only => [:index, :show])
+
+      @sub_controller_class = Class.new(@super_controller_class)
+      @sub_controller = @sub_controller_class.new
+    end
+
+    it "sub_classes should skip the same behaviors and actions as super_classes" do
+      @super_controller_class.cancan_skipper[:load][nil].should == {:only => [:index, :show]}
+      @super_controller_class.cancan_skipper[:authorize][nil].should == {:only => [:index, :show]}
+
+      @sub_controller_class.cancan_skipper[:load][nil].should == {:only => [:index, :show]}
+      @sub_controller_class.cancan_skipper[:authorize][nil].should == {:only => [:index, :show]}
+    end
+  end
 end
