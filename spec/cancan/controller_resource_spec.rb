@@ -239,6 +239,11 @@ describe CanCan::ControllerResource do
     resource.send(:resource_class).should == Section
   end
 
+  it "should have the specified resource_class if Proc is passed to load_resource" do
+    resource = CanCan::ControllerResource.new(@controller, :class => Proc.new { |controller| CanCan::ControllerResource })
+    resource.send(:resource_class).should == resource.class
+  end
+
   it "should load parent resource through proper id parameter" do
     project = Project.create!
     @params.merge!(:controller => "categories", :action => "index", :project_id => project.id)
