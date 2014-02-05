@@ -2,37 +2,36 @@ require "spec_helper"
 
 describe CanCan::Ability do
   before(:each) do
-    @ability = Object.new
-    @ability.extend(CanCan::Ability)
+    (@ability = double).extend(CanCan::Ability)
   end
 
-  it "should be able to :read anything" do
+  it "is able to :read anything" do
     @ability.can :read, :all
-    @ability.can?(:read, String).should be_true
-    @ability.can?(:read, 123).should be_true
+    expect(@ability.can?(:read, String)).to be_true
+    expect(@ability.can?(:read, 123)).to be_true
   end
 
-  it "should not have permission to do something it doesn't know about" do
-    @ability.can?(:foodfight, String).should be_false
+  it "does not have permission to do something it doesn't know about" do
+    expect(@ability.can?(:foodfight, String)).to be_false
   end
 
-  it "should pass true to `can?` when non false/nil is returned in block" do
+  it "passes true to `can?` when non false/nil is returned in block" do
     @ability.can :read, :all
     @ability.can :read, Symbol do |sym|
       "foo" # TODO test that sym is nil when no instance is passed
     end
-    @ability.can?(:read, :some_symbol).should == true
+    expect(@ability.can?(:read, :some_symbol)).to be_true
   end
 
-  it "should pass nil to a block when no instance is passed" do
+  it "passes nil to a block when no instance is passed" do
     @ability.can :read, Symbol do |sym|
-      sym.should be_nil
+      expect(sym).to be_nil
       true
     end
-    @ability.can?(:read, Symbol).should be_true
+    expect(@ability.can?(:read, Symbol)).to be_true
   end
 
-  it "should pass to previous rule, if block returns false or nil" do
+  it "passes to previous rule, if block returns false or nil" do
     @ability.can :read, Symbol
     @ability.can :read, Integer do |i|
       i < 5
@@ -40,364 +39,363 @@ describe CanCan::Ability do
     @ability.can :read, Integer do |i|
       i > 10
     end
-    @ability.can?(:read, Symbol).should be_true
-    @ability.can?(:read, 11).should be_true
-    @ability.can?(:read, 1).should be_true
-    @ability.can?(:read, 6).should be_false
+    expect(@ability.can?(:read, Symbol)).to be_true
+    expect(@ability.can?(:read, 11)).to be_true
+    expect(@ability.can?(:read, 1)).to be_true
+    expect(@ability.can?(:read, 6)).to be_false
   end
 
-  it "should not pass class with object if :all objects are accepted" do
+  it "does not pass class with object if :all objects are accepted" do
     @ability.can :preview, :all do |object|
-      object.should == 123
+      expect(object).to eq(123)
       @block_called = true
     end
     @ability.can?(:preview, 123)
-    @block_called.should be_true
+    expect(@block_called).to be_true
   end
 
-  it "should not call block when only class is passed, only return true" do
+  it "does not call block when only class is passed, only return true" do
     @block_called = false
     @ability.can :preview, :all do |object|
       @block_called = true
     end
-    @ability.can?(:preview, Hash).should be_true
-    @block_called.should be_false
+    expect(@ability.can?(:preview, Hash)).to be_true
+    expect(@block_called).to be_false
   end
 
-  it "should pass only object for global manage actions" do
+  it "passes only object for global manage actions" do
     @ability.can :manage, String do |object|
-      object.should == "foo"
+      expect(object).to eq("foo")
       @block_called = true
     end
-    @ability.can?(:stuff, "foo").should
-    @block_called.should be_true
+    expect(@ability.can?(:stuff, "foo")).to be_true
+    expect(@block_called).to be_true
   end
 
-  it "should alias update or destroy actions to modify action" do
+  it "makes alias for update or destroy actions to modify action" do
     @ability.alias_action :update, :destroy, :to => :modify
     @ability.can :modify, :all
-    @ability.can?(:update, 123).should be_true
-    @ability.can?(:destroy, 123).should be_true
+    expect(@ability.can?(:update, 123)).to be_true
+    expect(@ability.can?(:destroy, 123)).to be_true
   end
 
-  it "should allow deeply nested aliased actions" do
+  it "allows deeply nested aliased actions" do
     @ability.alias_action :increment, :to => :sort
     @ability.alias_action :sort, :to => :modify
     @ability.can :modify, :all
-    @ability.can?(:increment, 123).should be_true
+    expect(@ability.can?(:increment, 123)).to be_true
   end
 
-  it "should raise an Error if alias target is an exist action" do
-    lambda{ @ability.alias_action :show, :to => :show }.should raise_error(CanCan::Error, "You can't specify target (show) as alias because it is real action name")
+  it "raises an Error if alias target is an exist action" do
+    expect { @ability.alias_action :show, :to => :show }.to raise_error(CanCan::Error, "You can't specify target (show) as alias because it is real action name")
   end
 
-  it "should always call block with arguments when passing no arguments to can" do
+  it "always calls block with arguments when passing no arguments to can" do
     @ability.can do |action, object_class, object|
-      action.should == :foo
-      object_class.should == 123.class
-      object.should == 123
+      expect(action).to eq(:foo)
+      expect(object_class).to eq(123.class)
+      expect(object).to eq(123)
       @block_called = true
     end
     @ability.can?(:foo, 123)
-    @block_called.should be_true
+    expect(@block_called).to be_true
   end
 
-  it "should pass nil to object when comparing class with can check" do
+  it "passes nil to object when comparing class with can check" do
     @ability.can do |action, object_class, object|
-      action.should == :foo
-      object_class.should == Hash
-      object.should be_nil
+      expect(action).to eq(:foo)
+      expect(object_class).to eq(Hash)
+      expect(object).to be_nil
       @block_called = true
     end
     @ability.can?(:foo, Hash)
-    @block_called.should be_true
+    expect(@block_called).to be_true
   end
 
-  it "should automatically alias index and show into read calls" do
+  it "automatically makes alias for index and show into read calls" do
     @ability.can :read, :all
-    @ability.can?(:index, 123).should be_true
-    @ability.can?(:show, 123).should be_true
+    expect(@ability.can?(:index, 123)).to be_true
+    expect(@ability.can?(:show, 123)).to be_true
   end
 
-  it "should automatically alias new and edit into create and update respectively" do
+  it "automatically makes alias for new and edit into create and update respectively" do
     @ability.can :create, :all
     @ability.can :update, :all
-    @ability.can?(:new, 123).should be_true
-    @ability.can?(:edit, 123).should be_true
+    expect(@ability.can?(:new, 123)).to be_true
+    expect(@ability.can?(:edit, 123)).to be_true
   end
 
-  it "should not respond to prepare (now using initialize)" do
-    @ability.should_not respond_to(:prepare)
+  it "does not respond to prepare (now using initialize)" do
+    expect(@ability).to_not respond_to(:prepare)
   end
 
-  it "should offer cannot? method which is simply invert of can?" do
-    @ability.cannot?(:tie, String).should be_true
+  it "offers cannot? method which is simply invert of can?" do
+    expect(@ability.cannot?(:tie, String)).to be_true
   end
 
-  it "should be able to specify multiple actions and match any" do
+  it "is able to specify multiple actions and match any" do
     @ability.can [:read, :update], :all
-    @ability.can?(:read, 123).should be_true
-    @ability.can?(:update, 123).should be_true
-    @ability.can?(:count, 123).should be_false
+    expect(@ability.can?(:read, 123)).to be_true
+    expect(@ability.can?(:update, 123)).to be_true
+    expect(@ability.can?(:count, 123)).to be_false
   end
 
-  it "should be able to specify multiple classes and match any" do
+  it "is able to specify multiple classes and match any" do
     @ability.can :update, [String, Range]
-    @ability.can?(:update, "foo").should be_true
-    @ability.can?(:update, 1..3).should be_true
-    @ability.can?(:update, 123).should be_false
+    expect(@ability.can?(:update, "foo")).to be_true
+    expect(@ability.can?(:update, 1..3)).to be_true
+    expect(@ability.can?(:update, 123)).to be_false
   end
 
-  it "should support custom objects in the rule" do
+  it "supports custom objects in the rule" do
     @ability.can :read, :stats
-    @ability.can?(:read, :stats).should be_true
-    @ability.can?(:update, :stats).should be_false
-    @ability.can?(:read, :nonstats).should be_false
+    expect(@ability.can?(:read, :stats)).to be_true
+    expect(@ability.can?(:update, :stats)).to be_false
+    expect(@ability.can?(:read, :nonstats)).to be_false
   end
 
-  it "should check ancestors of class" do
+  it "checks ancestors of class" do
     @ability.can :read, Numeric
-    @ability.can?(:read, Integer).should be_true
-    @ability.can?(:read, 1.23).should be_true
-    @ability.can?(:read, "foo").should be_false
+    expect(@ability.can?(:read, Integer)).to be_true
+    expect(@ability.can?(:read, 1.23)).to be_true
+    expect(@ability.can?(:read, "foo")).to be_false
   end
 
-  it "should support 'cannot' method to define what user cannot do" do
+  it "supports 'cannot' method to define what user cannot do" do
     @ability.can :read, :all
     @ability.cannot :read, Integer
-    @ability.can?(:read, "foo").should be_true
-    @ability.can?(:read, 123).should be_false
+    expect(@ability.can?(:read, "foo")).to be_true
+    expect(@ability.can?(:read, 123)).to be_false
   end
 
-  it "should pass to previous rule, if block returns false or nil" do
+  it "passes to previous rule, if block returns false or nil" do
     @ability.can :read, :all
     @ability.cannot :read, Integer do |int|
       int > 10 ? nil : ( int > 5 )
     end
-    @ability.can?(:read, "foo").should be_true
-    @ability.can?(:read, 3).should be_true
-    @ability.can?(:read, 8).should be_false
-    @ability.can?(:read, 123).should be_true
+    expect(@ability.can?(:read, "foo")).to be_true
+    expect(@ability.can?(:read, 3)).to be_true
+    expect(@ability.can?(:read, 8)).to be_false
+    expect(@ability.can?(:read, 123)).to be_true
   end
 
-  it "should always return `false` for single cannot definition" do
+  it "always returns `false` for single cannot definition" do
     @ability.cannot :read, Integer do |int|
       int > 10 ? nil : ( int > 5 )
     end
-    @ability.can?(:read, "foo").should be_false
-    @ability.can?(:read, 3).should be_false
-    @ability.can?(:read, 8).should be_false
-    @ability.can?(:read, 123).should be_false
+    expect(@ability.can?(:read, "foo")).to be_false
+    expect(@ability.can?(:read, 3)).to be_false
+    expect(@ability.can?(:read, 8)).to be_false
+    expect(@ability.can?(:read, 123)).to be_false
   end
 
-  it "should pass to previous cannot definition, if block returns false or nil" do
+  it "passes to previous cannot definition, if block returns false or nil" do
     @ability.cannot :read, :all
     @ability.can :read, Integer do |int|
       int > 10 ? nil : ( int > 5 )
     end
-    @ability.can?(:read, "foo").should be_false
-    @ability.can?(:read, 3).should be_false
-    @ability.can?(:read, 10).should be_true
-    @ability.can?(:read, 123).should be_false
+    expect(@ability.can?(:read, "foo")).to be_false
+    expect(@ability.can?(:read, 3)).to be_false
+    expect(@ability.can?(:read, 10)).to be_true
+    expect(@ability.can?(:read, 123)).to be_false
   end
 
-  it "should append aliased actions" do
+  it "appends aliased actions" do
     @ability.alias_action :update, :to => :modify
     @ability.alias_action :destroy, :to => :modify
-    @ability.aliased_actions[:modify].should == [:update, :destroy]
+    expect(@ability.aliased_actions[:modify]).to eq([:update, :destroy])
   end
 
-  it "should clear aliased actions" do
+  it "clears aliased actions" do
     @ability.alias_action :update, :to => :modify
     @ability.clear_aliased_actions
-    @ability.aliased_actions[:modify].should be_nil
+    expect(@ability.aliased_actions[:modify]).to be_nil
   end
 
-  it "should pass additional arguments to block from can?" do
+  it "passes additional arguments to block from can?" do
     @ability.can :read, Integer do |int, x|
       int > x
     end
-    @ability.can?(:read, 2, 1).should be_true
-    @ability.can?(:read, 2, 3).should be_false
+    expect(@ability.can?(:read, 2, 1)).to be_true
+    expect(@ability.can?(:read, 2, 3)).to be_false
   end
 
-  it "should use conditions as third parameter and determine abilities from it" do
+  it "uses conditions as third parameter and determine abilities from it" do
     @ability.can :read, Range, :begin => 1, :end => 3
-    @ability.can?(:read, 1..3).should be_true
-    @ability.can?(:read, 1..4).should be_false
-    @ability.can?(:read, Range).should be_true
+    expect(@ability.can?(:read, 1..3)).to be_true
+    expect(@ability.can?(:read, 1..4)).to be_false
+    expect(@ability.can?(:read, Range)).to be_true
   end
 
-  it "should allow an array of options in conditions hash" do
+  it "allows an array of options in conditions hash" do
     @ability.can :read, Range, :begin => [1, 3, 5]
-    @ability.can?(:read, 1..3).should be_true
-    @ability.can?(:read, 2..4).should be_false
-    @ability.can?(:read, 3..5).should be_true
+    expect(@ability.can?(:read, 1..3)).to be_true
+    expect(@ability.can?(:read, 2..4)).to be_false
+    expect(@ability.can?(:read, 3..5)).to be_true
   end
 
-  it "should allow a range of options in conditions hash" do
+  it "allows a range of options in conditions hash" do
     @ability.can :read, Range, :begin => 1..3
-    @ability.can?(:read, 1..10).should be_true
-    @ability.can?(:read, 3..30).should be_true
-    @ability.can?(:read, 4..40).should be_false
+    expect(@ability.can?(:read, 1..10)).to be_true
+    expect(@ability.can?(:read, 3..30)).to be_true
+    expect(@ability.can?(:read, 4..40)).to be_false
   end
 
-  it "should allow nested hashes in conditions hash" do
+  it "allows nested hashes in conditions hash" do
     @ability.can :read, Range, :begin => { :to_i => 5 }
-    @ability.can?(:read, 5..7).should be_true
-    @ability.can?(:read, 6..8).should be_false
+    expect(@ability.can?(:read, 5..7)).to be_true
+    expect(@ability.can?(:read, 6..8)).to be_false
   end
 
-  it "should match any element passed in to nesting if it's an array (for has_many associations)" do
+  it "matches any element passed in to nesting if it's an array (for has_many associations)" do
     @ability.can :read, Range, :to_a => { :to_i => 3 }
-    @ability.can?(:read, 1..5).should be_true
-    @ability.can?(:read, 4..6).should be_false
+    expect(@ability.can?(:read, 1..5)).to be_true
+    expect(@ability.can?(:read, 4..6)).to be_false
   end
 
-  it "should accept a set as a condition value" do
-    mock(object_with_foo_2 = Object.new).foo { 2 }
-    mock(object_with_foo_3 = Object.new).foo { 3 }
+  it "accepts a set as a condition value" do
+    expect(object_with_foo_2 = double(:foo => 2)).to receive(:foo)
+    expect(object_with_foo_3 = double(:foo => 3)).to receive(:foo) 
     @ability.can :read, Object, :foo => [1, 2, 5].to_set
-    @ability.can?(:read, object_with_foo_2).should be_true
-    @ability.can?(:read, object_with_foo_3).should be_false
+    expect(@ability.can?(:read, object_with_foo_2)).to be_true
+    expect(@ability.can?(:read, object_with_foo_3)).to be_false
   end
 
-  it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
-    mock(object_with_foo = Object.new).foo { :bar }
+  it "does not match subjects return nil for methods that must match nested a nested conditions hash" do
+    expect(object_with_foo = double(:foo => :bar)).to receive(:foo)
     @ability.can :read, Array, :first => { :foo => :bar }
-    @ability.can?(:read, [object_with_foo]).should be_true
-    @ability.can?(:read, []).should be_false
+    expect(@ability.can?(:read, [object_with_foo])).to be_true
+    expect(@ability.can?(:read, [])).to be_false
   end
 
-  it "should match strings but not substrings specified in a conditions hash" do
+  it "matches strings but not substrings specified in a conditions hash" do
     @ability.can :read, String, :presence => "declassified"
-    @ability.can?(:read, "declassified").should be_true
-    @ability.can?(:read, "classified").should be_false
+    expect(@ability.can?(:read, "declassified")).to be_true
+    expect(@ability.can?(:read, "classified")).to be_false
   end
 
-  it "should not stop at cannot definition when comparing class" do
+  it "does not stop at cannot definition when comparing class" do
     @ability.can :read, Range
     @ability.cannot :read, Range, :begin => 1
-    @ability.can?(:read, 2..5).should be_true
-    @ability.can?(:read, 1..5).should be_false
-    @ability.can?(:read, Range).should be_true
+    expect(@ability.can?(:read, 2..5)).to be_true
+    expect(@ability.can?(:read, 1..5)).to be_false
+    expect(@ability.can?(:read, Range)).to be_true
   end
 
-  it "should stop at cannot definition when no hash is present" do
+  it "stops at cannot definition when no hash is present" do
     @ability.can :read, :all
     @ability.cannot :read, Range
-    @ability.can?(:read, 1..5).should be_false
-    @ability.can?(:read, Range).should be_false
+    expect(@ability.can?(:read, 1..5)).to be_false
+    expect(@ability.can?(:read, Range)).to be_false
   end
 
-  it "should allow to check ability for Module" do
+  it "allows to check ability for Module" do
     module B; end
     class A; include B; end
     @ability.can :read, B
-    @ability.can?(:read, A).should be_true
-    @ability.can?(:read, A.new).should be_true
+    expect(@ability.can?(:read, A)).to be_true
+    expect(@ability.can?(:read, A.new)).to be_true
   end
 
-  it "should pass nil to a block for ability on Module when no instance is passed" do
+  it "passes nil to a block for ability on Module when no instance is passed" do
     module B; end
     class A; include B; end
     @ability.can :read, B do |sym|
-      sym.should be_nil
+      expect(sym).to be_nil
       true
     end
-    @ability.can?(:read, B).should be_true
-    @ability.can?(:read, A).should be_true
+    expect(@ability.can?(:read, B)).to be_true
+    expect(@ability.can?(:read, A)).to be_true
   end
 
-  it "passing a hash of subjects should check permissions through association" do
+  it "checks permissions through association when passing a hash of subjects" do
     @ability.can :read, Range, :string => {:length => 3}
-    @ability.can?(:read, "foo" => Range).should be_true
-    @ability.can?(:read, "foobar" => Range).should be_false
-    @ability.can?(:read, 123 => Range).should be_true
+    expect(@ability.can?(:read, "foo" => Range)).to be_true
+    expect(@ability.can?(:read, "foobar" => Range)).to be_false
+    expect(@ability.can?(:read, 123 => Range)).to be_true
   end
 
-  it "passing a hash of subjects with multiple definitions should check permissions correctly" do
+  it "checks permissions correctly when passing a hash of subjects with multiple definitions" do
     @ability.can :read, Range, :string => {:length => 4}
     @ability.can [:create, :read], Range, :string => {:upcase => 'FOO'}
-    @ability.can?(:read, "foo" => Range).should be_true
-    @ability.can?(:read, "foobar" => Range).should be_false
-    @ability.can?(:read, 1234 => Range).should be_true
+    expect(@ability.can?(:read, "foo" => Range)).to be_true
+    expect(@ability.can?(:read, "foobar" => Range)).to be_false
+    expect(@ability.can?(:read, 1234 => Range)).to be_true
   end
 
-  it "should allow to check ability on Hash-like object" do
+  it "allows to check ability on Hash-like object" do
     class Container < Hash; end
     @ability.can :read, Container
-    @ability.can?(:read, Container.new).should be_true
+    expect(@ability.can?(:read, Container.new)).to be_true
   end
 
-  it "should have initial attributes based on hash conditions of 'new' action" do
+  it "has initial attributes based on hash conditions of 'new' action" do
     @ability.can :manage, Range, :foo => "foo", :hash => {:skip => "hashes"}
     @ability.can :create, Range, :bar => 123, :array => %w[skip arrays]
     @ability.can :new, Range, :baz => "baz", :range => 1..3
     @ability.cannot :new, Range, :ignore => "me"
-    @ability.attributes_for(:new, Range).should == {:foo => "foo", :bar => 123, :baz => "baz"}
+    expect(@ability.attributes_for(:new, Range)).to eq({:foo => "foo", :bar => 123, :baz => "baz"})
   end
 
-  it "should raise access denied exception if ability us unauthorized to perform a certain action" do
+  it "raises access denied exception if ability us unauthorized to perform a certain action" do
     begin
       @ability.authorize! :read, :foo, 1, 2, 3, :message => "Access denied!"
     rescue CanCan::AccessDenied => e
-      e.message.should == "Access denied!"
-      e.action.should == :read
-      e.subject.should == :foo
+      expect(e.message).to eq("Access denied!")
+      expect(e.action).to eq(:read)
+      expect(e.subject).to eq(:foo)
     else
       fail "Expected CanCan::AccessDenied exception to be raised"
     end
   end
 
-  it "should not raise access denied exception if ability is authorized to perform an action and return subject" do
+  it "does not raise access denied exception if ability is authorized to perform an action and return subject" do
     @ability.can :read, :foo
-    lambda {
-      @ability.authorize!(:read, :foo).should == :foo
-    }.should_not raise_error
+    expect {
+      expect(@ability.authorize!(:read, :foo)).to eq(:foo)
+    }.to_not raise_error
   end
 
-  it "should know when block is used in conditions" do
+  it "knows when block is used in conditions" do
     @ability.can :read, :foo
-    @ability.should_not have_block(:read, :foo)
+    expect(@ability).to_not have_block(:read, :foo)
     @ability.can :read, :foo do |foo|
       false
     end
-    @ability.should have_block(:read, :foo)
+    expect(@ability).to have_block(:read, :foo)
   end
 
-  it "should know when raw sql is used in conditions" do
+  it "knows when raw sql is used in conditions" do
     @ability.can :read, :foo
-    @ability.should_not have_raw_sql(:read, :foo)
+    expect(@ability).to_not have_raw_sql(:read, :foo)
     @ability.can :read, :foo, 'false'
-    @ability.should have_raw_sql(:read, :foo)
+    expect(@ability).to have_raw_sql(:read, :foo)
   end
 
-  it "should raise access denied exception with default message if not specified" do
+  it "raises access denied exception with default message if not specified" do
     begin
       @ability.authorize! :read, :foo
     rescue CanCan::AccessDenied => e
       e.default_message = "Access denied!"
-      e.message.should == "Access denied!"
+      expect(e.message).to eq("Access denied!")
     else
       fail "Expected CanCan::AccessDenied exception to be raised"
     end
   end
 
-  it "should determine model adapter class by asking AbstractAdapter" do
-    model_class = Object.new
-    adapter_class = Object.new
-    stub(CanCan::ModelAdapters::AbstractAdapter).adapter_class(model_class) { adapter_class }
-    stub(adapter_class).new(model_class, []) { :adapter_instance }
-    @ability.model_adapter(model_class, :read).should == :adapter_instance
+  it "determines model adapterO class by asking AbstractAdapter" do
+    adapter_class, model_class = double, double
+    allow(CanCan::ModelAdapters::AbstractAdapter).to receive(:adapter_class).with(model_class) { adapter_class }
+    allow(adapter_class).to receive(:new).with(model_class, []) { :adapter_instance }
+    expect(@ability.model_adapter(model_class, :read)).to eq(:adapter_instance)
   end
 
-  it "should raise an error when attempting to use a block with a hash condition since it's not likely what they want" do
-    lambda {
+  it "raises an error when attempting to use a block with a hash condition since it's not likely what they want" do
+    expect {
       @ability.can :read, Array, :published => true do
         false
       end
-    }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
+    }.to raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
   end
 
   describe "unauthorized message" do
@@ -405,54 +403,53 @@ describe CanCan::Ability do
       I18n.backend = nil
     end
 
-    it "should use action/subject in i18n" do
+    it "uses action/subject in i18n" do
       I18n.backend.store_translations :en, :unauthorized => {:update => {:array => "foo"}}
-      @ability.unauthorized_message(:update, Array).should == "foo"
-      @ability.unauthorized_message(:update, [1, 2, 3]).should == "foo"
-      @ability.unauthorized_message(:update, :missing).should be_nil
+      expect(@ability.unauthorized_message(:update, Array)).to eq("foo")
+      expect(@ability.unauthorized_message(:update, [1, 2, 3])).to eq("foo")
+      expect(@ability.unauthorized_message(:update, :missing)).to be_nil
     end
 
-    it "should use symbol as subject directly" do
+    it "uses symbol as subject directly" do
       I18n.backend.store_translations :en, :unauthorized => {:has => {:cheezburger => "Nom nom nom. I eated it."}}
-      @ability.unauthorized_message(:has, :cheezburger).should == "Nom nom nom. I eated it."
+      expect(@ability.unauthorized_message(:has, :cheezburger)).to eq("Nom nom nom. I eated it.")
     end
 
-    it "should fall back to 'manage' and 'all'" do
+    it "falls back to 'manage' and 'all'" do
       I18n.backend.store_translations :en, :unauthorized => {
         :manage => {:all => "manage all", :array => "manage array"},
         :update => {:all => "update all", :array => "update array"}
       }
-      @ability.unauthorized_message(:update, Array).should == "update array"
-      @ability.unauthorized_message(:update, Hash).should == "update all"
-      @ability.unauthorized_message(:foo, Array).should == "manage array"
-      @ability.unauthorized_message(:foo, Hash).should == "manage all"
+      expect(@ability.unauthorized_message(:update, Array)).to eq("update array")
+      expect(@ability.unauthorized_message(:update, Hash)).to eq("update all")
+      expect(@ability.unauthorized_message(:foo, Array)).to eq("manage array")
+      expect(@ability.unauthorized_message(:foo, Hash)).to eq("manage all")
     end
 
-    it "should follow aliased actions" do
+    it "follows aliased actions" do
       I18n.backend.store_translations :en, :unauthorized => {:modify => {:array => "modify array"}}
       @ability.alias_action :update, :to => :modify
-      @ability.unauthorized_message(:update, Array).should == "modify array"
-      @ability.unauthorized_message(:edit, Array).should == "modify array"
+      expect(@ability.unauthorized_message(:update, Array)).to eq("modify array")
+      expect(@ability.unauthorized_message(:edit, Array)).to eq("modify array")
     end
 
-    it "should have variables for action and subject" do
+    it "has variables for action and subject" do
       I18n.backend.store_translations :en, :unauthorized => {:manage => {:all => "%{action} %{subject}"}} # old syntax for now in case testing with old I18n
-      @ability.unauthorized_message(:update, Array).should == "update array"
-      @ability.unauthorized_message(:update, ArgumentError).should == "update argument error"
-      @ability.unauthorized_message(:edit, 1..3).should == "edit range"
+      expect(@ability.unauthorized_message(:update, Array)).to eq("update array")
+      expect(@ability.unauthorized_message(:update, ArgumentError)).to eq("update argument error")
+      expect(@ability.unauthorized_message(:edit, 1..3)).to eq("edit range")
     end
   end
 
   describe "#merge" do
-    it "should add the rules from the given ability" do
+    it "adds the rules from the given ability" do
       @ability.can :use, :tools
-      another_ability = Object.new
-      another_ability.extend(CanCan::Ability)
+      (another_ability = double).extend(CanCan::Ability)
       another_ability.can :use, :search
 
       @ability.merge(another_ability)
-      @ability.can?(:use, :search).should be_true
-      @ability.send(:rules).size.should == 2
+      expect(@ability.can?(:use, :search)).to be_true
+      expect(@ability.send(:rules).size).to eq(2)
     end
   end
 end
