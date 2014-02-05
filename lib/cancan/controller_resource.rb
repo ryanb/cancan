@@ -214,6 +214,7 @@ module CanCan
     end
 
     def resource_params
+      return @controller.send(:resource_params) if @controller.respond_to?(:resource_params)
       if @options[:class]
         params_key = extract_key(@options[:class])
         return @params[params_key] if @params[params_key]
