@@ -41,6 +41,12 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       CanCan::ModelAdapters::DataMapperAdapter.find(Article, article.id).should == article
     end
 
+    it "should raise an error if record is not found" do
+      expect do
+        CanCan::ModelAdapters::DataMapperAdapter.find(Article, 123789)
+      end.to raise_error(::DataMapper::ObjectNotFoundError)
+    end
+
     it "should not fetch any records when no abilities are defined" do
       Article.create
       Article.accessible_by(@ability).should be_empty

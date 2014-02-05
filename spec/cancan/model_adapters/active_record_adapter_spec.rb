@@ -68,6 +68,12 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       CanCan::ModelAdapters::ActiveRecordAdapter.find(Article, article.id).should == article
     end
 
+    it "should raise an error if record is not found" do
+      expect do
+        CanCan::ModelAdapters::ActiveRecordAdapter.find(Article, 123789)
+      end.to raise_error(::ActiveRecord::RecordNotFound)
+    end
+
     it "should not fetch any records when no abilities are defined" do
       Article.create!
       Article.accessible_by(@ability).should be_empty
