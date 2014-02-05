@@ -255,15 +255,18 @@ describe CanCan::Ability do
   end
 
   it "should accept a set as a condition value" do
-    mock(object_with_foo_2 = Object.new).foo { 2 }
-    mock(object_with_foo_3 = Object.new).foo { 3 }
+    object_with_foo_2 = Object.new
+    object_with_foo_2.should_receive(:foo).and_return(2)
+    object_with_foo_3 = Object.new
+    object_with_foo_3.should_receive(:foo).and_return(3)
     @ability.can :read, Object, :foo => [1, 2, 5].to_set
     @ability.can?(:read, object_with_foo_2).should be_true
     @ability.can?(:read, object_with_foo_3).should be_false
   end
 
   it "should not match subjects return nil for methods that must match nested a nested conditions hash" do
-    mock(object_with_foo = Object.new).foo { :bar }
+    object_with_foo = Object.new
+    object_with_foo.should_receive(:foo).and_return(:bar)
     @ability.can :read, Array, :first => { :foo => :bar }
     @ability.can?(:read, [object_with_foo]).should be_true
     @ability.can?(:read, []).should be_false
@@ -387,8 +390,8 @@ describe CanCan::Ability do
   it "should determine model adapter class by asking AbstractAdapter" do
     model_class = Object.new
     adapter_class = Object.new
-    stub(CanCan::ModelAdapters::AbstractAdapter).adapter_class(model_class) { adapter_class }
-    stub(adapter_class).new(model_class, []) { :adapter_instance }
+    CanCan::ModelAdapters::AbstractAdapter.stub(:adapter_class).with(model_class).and_return(adapter_class)
+    adapter_class.stub(:new).with(model_class, []).and_return(:adapter_instance)
     @ability.model_adapter(model_class, :read).should == :adapter_instance
   end
 
