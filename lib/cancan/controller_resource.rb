@@ -82,7 +82,12 @@ module CanCan
     end
 
     def build_resource
-      resource = resource_base.new(resource_params || {})
+      # use Rails 3.1's assign_attribute when resource_params[:assign_as] is present
+      if @options && @options[:assign_as].present? && (resource = resource_base.new).respond_to?(:assign_attributes)
+        resource.assign_attributes(resource_params || {}, :as => @options[:assign_as])
+      else
+        resource = resource_base.new(resource_params || {})
+      end
       assign_attributes(resource)
     end
 
