@@ -29,6 +29,11 @@ module CanCan
     #
     #   can? :create, @category => Project
     #
+    # You can also pass an array of objects to check. The behaviour is check you have permission on any of the given objects.
+    #
+    #   can? :create, [Project, Rule]
+    #
+    #
     # Any additional arguments will be passed into the "can" block definition. This
     # can be used to pass more information about the user's request for example.
     #

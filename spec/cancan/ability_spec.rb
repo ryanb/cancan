@@ -148,6 +148,20 @@ describe CanCan::Ability do
     @ability.can?(:update, 123).should be_false
   end
 
+  it "should be able to match multiple classes" do
+    @ability.can :update, [String, Range]
+    @ability.can?(:update, "foo").should be_true
+    @ability.can?(:update, ["foo", 1..3]).should be_true
+    @ability.can?(:update, [1..3, "foo"]).should be_true
+  end
+
+  it "should be able to match at least one of given class" do
+    @ability.can :update, [String, Range]
+    @ability.can?(:update, ["foo", 1..3]).should be_true
+    @ability.can?(:update, [123, "foo"]).should be_true
+    @ability.can?(:update, 123).should be_false
+  end
+
   it "should support custom objects in the rule" do
     @ability.can :read, :stats
     @ability.can?(:read, :stats).should be_true
