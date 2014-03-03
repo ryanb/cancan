@@ -87,11 +87,16 @@ module CanCan
     end
 
     def matches_subject?(subject)
-      @subjects.include?(:all) || @subjects.include?(subject) || matches_subject_class?(subject)
+      @subjects.include?(:all) || @subjects.include?(subject) || matches_subject_class?(subject) || matches_subject_any?(subject)
     end
 
     def matches_subject_class?(subject)
       @subjects.any? { |sub| sub.kind_of?(Module) && (subject.kind_of?(sub) || subject.class.to_s == sub.to_s || subject.kind_of?(Module) && subject.ancestors.include?(sub)) }
+    end
+
+    def matches_subject_any?(subject)
+      subject = [subject].flatten
+      subject.any? { |sub| @subjects.include?(sub) || matches_subject_class?(sub) }
     end
 
     # Checks if the given subject matches the given conditions hash.
