@@ -148,18 +148,13 @@ describe CanCan::Ability do
     @ability.can?(:update, 123).should be_false
   end
 
-  it "should be able to match multiple classes" do
-    @ability.can :update, [String, Range]
+  it "should be able to match any of multiple given subjects" do
+    @ability.can :update, String
     @ability.can?(:update, "foo").should be_true
-    @ability.can?(:update, ["foo", 1..3]).should be_true
-    @ability.can?(:update, [1..3, "foo"]).should be_true
-  end
-
-  it "should be able to match at least one of given class" do
-    @ability.can :update, [String, Range]
-    @ability.can?(:update, ["foo", 1..3]).should be_true
-    @ability.can?(:update, [123, "foo"]).should be_true
-    @ability.can?(:update, 123).should be_false
+    @ability.can?(:update, 1..3).should be_false
+    @ability.can?(:update, {:any => ["foo", "bar"]}).should be_true
+    @ability.can?(:update, {:any => ["foo", 1..3]}).should be_true
+    @ability.can?(:update, {:any => [1..3, 123]}).should be_false
   end
 
   it "should support custom objects in the rule" do
@@ -167,6 +162,8 @@ describe CanCan::Ability do
     @ability.can?(:read, :stats).should be_true
     @ability.can?(:update, :stats).should be_false
     @ability.can?(:read, :nonstats).should be_false
+    @ability.can?(:read, {:any => [:stats, :nonstats]}).should be_true
+    @ability.can?(:read, {:any => [:nonstats, :neither]}).should be_false
   end
 
   it "should check ancestors of class" do
@@ -181,6 +178,8 @@ describe CanCan::Ability do
     @ability.cannot :read, Integer
     @ability.can?(:read, "foo").should be_true
     @ability.can?(:read, 123).should be_false
+    @ability.can?(:read, {:any => ["foo", 123]}).should be_true
+    @ability.can?(:read, {:any => [123, 456]}).should be_false
   end
 
   it "should pass to previous rule, if block returns false or nil" do
@@ -192,6 +191,8 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_true
     @ability.can?(:read, 8).should be_false
     @ability.can?(:read, 123).should be_true
+    @ability.can?(:read, {:any => [3, 8]}).should be_true
+    @ability.can?(:read, {:any => [8, 9]}).should be_false
   end
 
   it "should always return `false` for single cannot definition" do
@@ -202,6 +203,7 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_false
     @ability.can?(:read, 8).should be_false
     @ability.can?(:read, 123).should be_false
+    @ability.can?(:read, {:any => [123, 8]}).should be_false
   end
 
   it "should pass to previous cannot definition, if block returns false or nil" do
@@ -213,6 +215,9 @@ describe CanCan::Ability do
     @ability.can?(:read, 3).should be_false
     @ability.can?(:read, 10).should be_true
     @ability.can?(:read, 123).should be_false
+    @ability.can?(:read, {:any => [10, 123]}).should be_true
+    @ability.can?(:read, {:any => [6, 8]}).should be_true
+    @ability.can?(:read, {:any => [3, 123]}).should be_false
   end
 
   it "should append aliased actions" do
@@ -240,6 +245,8 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..3).should be_true
     @ability.can?(:read, 1..4).should be_false
     @ability.can?(:read, Range).should be_true
+    @ability.can?(:read, {:any => [1..3, 1..4]}).should be_true
+    @ability.can?(:read, {:any => [1..4, 2..4]}).should be_false
   end
 
   it "should allow an array of options in conditions hash" do
@@ -247,6 +254,8 @@ describe CanCan::Ability do
     @ability.can?(:read, 1..3).should be_true
     @ability.can?(:read, 2..4).should be_false
     @ability.can?(:read, 3..5).should be_true
+    @ability.can?(:read, {:any => [2..4, 3..5]}).should be_true
+    @ability.can?(:read, {:any => [2..4, 2..5]}).should be_false
   end
 
   it "should allow a range of options in conditions hash" do
@@ -328,6 +337,8 @@ describe CanCan::Ability do
     @ability.can?(:read, "foo" => Range).should be_true
     @ability.can?(:read, "foobar" => Range).should be_false
     @ability.can?(:read, 123 => Range).should be_true
+    @ability.can?(:read, {:any => [{"foo" => Range}, {"foobar" => Range}]}).should be_true
+    @ability.can?(:read, {:any => [{"food" => Range}, {"foobar" => Range}]}).should be_false
   end
 
   it "passing a hash of subjects with multiple definitions should check permissions correctly" do
@@ -336,6 +347,8 @@ describe CanCan::Ability do
     @ability.can?(:read, "foo" => Range).should be_true
     @ability.can?(:read, "foobar" => Range).should be_false
     @ability.can?(:read, 1234 => Range).should be_true
+    @ability.can?(:read, {:any => [{"foo" => Range}, {"foobar" => Range}]}).should be_true
+    @ability.can?(:read, {:any => [{"foo.bar" => Range}, {"foobar" => Range}]}).should be_false
   end
 
   it "should allow to check ability on Hash-like object" do

@@ -29,9 +29,11 @@ module CanCan
     #
     #   can? :create, @category => Project
     #
-    # You can also pass an array of objects to check. The behaviour is check you have permission on any of the given objects.
+    # You can also pass multiple objects to check. You only need to pass a hash 
+    # following the pattern { :any => [many subjects] }. The behaviour is check if 
+    # there is a permission on any of the given objects.
     #
-    #   can? :create, [Project, Rule]
+    #   can? :create, {:any => [Project, Rule]} 
     #
     #
     # Any additional arguments will be passed into the "can" block definition. This
@@ -59,8 +61,17 @@ module CanCan
     #
     # Also see the RSpec Matchers to aid in testing.
     def can?(action, subject, *extra_args)
-      match = relevant_rules_for_match(action, subject).detect do |rule|
-        rule.matches_conditions?(action, subject, extra_args)
+      match = if subject.respond_to?(:keys) && subject.key?(:any)
+        matches = subject[:any].map do |subject|
+          relevant_rules_for_match(action, subject).detect do |rule|
+            rule.matches_conditions?(action, subject, extra_args)
+          end
+        end
+        matches.compact.first
+      else  
+        relevant_rules_for_match(action, subject).detect do |rule|
+          rule.matches_conditions?(action, subject, extra_args)
+        end
       end
       match ? match.base_behavior : false
     end
