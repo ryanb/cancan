@@ -39,7 +39,7 @@ module CanCan
         matches_conditions_hash?(subject)
       else
         # Don't stop at "cannot" definitions when there are conditions.
-        @conditions.empty? ? true : @base_behavior
+        (@conditions.is_a?(ActiveRecord::Relation) || @conditions.empty?) ? true : @base_behavior
       end
     end
 
@@ -48,7 +48,7 @@ module CanCan
     end
 
     def only_raw_sql?
-      @block.nil? && conditions? && !@conditions.kind_of?(Hash)
+      @block.nil? && conditions? && !@conditions.kind_of?(Hash) && !@conditions.is_a?(ActiveRecord::Relation)
     end
 
     def attributes?
@@ -56,11 +56,11 @@ module CanCan
     end
 
     def conditions?
-      @conditions.present?
+      @conditions.is_a?(ActiveRecord::Relation) || @conditions.present? 
     end
 
     def instance_conditions?
-      @block || conditions?
+      @block || (!@conditions.is_a?(ActiveRecord::Relation) && conditions?)
     end
 
     def unmergeable?
