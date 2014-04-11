@@ -97,6 +97,9 @@ module CanCan
       end
 
       def database_records
+
+        binding.pry
+
         if override_scope
           @model_class.scoped.merge(override_scope)
         elsif @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
