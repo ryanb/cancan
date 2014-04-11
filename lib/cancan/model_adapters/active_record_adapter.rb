@@ -104,6 +104,7 @@ module CanCan
           if mergeable_conditions
             #@model_class.where(conditions).joins(joins)
             @model_class.where(conditions).includes(joins)
+            binding.pry
           else
             @model_class.where(*(@rules.map(&:conditions))).joins(joins)
           end
