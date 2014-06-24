@@ -8,7 +8,7 @@ Kernel.const_get(rspec_module)::Matchers.define :be_able_to do |*args|
     "expected to be able to #{args.map(&:inspect).join(" ")}"
   end
 
-  failure_message_for_should_not do |ability|
+  failure_message_when_negated do |ability|
     "expected not to be able to #{args.map(&:inspect).join(" ")}"
   end
 end
