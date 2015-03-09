@@ -1,10 +1,10 @@
-rspec_module = Kernel.const_get(defined?(RSpec::Core) ? 'RSpec' : 'Spec')  # for RSpec 1 compatability
-rspec_module::Matchers.define :be_able_to do |*args|
+rspec_module = defined?(RSpec::Core) ? 'RSpec' : 'Spec' # for RSpec 1 compatability
+Kernel.const_get(rspec_module)::Matchers.define :be_able_to do |*args|
   match do |ability|
     ability.can?(*args)
   end
 
-  if rspec_module::Version && rspec_module::Version::STRING =~ /^3\./
+  if respond_to?(:failure_message) && respond_to?(:failure_message_when_negated)
     failure_message do |ability|
        "expected to be able to #{args.map(&:inspect).join(" ")}"
     end
