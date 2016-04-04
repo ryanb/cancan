@@ -52,7 +52,7 @@ module CanCan
       #   query(:manage, User).conditions # => "not (self_managed = 't') AND ((manager_id = 1) OR (id = 1))"
       #
       def conditions
-        if @rules.size == 1 && @rules.first.base_behavior
+        if (@rules.size == 1 || @rules.uniq{|r| r.conditions}.size == 1) && @rules.first.base_behavior
           # Return the conditions directly if there's just one definition
           tableized_conditions(@rules.first.conditions).dup
         else
