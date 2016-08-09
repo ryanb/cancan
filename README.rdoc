@@ -1,3 +1,6 @@
+= CanCan Not Actively Maintained
+WARNING: This project is not being actively maintained. You should use CanCanCan instead. Thank you to all who contribued.
+
 = CanCan
 {<img src="https://fury-badge.herokuapp.com/rb/cancan.png" alt="Gem Version" />}[http://badge.fury.io/rb/cancan] 
 {<img src="https://secure.travis-ci.org/ryanb/cancan.png?branch=master" />}[http://travis-ci.org/ryanb/cancan] 
