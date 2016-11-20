@@ -10,6 +10,13 @@ CanCan is an authorization library for Ruby on Rails which restricts what resour
 
 == Installation
 
+In <b>Rails 4</b>, add this to your Gemfile and run the +bundle+ command.
+
+  gem "cancan"
+
+Alternatively, you can install it using: 
+  gem install cancan
+
 In <b>Rails 3</b>, add this to your Gemfile and run the +bundle+ command.
 
   gem "cancan"
