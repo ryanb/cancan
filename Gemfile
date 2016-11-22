@@ -18,3 +18,5 @@ else
 end
 
 gemspec
+
+ruby "1.9.0"
