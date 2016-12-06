@@ -229,8 +229,15 @@ module CanCan
       @name || name_from_controller
     end
 
+    # Returns the params for the given resource.
+    # If a `resource_params` method is defined on the controller, defer to
+    # this in stead: This will allow for fine grained integration with strong
+    # parameters, by defering the params permitting to the controller's
+    # `resource_params` method.
+    #
     def resource_params
-      if @options[:class]
+      params = @controller.try(:resource_params) if @controller.respond_to?(:resource_params)
+      params ||= if @options[:class]
         @params[@options[:class].to_s.underscore.gsub('/', '_')]
       else
         @params[namespaced_name.to_s.underscore.gsub("/", "_")]
