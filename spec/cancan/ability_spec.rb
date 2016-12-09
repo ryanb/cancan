@@ -64,6 +64,16 @@ describe CanCan::Ability do
     @block_called.should be_false
   end
 
+  it "should not call block when only class is passed, and return false when disable_risky_blocks() was set" do
+    @block_called = false
+    @ability.disable_risky_blocks
+    @ability.can :preview, :all do |object|
+      @block_called = true
+    end
+    @ability.can?(:preview, Hash).should be_false
+    @block_called.should be_false
+  end
+
   it "should pass only object for global manage actions" do
     @ability.can :manage, String do |object|
       object.should == "foo"

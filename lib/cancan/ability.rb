@@ -16,6 +16,12 @@ module CanCan
   #   end
   #
   module Ability
+
+    # Disable insecure default behaviour of always allowing methods on a class if a block is defined
+    def disable_risky_blocks
+      @use_risky_blocks = false
+    end
+
     # Check if the user has permission to perform a given action on an object.
     #
     #   can? :destroy, @project
@@ -122,7 +128,7 @@ module CanCan
     #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(true, action, subject, conditions, block)
+      rules << Rule.new(true, action, subject, conditions, @use_risky_blocks, block)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -138,7 +144,7 @@ module CanCan
     #   end
     #
     def cannot(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(false, action, subject, conditions, block)
+      rules << Rule.new(false, action, subject, conditions, @use_risky_blocks, block)
     end
 
     # Alias one or more actions into another one.
