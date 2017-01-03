@@ -30,8 +30,8 @@ module CanCan
     def matches_conditions?(action, subject, extra_args)
       if @match_all
         call_block_with_all(action, subject, extra_args)
-      elsif @block && !subject_class?(subject)
-        @block.call(subject, *extra_args)
+      elsif @block
+        @block.call( subject_class?( subject ) ? nil : subject, *extra_args)
       elsif @conditions.kind_of?(Hash) && subject.class == Hash
         nested_subject_matches_conditions?(subject)
       elsif @conditions.kind_of?(Hash) && !subject_class?(subject)
