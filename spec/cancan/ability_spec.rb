@@ -55,13 +55,16 @@ describe CanCan::Ability do
     @block_called.should be_true
   end
 
-  it "should not call block when only class is passed, only return true" do
+  it "should call block with nil when only class is passed" do
     @block_called = false
+    @passed_object = Object.new
     @ability.can :preview, :all do |object|
       @block_called = true
+      @passed_object = object
     end
-    @ability.can?(:preview, Hash).should be_true
-    @block_called.should be_false
+    @ability.can?(:preview, Hash).should be_false
+    @block_called.should be_true
+    @passed_object.should be_nil
   end
 
   it "should pass only object for global manage actions" do
@@ -301,12 +304,17 @@ describe CanCan::Ability do
   it "should pass nil to a block for ability on Module when no instance is passed" do
     module B; end
     class A; include B; end
+    @block_called = false
+    @passed_arg = Object.new
     @ability.can :read, B do |sym|
-      sym.should be_nil
+      @block_called = true
+      @passed_arg = sym
       true
     end
     @ability.can?(:read, B).should be_true
     @ability.can?(:read, A).should be_true
+    @passed_arg.should be_nil
+    @block_called.should be_true
   end
 
   it "passing a hash of subjects should check permissions through association" do
