@@ -55,13 +55,37 @@ describe CanCan::Ability do
     @block_called.should be_true
   end
 
-  it "should not call block when only class is passed, only return true" do
+  it "should call block when only class is passed and block doesn't contain any calls on instance, only return true" do
     @block_called = false
     @ability.can :preview, :all do |object|
       @block_called = true
     end
     @ability.can?(:preview, Hash).should be_true
+    @block_called.should be_true
+  end
+
+  it "should not call block when only class is passed and block does! contain calls on instance, anyway! return true" do
+    @block_called = false
+    @ability.can :preview, :all do |object|
+      object.whatever = "Whatever!"
+    end
+    @ability.can?(:preview, Hash).should be_true
     @block_called.should be_false
+  end
+
+  it "should evaluate conditions inside blocks when only class is passed and block doesn't contain any calls on instance, only return true" do
+    @something = 'something'
+    
+    @ability.can :preview, :all do |object|
+      @something == 'something'
+    end
+    @ability.can?(:preview, Hash).should be_true
+
+    @ability.can :write, :all do |object|
+      @something == 'something else'
+    end
+
+    @ability.can?(:write, Hash).should be_false
   end
 
   it "should pass only object for global manage actions" do
