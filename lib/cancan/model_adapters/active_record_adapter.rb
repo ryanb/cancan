@@ -127,7 +127,7 @@ module CanCan
 
       def merge_conditions(sql, conditions_hash, behavior)
         if conditions_hash.blank?
-          behavior ? true_sql : false_sql
+          behavior ? false_sql : true_sql
         else
           conditions = sanitize_sql(conditions_hash)
           case sql
