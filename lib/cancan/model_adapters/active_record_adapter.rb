@@ -56,8 +56,8 @@ module CanCan
           # Return the conditions directly if there's just one definition
           tableized_conditions(@rules.first.conditions).dup
         else
-          @rules.reverse.inject(false_sql) do |sql, rule|
-            merge_conditions(sql, tableized_conditions(rule.conditions).dup, rule.base_behavior)
+          @rules.reverse.inject(false_sql) do |sql, rule, result|
+            result = "#{result} #{merge_conditions(sql, tableized_conditions(rule.conditions).dup, rule.base_behavior)}"
           end
         end
       end
