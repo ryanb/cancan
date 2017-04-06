@@ -115,4 +115,11 @@ describe CanCan::ControllerAdditions do
     @controller_class.enable_authorization { |e| @block_called = (e == :exception) }
     @block_called.should be_true
   end
+
+  it "load_and_authorize_resource works as a instance class method" do
+    controller_resource = double("controller_resource")
+    controller_resource.should_receive(:process)
+    CanCan::ControllerResource.stub(:new).with(@controller, nil, :load => true, :authorize => true, :foo => :bar) { controller_resource }
+    @controller.load_and_authorize_resource!(:foo => :bar)
+  end
 end
