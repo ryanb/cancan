@@ -334,6 +334,7 @@ module CanCan
     # See the load_and_authorize_resource method to automatically add the authorize! behavior
     # to the default RESTful actions.
     def authorize!(*args)
+      raise CanCan::AccessDenied.new("User not found") if current_user.nil?
       @_authorized = true
       current_ability.authorize!(*args)
     end
