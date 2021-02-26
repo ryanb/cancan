@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.homepage    = "http://github.com/ryanb/cancan"
   s.summary     = "Simple authorization solution for Rails."
   s.description = "Simple authorization solution for Rails which is decoupled from user roles. All permissions are stored in a single location."
+  s.license     = "MIT"
 
   s.files        = Dir["{lib,spec}/**/*", "[A-Z]*", "init.rb"] - ["Gemfile.lock"]
   s.require_path = "lib"
