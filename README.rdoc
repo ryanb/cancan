@@ -9,6 +9,8 @@ The CanCan gem is <b>no longer maintained</b>. Please use another authorization 
 
 Wiki[https://github.com/ryanb/cancan/wiki] | RDocs[http://rdoc.info/projects/ryanb/cancan] | Screencast[http://railscasts.com/episodes/192-authorization-with-cancan]
 
+*Important*: Please see CanCanCan[https://github.com/CanCanCommunity/cancancan] for an up-to-date, community-maintained fork of this project.
+
 CanCan is an authorization library for Ruby on Rails which restricts what resources a given user is allowed to access. All permissions are defined in a single location (the +Ability+ class) and not duplicated across controllers, views, and database queries.
 
 
