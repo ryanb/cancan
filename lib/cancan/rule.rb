@@ -38,7 +38,7 @@ module CanCan
         matches_conditions_hash?(subject)
       else
         # Don't stop at "cannot" definitions when there are conditions.
-        @conditions.empty? ? true : @base_behavior
+        conditions_empty? ? true : @base_behavior
       end
     end
 
@@ -111,7 +111,7 @@ module CanCan
             else
               attribute = subject.send(name)
               if value.kind_of?(Hash)
-                if attribute.kind_of? Array
+                if attribute.kind_of?(Array) || attribute.kind_of?(ActiveRecord::Relation)
                   attribute.any? { |element| matches_conditions_hash? element, value }
                 else
                   !attribute.nil? && matches_conditions_hash?(attribute, value)

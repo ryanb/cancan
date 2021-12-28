@@ -38,7 +38,7 @@ User permissions are defined in an +Ability+ class. CanCan 1.5 includes a Rails 
 
   rails g cancan:ability
 
-In Rails 2.3, just add a new class in `app/models/ability.rb` with the following contents:
+In Rails 2.3, just add a new class in <tt>app/models/ability.rb</tt> with the following contents:
 
   class Ability
     include CanCan::Ability
@@ -79,6 +79,36 @@ Setting this for every action can be tedious, therefore the +load_and_authorize_
 
 See {Authorizing Controller Actions}[https://github.com/ryanb/cancan/wiki/authorizing-controller-actions] for more information.
 
+
+==== Strong Parameters
+
+When using <tt>strong_parameters</tt> or Rails 4+, you have to sanitize inputs before saving the record, in actions such as <tt>:create</tt> and <tt>:update</tt>.
+
+By default, CanCan will try to sanitize the input on <tt>:create</tt> and <tt>:update</tt> routes by seeing if your controller will respond to the following methods (in order):
+
+* <tt>create_params</tt> or <tt>update_params</tt> (depending on the action you are performing)
+* <tt><model_name>_params</tt> such as <tt>article_params</tt> (this is the default convention in rails for naming your param method)
+* <tt>resource_params</tt> (a generically named method you could specify in each controller)
+
+Additionally, <tt>load_and_authorize_resource</tt> can now take a <tt>param_method</tt> option to specify a custom method in the controller to run to sanitize input.
+
+  class ArticlesController < ApplicationController
+    load_and_authorize_resource param_method: :my_sanitizer
+
+    def create
+      if @article.save
+        # hurray
+      else
+        render :new
+      end
+    end
+
+    private
+
+    def my_sanitizer
+      params.require(:article).permit(:name)
+    end
+  end
 
 === 3. Handle Unauthorized Access
 
