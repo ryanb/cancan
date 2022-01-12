@@ -97,6 +97,12 @@ module CanCan
       end
 
       def database_records
+        database_records_not_unlocked.readonly(false)
+      end
+
+      private
+
+      def database_records_not_unlocked
         if override_scope
           @model_class.scoped.merge(override_scope)
         elsif @model_class.respond_to?(:where) && @model_class.respond_to?(:joins)
@@ -110,8 +116,6 @@ module CanCan
           @model_class.scoped(:conditions => conditions, :joins => joins)
         end
       end
-
-      private
 
       def override_scope
         conditions = @rules.map(&:conditions).compact
