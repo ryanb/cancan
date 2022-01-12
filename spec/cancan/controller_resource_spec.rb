@@ -488,4 +488,61 @@ describe CanCan::ControllerResource do
     lambda { resource.load_and_authorize_resource }.should_not raise_error
     @controller.instance_variable_get(:@project).should be_nil
   end
+
+  context "with a strong parameters method" do
+
+    it "only calls the santitize method with actions matching param_actions" do
+      @params.merge!(:controller => "project", :action => "update")
+      stub(@controller).resource_params { raise 'Should not be called' }
+      resource = CanCan::ControllerResource.new(@controller)
+      stub(resource).param_actions { [:create] }
+
+      expect { resource.send("resource_params") }.to_not raise_error
+    end
+
+    it "uses the specified option for santitizing input" do
+      @params.merge!(:controller => "project", :action => "create")
+      stub(@controller).resource_params { {:resource => 'params'} }
+      stub(@controller).project_params { {:model => 'params'} }
+      stub(@controller).create_params { {:create => 'params'} }
+      stub(@controller).custom_params { {:custom => 'params'} }
+      resource = CanCan::ControllerResource.new(@controller, { :param_method => :custom_params })
+      resource.send("resource_params").should eq(:custom => 'params')
+    end
+
+    it "prefers to use the create_params method for santitizing input" do
+      @params.merge!(:controller => "project", :action => "create")
+      stub(@controller).resource_params { {:resource => 'params'} }
+      stub(@controller).project_params { {:model => 'params'} }
+      stub(@controller).create_params { {:create => 'params'} }
+      stub(@controller).custom_params { {:custom => 'params'} }
+      resource = CanCan::ControllerResource.new(@controller)
+      resource.send("resource_params").should eq(:create => 'params')
+    end
+
+    it "uses the proper action param based on the action" do
+      @params.merge!(:controller => "project", :action => "update")
+      stub(@controller).create_params { {:create => 'params'} }
+      stub(@controller).update_params { {:update => 'params'} }
+      resource = CanCan::ControllerResource.new(@controller)
+      resource.send("resource_params").should eq(:update => 'params')
+    end
+
+    it "prefers to use the <model_name>_params method for santitizing input if create is not found" do
+      @params.merge!(:controller => "project", :action => "create")
+      stub(@controller).resource_params { {:resource => 'params'} }
+      stub(@controller).project_params { {:model => 'params'} }
+      stub(@controller).custom_params { {:custom => 'params'} }
+      resource = CanCan::ControllerResource.new(@controller)
+      resource.send("resource_params").should eq(:model => 'params')
+    end
+
+    it "prefers to use the resource_params method for santitizing input if create or model is not found" do
+      @params.merge!(:controller => "project", :action => "create")
+      stub(@controller).resource_params { {:resource => 'params'} }
+      stub(@controller).custom_params { {:custom => 'params'} }
+      resource = CanCan::ControllerResource.new(@controller)
+      resource.send("resource_params").should eq(:resource => 'params')
+    end
+  end
 end
