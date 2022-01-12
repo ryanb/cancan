@@ -113,6 +113,24 @@ if ENV["MODEL_ADAPTER"].nil? || ENV["MODEL_ADAPTER"] == "active_record"
       Comment.accessible_by(@ability).should == [comment1]
     end
 
+    it "should only read articles which are published or in visible categories" do
+      @ability.can :read, Article, :category => { :visible => true }
+      @ability.can :read, Article, :published => true
+      article1 = Article.create!(:published => true)
+      article2 = Article.create!(:published => false)
+      article3 = Article.create!(:published => false, :category => Category.create!(:visible => true))
+      Article.accessible_by(@ability).should == [article1, article3]
+    end
+
+    it "should only read categories once even if they have multiple articles" do
+      @ability.can :read, Category, :articles => { :published => true }
+      @ability.can :read, Article, :published => true
+      category = Category.create!
+      Article.create!(:published => true, :category => category)
+      Article.create!(:published => true, :category => category)
+      Category.accessible_by(@ability).should == [category]
+    end
+
     it "should only read comments for visible categories through articles" do
       @ability.can :read, Comment, :article => { :category => { :visible => true } }
       comment1 = Comment.create!(:article => Article.create!(:category => Category.create!(:visible => true)))
