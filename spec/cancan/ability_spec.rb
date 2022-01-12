@@ -400,6 +400,13 @@ describe CanCan::Ability do
     }.should raise_error(CanCan::Error, "You are not able to supply a block with a hash of conditions in read Array ability. Use either one.")
   end
 
+  it "should default subjects to :all if action is provided" do
+    @ability.can :count
+    @ability.can?(:count, 123).should be_true
+    @ability.can?(:count, String).should be_true
+    @ability.can?(:count, :anything).should be_true
+  end
+
   describe "unauthorized message" do
     after(:each) do
       I18n.backend = nil
