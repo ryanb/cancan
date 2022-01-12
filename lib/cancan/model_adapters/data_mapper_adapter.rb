@@ -6,7 +6,7 @@ module CanCan
       end
 
       def self.find(model_class, id)
-        model_class.get(id)
+        model_class.get!(id)
       end
 
       def self.override_conditions_hash_matching?(subject, conditions)
