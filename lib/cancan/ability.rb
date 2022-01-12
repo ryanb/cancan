@@ -16,6 +16,7 @@ module CanCan
   #   end
   #
   module Ability
+
     # Check if the user has permission to perform a given action on an object.
     #
     #   can? :destroy, @project
@@ -122,7 +123,7 @@ module CanCan
     #   end
     #
     def can(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(true, action, subject, conditions, block)
+      rules << Rule.new(true, action, subject, conditions, @strict_class_access, block)
     end
 
     # Defines an ability which cannot be done. Accepts the same arguments as "can".
@@ -138,7 +139,32 @@ module CanCan
     #   end
     #
     def cannot(action = nil, subject = nil, conditions = nil, &block)
-      rules << Rule.new(false, action, subject, conditions, block)
+      rules << Rule.new(false, action, subject, conditions, @strict_class_access, block)
+    end
+
+    # Set strict class access.
+    #
+    # If you define a block for testing objects of a certain class, the default behaviour
+    # is that "can?" returns true for all methods you test on that class:
+    #
+    #   ability.can :destroy, :all { |object| false }
+    #
+    #   ability.can? :destroy, {} => false        # block called, and returns false
+    #   ability.can? :destroy, Hash  # => true    # careful - block not called, true returned by default
+    #
+    # If you enable strick class access, you need to specifically permit class methods:
+    #
+    #   ability.strict_class_access = true        # enable strict class access
+    #   ability.can :destroy, :all { |object| false }
+    #
+    #   ability.can? :destroy, {} => false        # block is called, and returns false
+    #   ability.can? :destroy, Hash  # => false   # block not called, false returned since strict class access is on
+    #
+    #   ability.can :destroy, Hash                # specifically allow destroying Hashes
+    #   ability.can? :destroy, Hash  # => true    # true returned, since we specifically allowed it
+    #
+    def strict_class_access
+      @strict_class_access = true
     end
 
     # Alias one or more actions into another one.
