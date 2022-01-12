@@ -114,6 +114,25 @@ if ENV["MODEL_ADAPTER"] == "data_mapper"
       @ability.should_not be_able_to(:read, article3)
     end
 
-    # TODO: add more comparison specs
+    it "should match lt condition" do
+      @ability.can :read, Article, :priority.lt => 4
+      article1 = Article.create(:priority => 4)
+      article2 = Article.create(:priority => 3)
+      Article.accessible_by(@ability).should == [article2]
+      @ability.should be_able_to(:read, article2)
+      @ability.should_not be_able_to(:read, article1)
+    end
+
+    it "should match lte condition" do
+      @ability.can :read, Article, :priority.lte => 4
+      article1 = Article.create(:priority => 5)
+      article2 = Article.create(:priority => 4)
+      article3 = Article.create(:priority => 3)
+      Article.accessible_by(@ability).should == [article2, article3]
+      @ability.should be_able_to(:read, article2)
+      @ability.should be_able_to(:read, article3)
+      @ability.should_not be_able_to(:read, article1)
+    end
+
   end
 end

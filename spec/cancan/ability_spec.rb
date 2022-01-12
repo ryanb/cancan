@@ -19,7 +19,7 @@ describe CanCan::Ability do
   it "should pass true to `can?` when non false/nil is returned in block" do
     @ability.can :read, :all
     @ability.can :read, Symbol do |sym|
-      "foo" # TODO test that sym is nil when no instance is passed
+      "foo"
     end
     @ability.can?(:read, :some_symbol).should == true
   end
