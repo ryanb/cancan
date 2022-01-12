@@ -38,7 +38,7 @@ module CanCan
         matches_conditions_hash?(subject)
       else
         # Don't stop at "cannot" definitions when there are conditions.
-        @conditions.empty? ? true : @base_behavior
+        conditions_empty? ? true : @base_behavior
       end
     end
 
