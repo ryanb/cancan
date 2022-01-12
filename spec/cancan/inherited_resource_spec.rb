@@ -6,55 +6,55 @@ describe CanCan::InheritedResource do
     @controller_class = Class.new
     @controller = @controller_class.new
     @ability = Ability.new(nil)
-    stub(@controller).params { @params }
-    stub(@controller).current_ability { @ability }
-    stub(@controller_class).cancan_skipper { {:authorize => {}, :load => {}} }
+    allow(@controller).to receive(:params).and_return { @params }
+    allow(@controller).to receive(:current_ability) { @ability }
+    allow(@controller_class).to receive(:cancan_skipper) { {:authorize => {}, :load => {}} }
   end
 
-  it "show should load resource through @controller.resource" do
+  it "show loads resource through @controller.resource" do
     @params.merge!(:action => "show", :id => 123)
-    stub(@controller).resource { :project_resource }
+    allow(@controller).to receive(:resource) { :project_resource }
     CanCan::InheritedResource.new(@controller).load_resource
-    @controller.instance_variable_get(:@project).should == :project_resource
+    expect(@controller.instance_variable_get(:@project)).to eq(:project_resource)
   end
 
-  it "new should load through @controller.build_resource" do
+  it "new loads through @controller.build_resource" do
     @params[:action] = "new"
-    stub(@controller).build_resource { :project_resource }
+    allow(@controller).to receive(:build_resource) { :project_resource }
     CanCan::InheritedResource.new(@controller).load_resource
-    @controller.instance_variable_get(:@project).should == :project_resource
+    expect(@controller.instance_variable_get(:@project)).to eq(:project_resource)
   end
 
-  it "index should load through @controller.association_chain when parent" do
+  it "index loads through @controller.association_chain when parent" do
     @params[:action] = "index"
-    stub(@controller).association_chain { @controller.instance_variable_set(:@project, :project_resource) }
+    allow(@controller).to receive(:association_chain) { @controller.instance_variable_set(:@project, :project_resource) }
     CanCan::InheritedResource.new(@controller, :parent => true).load_resource
-    @controller.instance_variable_get(:@project).should == :project_resource
+    expect(@controller.instance_variable_get(:@project)).to eq(:project_resource)
   end
 
-  it "index should load through @controller.end_of_association_chain" do
+  it "index loads through @controller.end_of_association_chain" do
     @params[:action] = "index"
-    stub(Project).accessible_by(@ability, :index) { :projects }
-    stub(@controller).end_of_association_chain { Project }
+    allow(Project).to receive(:accessible_by).with(@ability, :index) { :projects }
+    allow(@controller).to receive(:end_of_association_chain) { Project }
     CanCan::InheritedResource.new(@controller).load_resource
-    @controller.instance_variable_get(:@projects).should == :projects
+    expect(@controller.instance_variable_get(:@projects)).to eq(:projects)
   end
 
-  it "should build a new resource with attributes from current ability" do
+  it "builds a new resource with attributes from current ability" do
     @params[:action] = "new"
     @ability.can(:create, Project, :name => "from conditions")
-    stub(@controller).build_resource { Struct.new(:name).new }
+    allow(@controller).to receive(:build_resource) { Struct.new(:name).new }
     resource = CanCan::InheritedResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).name.should == "from conditions"
+    expect(@controller.instance_variable_get(:@project).name).to eq("from conditions")
   end
 
-  it "should override initial attributes with params" do
+  it "overrides initial attributes with params" do
     @params.merge!(:action => "new", :project => {:name => "from params"})
     @ability.can(:create, Project, :name => "from conditions")
-    stub(@controller).build_resource { Struct.new(:name).new }
+    allow(@controller).to receive(:build_resource) { Struct.new(:name).new }
     resource = CanCan::ControllerResource.new(@controller)
     resource.load_resource
-    @controller.instance_variable_get(:@project).name.should == "from params"
+    expect(@controller.instance_variable_get(:@project).name).to eq("from params")
   end
 end
